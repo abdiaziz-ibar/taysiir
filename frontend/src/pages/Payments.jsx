@@ -36,8 +36,8 @@ const Payments = () => {
           <tbody>
             {payments.map((p) => (
               <tr key={p._id}>
-                <td><Link to={`/payments/${p._id}`} className="text-navy hover:underline">{p.receiptNumber}</Link></td>
-                <td><Link to={`/parents/${p.parentId?._id}`} className="text-navy hover:underline">{p.parentId?.fullName}</Link></td>
+                <td><Link to={`/payments/${p._id}`} className="text-link hover:underline">{p.receiptNumber}</Link></td>
+                <td><Link to={`/parents/${p.parentId?._id}`} className="text-link hover:underline">{p.parentId?.fullName}</Link></td>
                 <td>{formatDate(p.paymentDate)}</td>
                 <td className="text-right">{formatMoney(p.amount)}</td>
                 <td>{p.paymentMethod}</td>

@@ -30,7 +30,7 @@ const Fees = () => {
           <tbody>
             {fees.map((f) => (
               <tr key={f._id}>
-                <td><Link to={`/parents/${f.parentId?._id}`} className="text-navy hover:underline">{f.parentId?.fullName}</Link></td>
+                <td><Link to={`/parents/${f.parentId?._id}`} className="text-link hover:underline">{f.parentId?.fullName}</Link></td>
                 <td className="text-right">{formatMoney(f.totalAmount)}</td>
                 <td className="text-right">{formatMoney(f.totalPaid)}</td>
                 <td className="text-right">{formatMoney(f.balance)}</td>

@@ -127,7 +127,7 @@ const Parents = () => {
               <tr key={p._id}>
                 <td>{p.parentId}</td>
                 <td>
-                  <Link to={`/parents/${p._id}`} className="text-navy hover:underline font-medium">
+                  <Link to={`/parents/${p._id}`} className="text-link hover:underline font-medium">
                     {p.fullName}
                   </Link>
                 </td>

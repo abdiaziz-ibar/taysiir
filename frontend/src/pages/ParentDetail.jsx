@@ -47,7 +47,7 @@ const ParentDetail = () => {
 
   return (
     <div className="space-y-6">
-      <Link to="/parents" className="text-sm text-navy hover:underline">&larr; Ku Noqo Waalidiinta</Link>
+      <Link to="/parents" className="text-sm text-link hover:underline">&larr; Ku Noqo Waalidiinta</Link>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card md:col-span-1">
@@ -133,7 +133,7 @@ const ParentDetail = () => {
           <tbody>
             {payments.map((p) => (
               <tr key={p._id}>
-                <td><Link to={`/payments/${p._id}`} className="text-navy hover:underline">{p.receiptNumber}</Link></td>
+                <td><Link to={`/payments/${p._id}`} className="text-link hover:underline">{p.receiptNumber}</Link></td>
                 <td>{formatDate(p.paymentDate)}</td>
                 <td>{p.academicYearId?.name}</td>
                 <td className="text-right">{formatMoney(p.amount)}</td>

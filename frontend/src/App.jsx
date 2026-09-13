@@ -13,6 +13,7 @@ import PaymentDetail from "./pages/PaymentDetail";
 import Debts from "./pages/Debts";
 import MonthlyReport from "./pages/reports/MonthlyReport";
 import YearlyReport from "./pages/reports/YearlyReport";
+import AllYearsReport from "./pages/reports/AllYearsReport";
 import DebtsReport from "./pages/reports/DebtsReport";
 import AcademicYears from "./pages/AcademicYears";
 import Users from "./pages/Users";
@@ -41,6 +42,7 @@ function App() {
 
           <Route path="/reports/monthly" element={<MonthlyReport />} />
           <Route path="/reports/yearly" element={<YearlyReport />} />
+          <Route path="/reports/all-years" element={<AllYearsReport />} />
           <Route path="/reports/debts" element={<DebtsReport />} />
 
           <Route path="/academic-years" element={<AcademicYears />} />

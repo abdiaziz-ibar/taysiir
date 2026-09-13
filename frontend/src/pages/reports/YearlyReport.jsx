@@ -37,11 +37,15 @@ const YearlyReport = () => {
       <div className="card">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data.monthly}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E1DDD1" />
-            <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip formatter={(v) => formatMoney(v)} />
-            <Legend />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E7E5E0" />
+            <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#6B7280" }} />
+            <YAxis tick={{ fontSize: 12, fill: "#6B7280" }} />
+            <Tooltip
+              formatter={(v) => formatMoney(v)}
+              contentStyle={{ background: "#FFFFFF", border: "1px solid #E7E5E0", borderRadius: 6, color: "#14181F" }}
+              cursor={{ fill: "rgba(31,58,95,0.06)" }}
+            />
+            <Legend wrapperStyle={{ color: "#6B7280" }} />
             <Bar dataKey="paid" name="Paid" fill="#1F3A5F" radius={[3, 3, 0, 0]} />
             <Bar dataKey="balance" name="Balance" fill="#C98A2C" radius={[3, 3, 0, 0]} />
           </BarChart>

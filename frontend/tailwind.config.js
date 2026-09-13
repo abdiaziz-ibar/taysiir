@@ -4,9 +4,9 @@ export default {
   theme: {
     extend: {
       colors: {
-        paper: "#F7F5F0",
+        paper: "#FAFAF9",
         surface: "#FFFFFF",
-        ink: "#1C2321",
+        ink: "#14181F",
         navy: {
           DEFAULT: "#1F3A5F",
           light: "#2E5386",
@@ -16,9 +16,14 @@ export default {
           DEFAULT: "#C98A2C",
           light: "#E3A94F",
         },
+        brand: {
+          DEFAULT: "#C2410C",
+          dark: "#9A3412",
+        },
+        link: "#1F3A5F",
         success: "#2F7A4D",
         danger: "#B3402A",
-        line: "#E1DDD1",
+        line: "#E7E5E0",
       },
       fontFamily: {
         serif: ["Lora", "Georgia", "serif"],

@@ -56,17 +56,16 @@ const getMonthlyReport = async (req, res, next) => {
     const payments = await prisma.payment.findMany({ where: { academicYearId } });
 
     const monthBuckets = MONTHS.map((label, idx) => {
-      const isFirstHalf = idx < 4;
       const monthIndex = (8 + idx) % 12;
-      const calendarYear = isFirstHalf ? year.startYear : year.endYear;
-      return { label, monthIndex, calendarYear, totalPaid: 0, count: 0 };
+      return { label, monthIndex, totalPaid: 0, count: 0 };
     });
 
+    // Bucket by month name only (not calendar year): a payment already belongs
+    // to this academic year via academicYearId, even if it was paid late
+    // (e.g. a parent settling a past year's debt today).
     payments.forEach((p) => {
       const d = new Date(p.paymentDate);
-      const bucket = monthBuckets.find(
-        (b) => b.monthIndex === d.getMonth() && b.calendarYear === d.getFullYear()
-      );
+      const bucket = monthBuckets.find((b) => b.monthIndex === d.getMonth());
       if (bucket) {
         bucket.totalPaid += p.amount;
         bucket.count += 1;
@@ -98,16 +97,12 @@ const getYearlyReport = async (req, res, next) => {
 
     const payments = await prisma.payment.findMany({ where: { academicYearId } });
     const monthBuckets = MONTHS.map((label, idx) => {
-      const isFirstHalf = idx < 4;
       const monthIndex = (8 + idx) % 12;
-      const calendarYear = isFirstHalf ? year.startYear : year.endYear;
-      return { label, monthIndex, calendarYear, paid: 0 };
+      return { label, monthIndex, paid: 0 };
     });
     payments.forEach((p) => {
       const d = new Date(p.paymentDate);
-      const bucket = monthBuckets.find(
-        (b) => b.monthIndex === d.getMonth() && b.calendarYear === d.getFullYear()
-      );
+      const bucket = monthBuckets.find((b) => b.monthIndex === d.getMonth());
       if (bucket) bucket.paid += p.amount;
     });
 
@@ -126,6 +121,46 @@ const getYearlyReport = async (req, res, next) => {
       collectionRate: Math.round(collectionRate * 100) / 100,
       monthly,
     });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// GET /api/reports/all-years  (totals per academic year, so every year can be compared in one place)
+const getAllYearsReport = async (req, res, next) => {
+  try {
+    const years = await prisma.academicYear.findMany({ orderBy: { startYear: "asc" } });
+    const fees = await prisma.fee.findMany();
+
+    const rows = years.map((year) => {
+      const yearFees = fees.filter((f) => f.academicYearId === year.id);
+      const totalFees = yearFees.reduce((s, f) => s + f.totalAmount, 0);
+      const totalPaid = yearFees.reduce((s, f) => s + f.totalPaid, 0);
+      const totalDebt = yearFees.reduce((s, f) => s + f.balance, 0);
+      const collectionRate = totalFees > 0 ? (totalPaid / totalFees) * 100 : 0;
+
+      return {
+        academicYearId: year.id,
+        academicYear: year.name,
+        isActive: year.isActive,
+        totalParents: yearFees.length,
+        totalFees,
+        totalPaid,
+        totalDebt,
+        collectionRate: Math.round(collectionRate * 100) / 100,
+      };
+    });
+
+    const totals = rows.reduce(
+      (acc, r) => ({
+        totalFees: acc.totalFees + r.totalFees,
+        totalPaid: acc.totalPaid + r.totalPaid,
+        totalDebt: acc.totalDebt + r.totalDebt,
+      }),
+      { totalFees: 0, totalPaid: 0, totalDebt: 0 }
+    );
+
+    res.json({ years: rows, totals });
   } catch (err) {
     next(err);
   }
@@ -188,6 +223,7 @@ module.exports = {
   getDashboard,
   getMonthlyReport,
   getYearlyReport,
+  getAllYearsReport,
   getDebtsReport,
   getParentReport,
 };

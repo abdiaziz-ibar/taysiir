@@ -42,10 +42,14 @@ const Dashboard = () => {
         <h3 className="font-serif text-lg mb-4">Lacagta La Bixiyey Bishii Kasta</h3>
         <ResponsiveContainer width="100%" height={280}>
           <BarChart data={monthly}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E1DDD1" />
-            <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
-            <Tooltip formatter={(v) => formatMoney(v)} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E7E5E0" />
+            <XAxis dataKey="month" tick={{ fontSize: 12, fill: "#6B7280" }} />
+            <YAxis tick={{ fontSize: 12, fill: "#6B7280" }} />
+            <Tooltip
+              formatter={(v) => formatMoney(v)}
+              contentStyle={{ background: "#FFFFFF", border: "1px solid #E7E5E0", borderRadius: 6, color: "#14181F" }}
+              cursor={{ fill: "rgba(31,58,95,0.06)" }}
+            />
             <Bar dataKey="totalPaid" fill="#1F3A5F" radius={[3, 3, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>

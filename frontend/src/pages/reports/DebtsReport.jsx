@@ -19,10 +19,10 @@ const DebtsReport = () => {
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-serif">Warbixinta Deymaha {yearName ? `— ${yearName}` : ""}</h2>
-        <button onClick={handlePrint} className="btn-secondary">Print</button>
+        <button onClick={handlePrint} className="btn-secondary print:hidden">Print</button>
       </div>
 
-      <div className="card overflow-x-auto">
+      <div className="card overflow-x-auto print:overflow-visible print:border-0 print:shadow-none print:p-0">
         <table className="table-base">
           <thead>
             <tr>

@@ -126,6 +126,72 @@ const createPayment = async (req, res, next) => {
   }
 };
 
+// PUT /api/payments/:id
+// { amount, paymentDate, paymentMethod, referenceNumber, notes, allowOverpayment }
+const updatePayment = async (req, res, next) => {
+  try {
+    const { amount, paymentDate, paymentMethod, referenceNumber, notes, allowOverpayment } = req.body;
+
+    if (amount !== undefined && Number(amount) <= 0) {
+      return res.status(400).json({ message: "Lacagta waa inay ka weyn tahay 0." });
+    }
+
+    const result = await prisma.$transaction(async (tx) => {
+      const payment = await tx.payment.findUnique({ where: { id: req.params.id } });
+      if (!payment) {
+        const err = new Error("Lacag-bixintan lama helin.");
+        err.statusCode = 404;
+        throw err;
+      }
+      const fee = await tx.fee.findUnique({ where: { id: payment.feeId } });
+      if (!fee) {
+        const err = new Error("Fee-ga lama helin.");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      const newAmount = amount !== undefined ? Number(amount) : payment.amount;
+      const totalPaidWithoutThis = fee.totalPaid - payment.amount;
+      const newTotalPaid = totalPaidWithoutThis + newAmount;
+
+      if (!allowOverpayment && newTotalPaid > fee.totalAmount) {
+        const err = new Error(
+          `Lacagta la geliyay ($${newAmount}) way ka badan tahay Ku Dhiman-ka ($${fee.totalAmount - totalPaidWithoutThis}).`
+        );
+        err.statusCode = 400;
+        throw err;
+      }
+
+      const { balance, status } = recalculate(fee.totalAmount, newTotalPaid);
+      const updatedFee = await tx.fee.update({
+        where: { id: fee.id },
+        data: { totalPaid: newTotalPaid, balance, status },
+      });
+
+      const updatedPayment = await tx.payment.update({
+        where: { id: payment.id },
+        data: {
+          amount: newAmount,
+          paymentDate: paymentDate ? new Date(paymentDate) : payment.paymentDate,
+          paymentMethod: paymentMethod ?? payment.paymentMethod,
+          referenceNumber: referenceNumber ?? payment.referenceNumber,
+          notes: notes ?? payment.notes,
+        },
+        include: paymentInclude,
+      });
+
+      return { payment: updatedPayment, fee: updatedFee };
+    });
+
+    res.json({
+      payment: serializePayment(result.payment),
+      fee: serializeFee(result.fee),
+    });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // DELETE /api/payments/:id  (reverses the payment from the fee balance)
 const deletePayment = async (req, res, next) => {
   try {
@@ -154,4 +220,4 @@ const deletePayment = async (req, res, next) => {
   }
 };
 
-module.exports = { getPayments, getPaymentById, createPayment, deletePayment };
+module.exports = { getPayments, getPaymentById, createPayment, updatePayment, deletePayment };

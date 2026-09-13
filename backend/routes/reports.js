@@ -4,6 +4,7 @@ const {
   getDashboard,
   getMonthlyReport,
   getYearlyReport,
+  getAllYearsReport,
   getDebtsReport,
   getParentReport,
 } = require("../controllers/reportController");
@@ -13,6 +14,7 @@ router.use(protect);
 router.get("/dashboard", getDashboard);
 router.get("/monthly", getMonthlyReport);
 router.get("/yearly", getYearlyReport);
+router.get("/all-years", getAllYearsReport);
 router.get("/debts", getDebtsReport);
 router.get("/parent/:id", getParentReport);
 

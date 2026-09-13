@@ -20,7 +20,7 @@ const Sidebar = () => {
   const [reportsOpen, setReportsOpen] = useState(true);
 
   return (
-    <aside className="w-64 bg-navy-dark min-h-screen flex flex-col shrink-0">
+    <aside className="w-64 bg-navy-dark min-h-screen flex flex-col shrink-0 print:hidden">
       <div className="px-5 py-6 border-b border-white/10">
         <h1 className="text-white font-serif text-lg leading-tight">
           Maamulka Lacagta
@@ -46,6 +46,7 @@ const Sidebar = () => {
           <div className="pl-4 space-y-1">
             <NavItem to="/reports/monthly">Warbixin Bille</NavItem>
             <NavItem to="/reports/yearly">Warbixin Sanad Dugsiyeed</NavItem>
+            <NavItem to="/reports/all-years">Dhammaan Sannadaha</NavItem>
             <NavItem to="/reports/debts">Warbixinta Deymaha</NavItem>
           </div>
         )}

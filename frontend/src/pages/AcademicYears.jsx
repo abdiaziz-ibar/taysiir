@@ -69,7 +69,7 @@ const AcademicYears = () => {
                   {y.isActive ? (
                     <button onClick={() => handleDeactivate(y._id)} className="text-sm text-danger hover:underline">Deactivate</button>
                   ) : (
-                    <button onClick={() => handleActivate(y._id)} className="text-sm text-navy hover:underline">Activate</button>
+                    <button onClick={() => handleActivate(y._id)} className="text-sm text-link hover:underline">Activate</button>
                   )}
                 </td>
               </tr>
