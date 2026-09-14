@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import api from "../api/axios";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../utils/format";
 
 const ParentDetail = () => {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
   const { years } = useAcademicYear();
   const [parent, setParent] = useState(null);
   const [payments, setPayments] = useState([]);
@@ -19,6 +20,11 @@ const ParentDetail = () => {
   const [editForm, setEditForm] = useState(null);
   const [editError, setEditError] = useState("");
   const [saving, setSaving] = useState(false);
+
+  const [feeEditingId, setFeeEditingId] = useState(null);
+  const [feeEditAmount, setFeeEditAmount] = useState("");
+  const [feeEditPaid, setFeeEditPaid] = useState("");
+  const [feeEditError, setFeeEditError] = useState("");
 
   const load = async () => {
     const res = await api.get(`/parents/${id}`);
@@ -42,6 +48,24 @@ const ParentDetail = () => {
       load();
     } catch (err) {
       setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+    }
+  };
+
+  const startFeeEdit = (f) => {
+    setFeeEditingId(f._id);
+    setFeeEditAmount(f.totalAmount);
+    setFeeEditPaid(f.totalPaid);
+    setFeeEditError("");
+  };
+
+  const handleFeeEditSave = async (feeId) => {
+    setFeeEditError("");
+    try {
+      await api.put(`/fees/${feeId}`, { totalAmount: Number(feeEditAmount), totalPaid: Number(feeEditPaid) });
+      setFeeEditingId(null);
+      load();
+    } catch (err) {
+      setFeeEditError(err.response?.data?.message || "Khalad ayaa dhacay.");
     }
   };
 
@@ -72,6 +96,13 @@ const ParentDetail = () => {
       setSaving(false);
     }
   };
+
+  useEffect(() => {
+    if (parent && searchParams.get("edit") === "1" && !editing) {
+      startEdit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [parent]);
 
   if (!parent) return <p className="text-ink/50">Waa la soo shubayaa...</p>;
 
@@ -165,6 +196,8 @@ const ParentDetail = () => {
             </form>
           )}
 
+          {feeEditError && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2 mb-3">{feeEditError}</div>}
+
           <table className="table-base">
             <thead>
               <tr>
@@ -173,20 +206,57 @@ const ParentDetail = () => {
                 <th className="text-right">Paid</th>
                 <th className="text-right">Balance</th>
                 <th>Status</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
               {parent.fees.map((f) => (
                 <tr key={f._id}>
                   <td>{f.academicYearId?.name}</td>
-                  <td className="text-right">{formatMoney(f.totalAmount)}</td>
-                  <td className="text-right">{formatMoney(f.totalPaid)}</td>
+                  <td className="text-right">
+                    {feeEditingId === f._id ? (
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className="input-field !w-28 ml-auto text-right"
+                        value={feeEditAmount}
+                        onChange={(e) => setFeeEditAmount(e.target.value)}
+                      />
+                    ) : (
+                      formatMoney(f.totalAmount)
+                    )}
+                  </td>
+                  <td className="text-right">
+                    {feeEditingId === f._id ? (
+                      <input
+                        type="number"
+                        min="0"
+                        step="0.01"
+                        className="input-field !w-28 ml-auto text-right"
+                        value={feeEditPaid}
+                        onChange={(e) => setFeeEditPaid(e.target.value)}
+                      />
+                    ) : (
+                      formatMoney(f.totalPaid)
+                    )}
+                  </td>
                   <td className="text-right">{formatMoney(f.balance)}</td>
                   <td><span className={statusBadgeClass(f.status)}>{statusLabel(f.status)}</span></td>
+                  <td className="text-right whitespace-nowrap">
+                    {feeEditingId === f._id ? (
+                      <>
+                        <button onClick={() => handleFeeEditSave(f._id)} className="text-sm text-success hover:underline mr-3">Kaydi</button>
+                        <button onClick={() => setFeeEditingId(null)} className="text-sm text-ink/60 hover:underline">Jooji</button>
+                      </>
+                    ) : (
+                      <button onClick={() => startFeeEdit(f)} className="text-sm text-link hover:underline">Edit</button>
+                    )}
+                  </td>
                 </tr>
               ))}
               {parent.fees.length === 0 && (
-                <tr><td colSpan={5} className="text-center text-ink/40 py-4">Weli Fee lama dhigin.</td></tr>
+                <tr><td colSpan={6} className="text-center text-ink/40 py-4">Weli Fee lama dhigin.</td></tr>
               )}
             </tbody>
           </table>

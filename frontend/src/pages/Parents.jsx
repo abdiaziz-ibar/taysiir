@@ -120,6 +120,7 @@ const Parents = () => {
               <th className="text-right">La Bixiyey</th>
               <th className="text-right">Ku Dhiman</th>
               <th>Status</th>
+              <th></th>
             </tr>
           </thead>
           <tbody>
@@ -136,10 +137,13 @@ const Parents = () => {
                 <td className="text-right">{formatMoney(p.totalPaid)}</td>
                 <td className="text-right">{formatMoney(p.balance)}</td>
                 <td><span className={statusBadgeClass(p.feeStatus)}>{statusLabel(p.feeStatus)}</span></td>
+                <td className="text-right">
+                  <Link to={`/parents/${p._id}?edit=1`} className="text-sm text-link hover:underline">Edit</Link>
+                </td>
               </tr>
             ))}
             {parents.length === 0 && (
-              <tr><td colSpan={7} className="text-center text-ink/40 py-6">Waalid lama helin.</td></tr>
+              <tr><td colSpan={8} className="text-center text-ink/40 py-6">Waalid lama helin.</td></tr>
             )}
           </tbody>
         </table>

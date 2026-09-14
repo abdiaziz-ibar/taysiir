@@ -66,18 +66,19 @@ const createFee = async (req, res, next) => {
   }
 };
 
-// PUT /api/fees/:id  { totalAmount }
+// PUT /api/fees/:id  { totalAmount, totalPaid }
 const updateFee = async (req, res, next) => {
   try {
     const fee = await prisma.fee.findUnique({ where: { id: req.params.id } });
     if (!fee) return res.status(404).json({ message: "Fee-ga lama helin." });
 
     const totalAmount = req.body.totalAmount !== undefined ? Number(req.body.totalAmount) : fee.totalAmount;
-    const { balance, status } = recalculate(totalAmount, fee.totalPaid);
+    const totalPaid = req.body.totalPaid !== undefined ? Number(req.body.totalPaid) : fee.totalPaid;
+    const { balance, status } = recalculate(totalAmount, totalPaid);
 
     const updated = await prisma.fee.update({
       where: { id: fee.id },
-      data: { totalAmount, balance, status },
+      data: { totalAmount, totalPaid, balance, status },
     });
     res.json(serializeFee(updated));
   } catch (err) {
