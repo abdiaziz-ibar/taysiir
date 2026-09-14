@@ -59,27 +59,27 @@ const Parents = () => {
           {error && <div className="md:col-span-2 bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
           <div>
             <label className="label-field">Magaca Waalidka</label>
-            <input className="input-field" required value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
+            <input className="input-field" required value={form.fullName} placeholder="Enter full name" onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
           </div>
           <div>
             <label className="label-field">Phone Number</label>
-            <input className="input-field" required value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <input className="input-field" required value={form.phone} placeholder="Enter phone number" onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
           <div>
             <label className="label-field">Alternative Phone</label>
-            <input className="input-field" value={form.alternativePhone} onChange={(e) => setForm({ ...form, alternativePhone: e.target.value })} />
+            <input className="input-field" value={form.alternativePhone} placeholder="Enter alternative phone number" onChange={(e) => setForm({ ...form, alternativePhone: e.target.value })} />
           </div>
           <div>
             <label className="label-field">Address</label>
-            <input className="input-field" value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            <input className="input-field" value={form.address} placeholder="Enter address" onChange={(e) => setForm({ ...form, address: e.target.value })} />
           </div>
           <div>
             <label className="label-field">Email (ikhtiyaari)</label>
-            <input className="input-field" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <input className="input-field" value={form.email} placeholder="Enter email" onChange={(e) => setForm({ ...form, email: e.target.value })} />
           </div>
           <div className="md:col-span-2">
             <label className="label-field">Notes</label>
-            <textarea className="input-field" rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            <textarea className="input-field" rows={2} value={form.notes} placeholder="Enter notes" onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           </div>
           <div className="md:col-span-2">
             <button className="btn-primary" disabled={saving}>{saving ? "Waa la kaydinayaa..." : "Kaydi Waalidka"}</button>

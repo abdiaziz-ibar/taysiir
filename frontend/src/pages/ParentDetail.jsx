@@ -15,6 +15,11 @@ const ParentDetail = () => {
   const [feeYear, setFeeYear] = useState("");
   const [error, setError] = useState("");
 
+  const [editing, setEditing] = useState(false);
+  const [editForm, setEditForm] = useState(null);
+  const [editError, setEditError] = useState("");
+  const [saving, setSaving] = useState(false);
+
   const load = async () => {
     const res = await api.get(`/parents/${id}`);
     setParent(res.data);
@@ -40,6 +45,34 @@ const ParentDetail = () => {
     }
   };
 
+  const startEdit = () => {
+    setEditForm({
+      fullName: parent.fullName,
+      phone: parent.phone,
+      alternativePhone: parent.alternativePhone || "",
+      address: parent.address || "",
+      email: parent.email || "",
+      notes: parent.notes || "",
+    });
+    setEditError("");
+    setEditing(true);
+  };
+
+  const handleEditSave = async (e) => {
+    e.preventDefault();
+    setEditError("");
+    setSaving(true);
+    try {
+      await api.put(`/parents/${id}`, editForm);
+      setEditing(false);
+      load();
+    } catch (err) {
+      setEditError(err.response?.data?.message || "Khalad ayaa dhacay.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   if (!parent) return <p className="text-ink/50">Waa la soo shubayaa...</p>;
 
   const feesForYear = selectedYear ? parent.fees.filter((f) => f.academicYearId?._id === selectedYear) : parent.fees;
@@ -51,17 +84,59 @@ const ParentDetail = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card md:col-span-1">
-          <h3 className="font-serif text-lg mb-3">Xogta Waalidka</h3>
-          <p className="text-sm text-ink/50">Parent ID</p>
-          <p className="mb-2">{parent.parentId}</p>
-          <p className="text-sm text-ink/50">Magaca</p>
-          <p className="mb-2">{parent.fullName}</p>
-          <p className="text-sm text-ink/50">Phone</p>
-          <p className="mb-2">{parent.phone}</p>
-          {parent.alternativePhone && (<><p className="text-sm text-ink/50">Alternative Phone</p><p className="mb-2">{parent.alternativePhone}</p></>)}
-          <p className="text-sm text-ink/50">Address</p>
-          <p className="mb-2">{parent.address || "-"}</p>
-          {parent.notes && (<><p className="text-sm text-ink/50">Notes</p><p>{parent.notes}</p></>)}
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="font-serif text-lg">Xogta Waalidka</h3>
+            {!editing && (
+              <button className="btn-secondary text-sm" onClick={startEdit}>Wax Ka Beddel (Edit)</button>
+            )}
+          </div>
+
+          {!editing ? (
+            <>
+              <p className="text-sm text-ink/50">Parent ID</p>
+              <p className="mb-2">{parent.parentId}</p>
+              <p className="text-sm text-ink/50">Magaca</p>
+              <p className="mb-2">{parent.fullName}</p>
+              <p className="text-sm text-ink/50">Phone</p>
+              <p className="mb-2">{parent.phone}</p>
+              {parent.alternativePhone && (<><p className="text-sm text-ink/50">Alternative Phone</p><p className="mb-2">{parent.alternativePhone}</p></>)}
+              <p className="text-sm text-ink/50">Address</p>
+              <p className="mb-2">{parent.address || "-"}</p>
+              {parent.notes && (<><p className="text-sm text-ink/50">Notes</p><p>{parent.notes}</p></>)}
+            </>
+          ) : (
+            <form onSubmit={handleEditSave} className="space-y-3">
+              {editError && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{editError}</div>}
+              <div>
+                <label className="label-field">Magaca Waalidka</label>
+                <input className="input-field" required value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} />
+              </div>
+              <div>
+                <label className="label-field">Phone Number</label>
+                <input className="input-field" required value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
+              </div>
+              <div>
+                <label className="label-field">Alternative Phone</label>
+                <input className="input-field" value={editForm.alternativePhone} onChange={(e) => setEditForm({ ...editForm, alternativePhone: e.target.value })} />
+              </div>
+              <div>
+                <label className="label-field">Address</label>
+                <input className="input-field" value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} />
+              </div>
+              <div>
+                <label className="label-field">Email (ikhtiyaari)</label>
+                <input className="input-field" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
+              </div>
+              <div>
+                <label className="label-field">Notes</label>
+                <textarea className="input-field" rows={2} value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} />
+              </div>
+              <div className="flex gap-3">
+                <button className="btn-primary" disabled={saving}>{saving ? "Waa la kaydinayaa..." : "Kaydi"}</button>
+                <button type="button" className="btn-secondary" onClick={() => setEditing(false)}>Jooji (Cancel)</button>
+              </div>
+            </form>
+          )}
         </div>
 
         <div className="card md:col-span-2">
