@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { formatMoney } from "../../utils/format";
+import { downloadCsv } from "../../utils/csv";
 
 const AllYearsReport = () => {
   const [data, setData] = useState({ years: [], totals: { totalFees: 0, totalPaid: 0, totalDebt: 0 } });
@@ -9,9 +10,27 @@ const AllYearsReport = () => {
     api.get("/reports/all-years").then((res) => setData(res.data));
   }, []);
 
+  const handleExport = () => {
+    const headers = ["Sanad Dugsiyeed", "Waalidiinta", "Wadarta Fee", "La Bixiyey", "Ku Dhiman", "Collection Rate"];
+    const rows = data.years.map((y) => [
+      y.academicYear,
+      y.totalParents,
+      y.totalFees,
+      y.totalPaid,
+      y.totalDebt,
+      `${y.collectionRate}%`,
+    ]);
+    rows.push(["Wadarta Guud", "", data.totals.totalFees, data.totals.totalPaid, data.totals.totalDebt, ""]);
+    const today = new Date().toISOString().slice(0, 10);
+    downloadCsv(`dhammaan-sannadaha-${today}.csv`, headers, rows);
+  };
+
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-serif">Dhammaan Sannadaha — Lacagta Guud</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-serif">Dhammaan Sannadaha — Lacagta Guud</h2>
+        <button onClick={handleExport} className="btn-secondary text-sm">⬇ Soo Deji Excel</button>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card">
