@@ -21,11 +21,14 @@ const Sidebar = () => {
 
   return (
     <aside className="w-64 bg-navy-dark min-h-screen flex flex-col shrink-0 print:hidden">
-      <div className="px-5 py-6 border-b border-white/10">
-        <h1 className="text-white font-serif text-lg leading-tight">
-          Maamulka Lacagta
-        </h1>
-        <p className="text-white/50 text-xs mt-0.5">Waalidiinta &amp; Deynta</p>
+      <div className="px-5 py-6 border-b border-white/10 flex items-center gap-3">
+        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center text-white font-serif font-bold text-sm shrink-0 shadow-sm">
+          TF
+        </div>
+        <div className="min-w-0">
+          <h1 className="text-white font-serif text-lg leading-tight truncate">Taysir Foundation</h1>
+          <p className="text-white/50 text-xs mt-0.5 truncate">Parent Fee &amp; Debt Management</p>
+        </div>
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">

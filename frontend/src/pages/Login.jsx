@@ -28,8 +28,8 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-navy-dark px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <h1 className="font-serif text-2xl text-white">Maamulka Lacagta</h1>
-          <p className="text-white/50 text-sm mt-1">Waalidiinta &amp; Deynta School-ka</p>
+          <h1 className="font-serif text-2xl text-white">Taysir Foundation</h1>
+          <p className="text-white/50 text-sm mt-1">Parent Fee &amp; Debt Management</p>
         </div>
         <form onSubmit={handleSubmit} className="bg-surface rounded-md p-6 space-y-4 shadow-xl">
           {error && (
