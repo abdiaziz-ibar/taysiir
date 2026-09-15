@@ -18,7 +18,11 @@ const serializeUser = (user) => {
 
 const serializeAcademicYear = (year) => withUnderscoreId(year);
 
-const serializeParent = (parent) => withUnderscoreId(parent);
+const serializeParent = (parent) => {
+  if (!parent) return parent;
+  const { otpCode, otpExpiresAt, ...rest } = parent;
+  return withUnderscoreId(rest);
+};
 
 // fee: optionally attach populated parent/academicYear objects under the
 // *Id keys, mirroring Mongoose's .populate() output shape.

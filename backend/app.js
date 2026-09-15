@@ -10,6 +10,7 @@ const feeRoutes = require("./routes/fees");
 const paymentRoutes = require("./routes/payments");
 const reportRoutes = require("./routes/reports");
 const userRoutes = require("./routes/users");
+const parentPortalRoutes = require("./routes/parentPortal");
 
 const app = express();
 
@@ -47,6 +48,7 @@ app.use("/api/fees", feeRoutes);
 app.use("/api/payments", paymentRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/parent-portal", parentPortalRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

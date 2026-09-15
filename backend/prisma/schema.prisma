@@ -29,9 +29,11 @@ model Parent {
   phone            String
   alternativePhone String?
   address          String?
-  email            String?
+  email            String?   @unique // set once the parent links their portal account
   notes            String?
   status           String    @default("active")
+  otpCode          String?
+  otpExpiresAt     DateTime?
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   fees             Fee[]

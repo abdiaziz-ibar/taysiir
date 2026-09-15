@@ -6,9 +6,10 @@ cd /var/www/html/taysiir
 echo "==> Pulling latest code"
 git pull origin main
 
-echo "==> Backend: installing deps + prisma generate"
+echo "==> Backend: installing deps + running migrations"
 cd backend
 npm install
+npx prisma migrate deploy
 npx prisma generate
 pm2 restart abdiaziz --update-env
 
