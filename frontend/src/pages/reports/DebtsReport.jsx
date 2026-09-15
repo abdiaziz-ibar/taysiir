@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { useAcademicYear } from "../../context/AcademicYearContext";
 import { formatMoney, statusLabel, statusBadgeClass } from "../../utils/format";
+import { downloadCsv } from "../../utils/csv";
 
 const DebtsReport = () => {
   const { selectedYearId, years } = useAcademicYear();
@@ -15,11 +16,30 @@ const DebtsReport = () => {
 
   const handlePrint = () => window.print();
 
+  const handleExport = () => {
+    const headers = ["Waalid", "Phone", "Academic Year", "Total Fee", "Paid", "Balance", "Status"];
+    const rows = data.debts.map((f) => [
+      f.parentId?.fullName,
+      f.parentId?.phone,
+      f.academicYearId?.name,
+      f.totalAmount,
+      f.totalPaid,
+      f.balance,
+      statusLabel(f.status),
+    ]);
+    rows.push(["", "", "", "", "", data.totalDebt, "Wadarta Deynta"]);
+    const today = new Date().toISOString().slice(0, 10);
+    downloadCsv(`warbixinta-deymaha-${yearName || today}.csv`, headers, rows);
+  };
+
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-serif">Warbixinta Deymaha {yearName ? `— ${yearName}` : ""}</h2>
-        <button onClick={handlePrint} className="btn-secondary print:hidden">Print</button>
+        <div className="flex gap-3 print:hidden">
+          <button onClick={handleExport} className="btn-secondary">⬇ Soo Deji Excel</button>
+          <button onClick={handlePrint} className="btn-secondary">Print</button>
+        </div>
       </div>
 
       <div className="card overflow-x-auto print:overflow-visible print:border-0 print:shadow-none print:p-0">
