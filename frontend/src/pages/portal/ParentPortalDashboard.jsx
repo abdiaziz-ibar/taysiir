@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Wallet, CheckCircle2, AlertCircle } from "lucide-react";
+import { Wallet, CheckCircle2, AlertCircle, GraduationCap, Receipt } from "lucide-react";
 import parentApi from "../../api/parentAxios";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../../utils/format";
 
@@ -34,25 +34,45 @@ const ParentPortalDashboard = () => {
     navigate("/portal/login");
   };
 
-  if (error) return <p className="p-6 text-danger">{error}</p>;
-  if (!data) return <p className="p-6 text-ink/50">Waa la soo shubayaa...</p>;
+  if (error) return <p className="min-h-screen flex items-center justify-center text-danger">{error}</p>;
+  if (!data) return <p className="min-h-screen flex items-center justify-center text-ink/50">Waa la soo shubayaa...</p>;
 
   const { parent, fees, payments } = data;
   const totalFee = fees.reduce((s, f) => s + f.totalAmount, 0);
   const totalPaid = fees.reduce((s, f) => s + f.totalPaid, 0);
   const totalBalance = fees.reduce((s, f) => s + f.balance, 0);
+  const paidPct = totalFee > 0 ? Math.min(100, Math.round((totalPaid / totalFee) * 100)) : 0;
 
   return (
     <div className="min-h-screen bg-paper">
-      <header className="bg-surface border-b border-line px-6 py-4 flex items-center justify-between">
-        <div>
-          <h1 className="font-serif text-lg">Taysir Foundation</h1>
-          <p className="text-xs text-ink/50">Salaan, {parent.fullName}</p>
+      <header className="bg-navy-dark px-6 py-5 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center text-white font-serif font-bold text-sm shrink-0 shadow-sm">
+            TF
+          </div>
+          <div>
+            <h1 className="font-serif text-lg text-white leading-tight">Taysir Foundation</h1>
+            <p className="text-white/50 text-xs mt-0.5">Xisaabta Waalidka</p>
+          </div>
         </div>
-        <button onClick={handleLogout} className="text-sm text-danger hover:underline">Ka Bax</button>
+        <button
+          onClick={handleLogout}
+          className="text-sm text-white/80 border border-white/20 rounded-full px-4 py-1.5 hover:bg-white/10 hover:text-white transition-colors"
+        >
+          Ka Bax
+        </button>
       </header>
 
       <main className="max-w-4xl mx-auto p-6 space-y-6">
+        <div className="card bg-gradient-to-br from-navy to-navy-light text-white border-0">
+          <p className="text-white/60 text-sm">Salaan,</p>
+          <h2 className="font-serif text-2xl mb-4">{parent.fullName}</h2>
+          <div className="w-full bg-white/15 rounded-full h-2 overflow-hidden">
+            <div className="bg-white h-full rounded-full transition-all" style={{ width: `${paidPct}%` }} />
+          </div>
+          <p className="text-white/70 text-xs mt-2">{paidPct}% ee lacagta guud ayaa la bixiyey</p>
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <StatCard label="Wadarta Lacagta" value={formatMoney(totalFee)} icon={Wallet} iconBg="bg-navy/10" iconColor="text-navy" />
           <StatCard label="La Bixiyey" value={formatMoney(totalPaid)} accent="text-success" icon={CheckCircle2} iconBg="bg-success/10" iconColor="text-success" />
@@ -60,7 +80,10 @@ const ParentPortalDashboard = () => {
         </div>
 
         <div className="card overflow-x-auto">
-          <h3 className="font-serif text-lg mb-3">Sanad Dugsiyeedka</h3>
+          <h3 className="font-serif text-lg mb-3 flex items-center gap-2">
+            <GraduationCap size={18} className="text-navy" />
+            Sanad Dugsiyeedka
+          </h3>
           <table className="table-base">
             <thead>
               <tr>
@@ -89,7 +112,10 @@ const ParentPortalDashboard = () => {
         </div>
 
         <div className="card overflow-x-auto">
-          <h3 className="font-serif text-lg mb-3">Taariikhda Lacag Bixinta</h3>
+          <h3 className="font-serif text-lg mb-3 flex items-center gap-2">
+            <Receipt size={18} className="text-navy" />
+            Taariikhda Lacag Bixinta
+          </h3>
           <table className="table-base">
             <thead>
               <tr>
