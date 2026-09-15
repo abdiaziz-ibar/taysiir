@@ -1,18 +1,36 @@
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
+import {
+  LayoutDashboard,
+  Users,
+  Wallet,
+  CreditCard,
+  AlertTriangle,
+  BarChart3,
+  CalendarDays,
+  CalendarRange,
+  Layers,
+  FileWarning,
+  GraduationCap,
+  UserCog,
+  Settings as SettingsIcon,
+  ChevronDown,
+  ChevronRight,
+} from "lucide-react";
 
 const linkBase =
   "flex items-center gap-3 px-4 py-2.5 rounded-md text-sm transition-colors";
 const linkActive = "bg-navy text-white";
 const linkInactive = "text-white/75 hover:bg-white/10 hover:text-white";
 
-const NavItem = ({ to, children, end }) => (
+const NavItem = ({ to, icon: Icon, children, end }) => (
   <NavLink
     to={to}
     end={end}
     className={({ isActive }) => `${linkBase} ${isActive ? linkActive : linkInactive}`}
   >
-    {children}
+    {Icon && <Icon size={17} className="shrink-0" />}
+    <span>{children}</span>
   </NavLink>
 );
 
@@ -32,31 +50,34 @@ const Sidebar = () => {
       </div>
 
       <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
-        <NavItem to="/dashboard" end>Dashboard</NavItem>
-        <NavItem to="/parents">Waalidiinta</NavItem>
-        <NavItem to="/fees">Lacagaha School-ka</NavItem>
-        <NavItem to="/payments">Lacag Bixinta</NavItem>
-        <NavItem to="/debts">Deymaha</NavItem>
+        <NavItem to="/dashboard" end icon={LayoutDashboard}>Dashboard</NavItem>
+        <NavItem to="/parents" icon={Users}>Waalidiinta</NavItem>
+        <NavItem to="/fees" icon={Wallet}>Lacagaha School-ka</NavItem>
+        <NavItem to="/payments" icon={CreditCard}>Lacag Bixinta</NavItem>
+        <NavItem to="/debts" icon={AlertTriangle}>Deymaha</NavItem>
 
         <button
           onClick={() => setReportsOpen((o) => !o)}
           className={`${linkBase} ${linkInactive} w-full justify-between`}
         >
-          <span>Warbixinnada</span>
-          <span className="text-xs">{reportsOpen ? "▾" : "▸"}</span>
+          <span className="flex items-center gap-3">
+            <BarChart3 size={17} className="shrink-0" />
+            Warbixinnada
+          </span>
+          {reportsOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
         </button>
         {reportsOpen && (
           <div className="pl-4 space-y-1">
-            <NavItem to="/reports/monthly">Warbixin Bille</NavItem>
-            <NavItem to="/reports/yearly">Warbixin Sanad Dugsiyeed</NavItem>
-            <NavItem to="/reports/all-years">Dhammaan Sannadaha</NavItem>
-            <NavItem to="/reports/debts">Warbixinta Deymaha</NavItem>
+            <NavItem to="/reports/monthly" icon={CalendarDays}>Warbixin Bille</NavItem>
+            <NavItem to="/reports/yearly" icon={CalendarRange}>Warbixin Sanad Dugsiyeed</NavItem>
+            <NavItem to="/reports/all-years" icon={Layers}>Dhammaan Sannadaha</NavItem>
+            <NavItem to="/reports/debts" icon={FileWarning}>Warbixinta Deymaha</NavItem>
           </div>
         )}
 
-        <NavItem to="/academic-years">Sanad Dugsiyeedka</NavItem>
-        <NavItem to="/users">Isticmaalayaasha</NavItem>
-        <NavItem to="/settings">Dejinta</NavItem>
+        <NavItem to="/academic-years" icon={GraduationCap}>Sanad Dugsiyeedka</NavItem>
+        <NavItem to="/users" icon={UserCog}>Isticmaalayaasha</NavItem>
+        <NavItem to="/settings" icon={SettingsIcon}>Dejinta</NavItem>
       </nav>
     </aside>
   );

@@ -1,7 +1,20 @@
 import { useEffect, useState } from "react";
+import { Wallet, CheckCircle2, AlertCircle } from "lucide-react";
 import api from "../../api/axios";
 import { formatMoney } from "../../utils/format";
 import { downloadCsv } from "../../utils/csv";
+
+const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, accent }) => (
+  <div className="card">
+    <div className="flex items-center justify-between mb-2">
+      <p className="text-xs uppercase tracking-wide text-ink/50">{label}</p>
+      <span className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${iconBg}`}>
+        <Icon size={16} className={iconColor} />
+      </span>
+    </div>
+    <p className={`text-2xl font-serif ${accent || ""}`}>{value}</p>
+  </div>
+);
 
 const AllYearsReport = () => {
   const [data, setData] = useState({ years: [], totals: { totalFees: 0, totalPaid: 0, totalDebt: 0 } });
@@ -33,18 +46,9 @@ const AllYearsReport = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="card">
-          <p className="text-xs uppercase tracking-wide text-ink/50">Wadarta Lacagta School-ka</p>
-          <p className="text-2xl font-serif mt-1">{formatMoney(data.totals.totalFees)}</p>
-        </div>
-        <div className="card">
-          <p className="text-xs uppercase tracking-wide text-ink/50">Wadarta La Bixiyey</p>
-          <p className="text-2xl font-serif mt-1 text-success">{formatMoney(data.totals.totalPaid)}</p>
-        </div>
-        <div className="card">
-          <p className="text-xs uppercase tracking-wide text-ink/50">Wadarta Ku Dhiman</p>
-          <p className="text-2xl font-serif mt-1 text-danger">{formatMoney(data.totals.totalDebt)}</p>
-        </div>
+        <StatCard label="Wadarta Lacagta School-ka" value={formatMoney(data.totals.totalFees)} icon={Wallet} iconBg="bg-navy/10" iconColor="text-navy" />
+        <StatCard label="Wadarta La Bixiyey" value={formatMoney(data.totals.totalPaid)} accent="text-success" icon={CheckCircle2} iconBg="bg-success/10" iconColor="text-success" />
+        <StatCard label="Wadarta Ku Dhiman" value={formatMoney(data.totals.totalDebt)} accent="text-danger" icon={AlertCircle} iconBg="bg-danger/10" iconColor="text-danger" />
       </div>
 
       <div className="card overflow-x-auto">
