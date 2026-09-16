@@ -1,14 +1,12 @@
 import { useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import parentApi from "../../api/parentAxios";
 
 const ParentPortalLogin = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const expired = searchParams.get("expired") === "1";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -32,11 +30,6 @@ const ParentPortalLogin = () => {
           <p className="text-white/50 text-sm mt-1">Xisaabta Waalidka — Soo Gal</p>
         </div>
         <form onSubmit={handleSubmit} className="bg-surface rounded-md p-6 space-y-4 shadow-xl">
-          {expired && !error && (
-            <div className="bg-amber/10 text-amber text-sm rounded-md px-3 py-2">
-              Session-kaagii wuu dhacay shaqo la'aan awgeed. Fadlan markale is soo diiwaan geli.
-            </div>
-          )}
           {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
           <div>
             <label className="label-field">Email</label>
