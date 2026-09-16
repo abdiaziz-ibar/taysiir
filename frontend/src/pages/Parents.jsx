@@ -5,7 +5,7 @@ import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, statusLabel, statusBadgeClass } from "../utils/format";
 import { downloadExcel, parseExcelFile } from "../utils/excel";
 
-const emptyForm = { fullName: "", phone: "", alternativePhone: "", address: "", email: "", notes: "" };
+const emptyForm = { fullName: "", phone: "", alternativePhone: "", address: "", email: "", notes: "", academicYearId: "", totalAmount: "" };
 
 const IMPORT_HEADERS = ["Magaca Waalidka", "Phone", "Alternative Phone", "Address", "Email", "Notes", "Total Fee"];
 const IMPORT_KEYS = ["fullName", "phone", "alternativePhone", "address", "email", "notes", "totalAmount"];
@@ -85,7 +85,12 @@ const Parents = () => {
     setError("");
     setSaving(true);
     try {
-      await api.post("/parents", form);
+      const { academicYearId, totalAmount, ...parentFields } = form;
+      const res = await api.post("/parents", parentFields);
+      const totalAmountNum = Number(totalAmount);
+      if (academicYearId && totalAmountNum > 0) {
+        await api.post("/fees", { parentId: res.data._id, academicYearId, totalAmount: totalAmountNum });
+      }
       setForm(emptyForm);
       setShowForm(false);
       load();
@@ -112,7 +117,13 @@ const Parents = () => {
             {importing ? "Waa la geliyaa..." : "⬆ Upload Excel"}
           </button>
           <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFileSelected} />
-          <button className="btn-primary" onClick={() => setShowForm((v) => !v)}>
+          <button
+            className="btn-primary"
+            onClick={() => {
+              if (!showForm) setForm((f) => ({ ...f, academicYearId: f.academicYearId || selectedYearId || "" }));
+              setShowForm((v) => !v);
+            }}
+          >
             {showForm ? "Jooji" : "+ Waalid Cusub"}
           </button>
         </div>
@@ -159,6 +170,22 @@ const Parents = () => {
           <div>
             <label className="label-field">Email (ikhtiyaari)</label>
             <input className="input-field" value={form.email} placeholder="Enter email" onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          </div>
+          <div className="md:col-span-2 border-t border-line pt-4">
+            <p className="text-sm text-ink/60 mb-3">Ikhtiyaari: hadda ku dar lacagta uu waalidkan ku leeyahay sanad dugsiyeedkan, si aadan mar dambe ugu noqon.</p>
+          </div>
+          <div>
+            <label className="label-field">Sanad Dugsiyeedka</label>
+            <select className="input-field" value={form.academicYearId} onChange={(e) => setForm({ ...form, academicYearId: e.target.value })}>
+              <option value="">-- Ha dooran --</option>
+              {years.map((y) => (
+                <option key={y._id} value={y._id}>{y.name}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label-field">Wadarta Fee</label>
+            <input type="number" min="0" step="0.01" className="input-field" value={form.totalAmount} placeholder="Tusaale: 100" onChange={(e) => setForm({ ...form, totalAmount: e.target.value })} />
           </div>
           <div className="md:col-span-2">
             <label className="label-field">Notes</label>

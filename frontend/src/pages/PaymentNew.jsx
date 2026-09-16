@@ -6,10 +6,13 @@ import { formatMoney } from "../utils/format";
 
 const PaymentNew = () => {
   const navigate = useNavigate();
-  const { selectedYearId } = useAcademicYear();
+  const { selectedYearId, years } = useAcademicYear();
   const [parents, setParents] = useState([]);
   const [parentId, setParentId] = useState("");
+  const [academicYearId, setAcademicYearId] = useState(selectedYearId || "");
   const [fee, setFee] = useState(null);
+  const [feeLoaded, setFeeLoaded] = useState(false);
+  const [newFeeAmount, setNewFeeAmount] = useState("");
   const [amount, setAmount] = useState("");
   const [paymentDate, setPaymentDate] = useState(new Date().toISOString().slice(0, 10));
   const [paymentMethod, setPaymentMethod] = useState("Cash");
@@ -20,30 +23,45 @@ const PaymentNew = () => {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    api.get("/parents", { params: { academicYearId: selectedYearId } }).then((res) => setParents(res.data));
-  }, [selectedYearId]);
+    api.get("/parents").then((res) => setParents(res.data));
+  }, []);
 
   useEffect(() => {
     setFee(null);
-    if (!parentId || !selectedYearId) return;
-    api.get("/fees", { params: { parentId, academicYearId: selectedYearId } }).then((res) => {
+    setFeeLoaded(false);
+    setNewFeeAmount("");
+    if (!parentId || !academicYearId) return;
+    api.get("/fees", { params: { parentId, academicYearId } }).then((res) => {
       setFee(res.data[0] || null);
+      setFeeLoaded(true);
     });
-  }, [parentId, selectedYearId]);
+  }, [parentId, academicYearId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    if (!fee) {
-      setError("Waalidkan Fee lama dhigin sanad dugsiyeedkan. Fadlan hore u samee Fee bogga Parent Detail.");
+
+    if (!fee && !(Number(newFeeAmount) > 0)) {
+      setError("Waalidkan Fee lama dhigin sanad dugsiyeedkan. Fadlan geli Wadarta Fee.");
       return;
     }
+
     setSaving(true);
     try {
+      let feeId = fee?._id;
+      if (!feeId) {
+        const feeRes = await api.post("/fees", {
+          parentId,
+          academicYearId,
+          totalAmount: Number(newFeeAmount),
+        });
+        feeId = feeRes.data._id;
+      }
+
       const res = await api.post("/payments", {
         parentId,
-        academicYearId: selectedYearId,
-        feeId: fee._id,
+        academicYearId,
+        feeId,
         amount: Number(amount),
         paymentDate,
         paymentMethod,
@@ -76,12 +94,33 @@ const PaymentNew = () => {
           </select>
         </div>
 
-        {parentId && (
-          <div className="bg-paper rounded-md p-3 grid grid-cols-3 gap-3 text-sm">
-            <div><p className="text-ink/50">Wadarta Fee</p><p className="font-medium">{fee ? formatMoney(fee.totalAmount) : "-"}</p></div>
-            <div><p className="text-ink/50">La Bixiyey</p><p className="font-medium">{fee ? formatMoney(fee.totalPaid) : "-"}</p></div>
-            <div><p className="text-ink/50">Ku Dhiman</p><p className="font-medium">{fee ? formatMoney(fee.balance) : "-"}</p></div>
-            {!fee && <p className="col-span-3 text-danger">Waalidkan Fee lama dhigin sanad dugsiyeedkan.</p>}
+        <div>
+          <label className="label-field">2. Dooro Sanad Dugsiyeedka</label>
+          <select className="input-field" required value={academicYearId} onChange={(e) => setAcademicYearId(e.target.value)}>
+            <option value="">Dooro Sanad Dugsiyeed...</option>
+            {years.map((y) => (
+              <option key={y._id} value={y._id}>{y.name}</option>
+            ))}
+          </select>
+        </div>
+
+        {parentId && academicYearId && feeLoaded && (
+          <div className="bg-paper rounded-md p-3 text-sm">
+            {fee ? (
+              <div className="grid grid-cols-3 gap-3">
+                <div><p className="text-ink/50">Wadarta Fee</p><p className="font-medium">{formatMoney(fee.totalAmount)}</p></div>
+                <div><p className="text-ink/50">La Bixiyey</p><p className="font-medium">{formatMoney(fee.totalPaid)}</p></div>
+                <div><p className="text-ink/50">Ku Dhiman</p><p className="font-medium">{formatMoney(fee.balance)}</p></div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <p className="text-amber">Waalidkan Fee lama dhigin sanad dugsiyeedkan ee la doortay. Geli Wadarta Fee si aad hal mar u sameyso Fee-ga iyo lacag-bixinta.</p>
+                <div>
+                  <label className="label-field">Wadarta Fee (Sanad Dugsiyeedkan)</label>
+                  <input type="number" min="0.01" step="0.01" required className="input-field" value={newFeeAmount} onChange={(e) => setNewFeeAmount(e.target.value)} />
+                </div>
+              </div>
+            )}
           </div>
         )}
 
