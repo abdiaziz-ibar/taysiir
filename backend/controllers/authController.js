@@ -30,4 +30,27 @@ const getMe = async (req, res) => {
   res.json({ user: req.user });
 };
 
-module.exports = { login, getMe };
+// POST /api/auth/verify-password  { password }
+// Re-checks the CURRENTLY logged-in admin's own password, as a step-up
+// confirmation before an irreversible action (e.g. deleting a parent).
+const verifyPassword = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    if (!password) return res.status(400).json({ message: "Fadlan geli password-ka." });
+
+    if (req.user.role !== "admin") {
+      return res.status(403).json({ message: "Kaliya admin ayaa tallaabadan sameyn kara." });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id: req.user._id } });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Password-ku waa khalad." });
+    }
+    res.json({ valid: true });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { login, getMe, verifyPassword };

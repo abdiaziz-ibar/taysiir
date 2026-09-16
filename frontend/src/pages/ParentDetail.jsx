@@ -4,6 +4,7 @@ import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../utils/format";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 const ParentDetail = () => {
   const { id } = useParams();
@@ -19,6 +20,7 @@ const ParentDetail = () => {
   const [feeYear, setFeeYear] = useState("");
   const [error, setError] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState(null);
@@ -102,13 +104,13 @@ const ParentDetail = () => {
   };
 
   const handleDeleteParent = async () => {
-    if (!confirm(`Ma hubtaa inaad tirtirto ${parent.fullName}? Tan waxay sidoo kale tirtiraysaa dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa oo dhan — lama soo celin karo.`)) return;
     setDeleting(true);
     try {
       await api.delete(`/parents/${id}`);
       navigate("/parents");
     } catch (err) {
       setDeleting(false);
+      setShowDeleteModal(false);
       alert(err.response?.data?.message || "Khalad ayaa dhacay.");
     }
   };
@@ -137,7 +139,7 @@ const ParentDetail = () => {
               <div className="flex gap-2 shrink-0">
                 <button className="btn-secondary text-sm" onClick={startEdit}>Wax Ka Beddel (Edit)</button>
                 {user?.role === "admin" && (
-                  <button className="btn-danger text-sm" onClick={handleDeleteParent} disabled={deleting}>
+                  <button className="btn-danger text-sm" onClick={() => setShowDeleteModal(true)} disabled={deleting}>
                     {deleting ? "..." : "Tirtir"}
                   </button>
                 )}
@@ -314,6 +316,14 @@ const ParentDetail = () => {
           </tbody>
         </table>
       </div>
+
+      <ConfirmDeleteModal
+        open={showDeleteModal}
+        title="Tirtir Waalidka?"
+        message={`Waxaad tirtirayaa ${parent.fullName}. Tan waxay sidoo kale tirtiraysaa dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa oo dhan — lama soo celin karo.`}
+        onConfirm={handleDeleteParent}
+        onClose={() => setShowDeleteModal(false)}
+      />
     </div>
   );
 };

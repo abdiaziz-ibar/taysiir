@@ -3,6 +3,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { formatMoney, formatDate } from "../utils/format";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 const PaymentDetail = () => {
   const { id } = useParams();
@@ -11,6 +12,7 @@ const PaymentDetail = () => {
   const [payment, setPayment] = useState(null);
   const receiptRef = useRef();
   const [deleting, setDeleting] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [editing, setEditing] = useState(false);
   const [amount, setAmount] = useState("");
@@ -62,13 +64,13 @@ const PaymentDetail = () => {
   };
 
   const handleDelete = async () => {
-    if (!confirm(`Ma hubtaa inaad tirtirto lacag-bixintan (${formatMoney(payment.amount)})? Balance-ka waalidku si toos ah ayuu u kordhi doonaa.`)) return;
     setDeleting(true);
     try {
       await api.delete(`/payments/${id}`);
       navigate("/payments");
     } catch (err) {
       setDeleting(false);
+      setShowDeleteModal(false);
       alert(err.response?.data?.message || "Khalad ayaa dhacay.");
     }
   };
@@ -121,7 +123,7 @@ const PaymentDetail = () => {
           <button onClick={handlePrint} className="btn-primary">Print Receipt</button>
           <button onClick={startEdit} className="btn-secondary">Wax Ka Beddel (Edit)</button>
           {user?.role === "admin" && (
-            <button onClick={handleDelete} disabled={deleting} className="btn-danger">
+            <button onClick={() => setShowDeleteModal(true)} disabled={deleting} className="btn-danger">
               {deleting ? "Waa la tirtirayaa..." : "Tirtir"}
             </button>
           )}
@@ -174,6 +176,14 @@ const PaymentDetail = () => {
           </div>
         </form>
       )}
+
+      <ConfirmDeleteModal
+        open={showDeleteModal}
+        title="Tirtir Lacag Bixinta?"
+        message={`Waxaad tirtirayaa lacag-bixintan (${formatMoney(payment.amount)}). Balance-ka waalidku si toos ah ayuu u kordhi doonaa — lama soo celin karo.`}
+        onConfirm={handleDelete}
+        onClose={() => setShowDeleteModal(false)}
+      />
     </div>
   );
 };
