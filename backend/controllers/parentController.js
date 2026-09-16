@@ -90,7 +90,7 @@ const createParent = async (req, res, next) => {
     }
     const parentId = await nextParentId();
     const parent = await prisma.parent.create({
-      data: { parentId, fullName, phone, alternativePhone, address, email, notes },
+      data: { parentId, fullName, phone, alternativePhone, address, email: email || null, notes },
     });
     res.status(201).json(serializeParent(parent));
   } catch (err) {
@@ -104,7 +104,7 @@ const updateParent = async (req, res, next) => {
     const { fullName, phone, alternativePhone, address, email, notes, status } = req.body;
     const parent = await prisma.parent.update({
       where: { id: req.params.id },
-      data: { fullName, phone, alternativePhone, address, email, notes, status },
+      data: { fullName, phone, alternativePhone, address, email: email || null, notes, status },
     });
     res.json(serializeParent(parent));
   } catch (err) {
