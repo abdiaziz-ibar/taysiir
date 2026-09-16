@@ -170,7 +170,7 @@ const getAllYearsReport = async (req, res, next) => {
 const getParentsSummaryReport = async (req, res, next) => {
   try {
     const parents = await prisma.parent.findMany({ orderBy: { fullName: "asc" } });
-    const fees = await prisma.fee.findMany();
+    const fees = await prisma.fee.findMany({ include: { academicYear: true }, orderBy: { academicYear: { startYear: "asc" } } });
 
     const rows = parents.map((parent) => {
       const parentFees = fees.filter((f) => f.parentId === parent.id);
@@ -187,6 +187,14 @@ const getParentsSummaryReport = async (req, res, next) => {
         totalFees,
         totalPaid,
         totalDebt,
+        years: parentFees.map((f) => ({
+          academicYearId: f.academicYearId,
+          academicYear: f.academicYear.name,
+          totalAmount: f.totalAmount,
+          totalPaid: f.totalPaid,
+          balance: f.balance,
+          status: f.status,
+        })),
       };
     });
 

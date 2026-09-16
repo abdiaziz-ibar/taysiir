@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Wallet, CheckCircle2, AlertCircle } from "lucide-react";
+import { Wallet, CheckCircle2, AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
 import api from "../../api/axios";
-import { formatMoney } from "../../utils/format";
+import { formatMoney, statusLabel, statusBadgeClass } from "../../utils/format";
 import { downloadExcel } from "../../utils/excel";
 
 const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, accent }) => (
@@ -20,6 +20,7 @@ const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, accent }) => (
 const ParentsSummaryReport = () => {
   const [data, setData] = useState({ parents: [], totals: { totalFees: 0, totalPaid: 0, totalDebt: 0 } });
   const [search, setSearch] = useState("");
+  const [expandedId, setExpandedId] = useState(null);
 
   useEffect(() => {
     api.get("/reports/parents-summary").then((res) => setData(res.data));
@@ -64,6 +65,7 @@ const ParentsSummaryReport = () => {
         <table className="table-base">
           <thead>
             <tr>
+              <th></th>
               <th>ID</th>
               <th>Magaca Waalidka</th>
               <th>Phone</th>
@@ -74,28 +76,73 @@ const ParentsSummaryReport = () => {
             </tr>
           </thead>
           <tbody>
-            {filtered.map((p) => (
-              <tr key={p.parentId}>
-                <td>{p.parentCode}</td>
-                <td>
-                  <Link to={`/parents/${p.parentId}`} className="text-link hover:underline font-medium">
-                    {p.fullName}
-                  </Link>
-                </td>
-                <td>{p.phone}</td>
-                <td className="text-right">{p.yearsCount}</td>
-                <td className="text-right">{formatMoney(p.totalFees)}</td>
-                <td className="text-right text-success">{formatMoney(p.totalPaid)}</td>
-                <td className="text-right text-danger">{formatMoney(p.totalDebt)}</td>
-              </tr>
-            ))}
+            {filtered.map((p) => {
+              const isOpen = expandedId === p.parentId;
+              return (
+                <Fragment key={p.parentId}>
+                  <tr
+                    className="cursor-pointer hover:bg-paper"
+                    onClick={() => setExpandedId(isOpen ? null : p.parentId)}
+                  >
+                    <td className="w-6 text-ink/40">
+                      {p.yearsCount > 0 && (isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />)}
+                    </td>
+                    <td>{p.parentCode}</td>
+                    <td>
+                      <Link
+                        to={`/parents/${p.parentId}`}
+                        className="text-link hover:underline font-medium"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        {p.fullName}
+                      </Link>
+                    </td>
+                    <td>{p.phone}</td>
+                    <td className="text-right">{p.yearsCount}</td>
+                    <td className="text-right">{formatMoney(p.totalFees)}</td>
+                    <td className="text-right text-success">{formatMoney(p.totalPaid)}</td>
+                    <td className="text-right text-danger">{formatMoney(p.totalDebt)}</td>
+                  </tr>
+                  {isOpen && p.years.length > 0 && (
+                    <tr>
+                      <td colSpan={8} className="bg-paper p-0">
+                        <table className="w-full text-sm">
+                          <thead>
+                            <tr className="text-ink/50">
+                              <th className="text-left font-normal py-2 pl-10">Sanad Dugsiyeed</th>
+                              <th className="text-right font-normal py-2">Wadarta Fee</th>
+                              <th className="text-right font-normal py-2">La Bixiyey</th>
+                              <th className="text-right font-normal py-2">Ku Dhiman</th>
+                              <th className="text-right font-normal py-2 pr-4">Status</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {p.years.map((y) => (
+                              <tr key={y.academicYearId} className="border-t border-line/60">
+                                <td className="py-2 pl-10">{y.academicYear}</td>
+                                <td className="text-right py-2">{formatMoney(y.totalAmount)}</td>
+                                <td className="text-right py-2 text-success">{formatMoney(y.totalPaid)}</td>
+                                <td className="text-right py-2 text-danger">{formatMoney(y.balance)}</td>
+                                <td className="text-right py-2 pr-4">
+                                  <span className={statusBadgeClass(y.status)}>{statusLabel(y.status)}</span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </td>
+                    </tr>
+                  )}
+                </Fragment>
+              );
+            })}
             {filtered.length === 0 && (
-              <tr><td colSpan={7} className="text-center text-ink/40 py-6">Waalid lama helin.</td></tr>
+              <tr><td colSpan={8} className="text-center text-ink/40 py-6">Waalid lama helin.</td></tr>
             )}
           </tbody>
           <tfoot>
             <tr>
-              <td className="font-medium py-3" colSpan={4}>Wadarta Guud</td>
+              <td className="font-medium py-3" colSpan={5}>Wadarta Guud</td>
               <td className="text-right font-medium py-3">{formatMoney(data.totals.totalFees)}</td>
               <td className="text-right font-medium py-3 text-success">{formatMoney(data.totals.totalPaid)}</td>
               <td className="text-right font-medium py-3 text-danger">{formatMoney(data.totals.totalDebt)}</td>
