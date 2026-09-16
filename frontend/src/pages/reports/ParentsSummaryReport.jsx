@@ -1,5 +1,4 @@
 import { Fragment, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
 import { Wallet, CheckCircle2, AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
 import api from "../../api/axios";
 import { formatMoney, statusLabel, statusBadgeClass } from "../../utils/format";
@@ -88,15 +87,7 @@ const ParentsSummaryReport = () => {
                       {p.yearsCount > 0 && (isOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />)}
                     </td>
                     <td>{p.parentCode}</td>
-                    <td>
-                      <Link
-                        to={`/parents/${p.parentId}`}
-                        className="text-link hover:underline font-medium"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        {p.fullName}
-                      </Link>
-                    </td>
+                    <td className="font-medium">{p.fullName}</td>
                     <td>{p.phone}</td>
                     <td className="text-right">{p.yearsCount}</td>
                     <td className="text-right">{formatMoney(p.totalFees)}</td>
