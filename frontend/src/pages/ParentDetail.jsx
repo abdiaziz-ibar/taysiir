@@ -1,16 +1,12 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useSearchParams, Link } from "react-router-dom";
 import api from "../api/axios";
-import { useAuth } from "../context/AuthContext";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../utils/format";
-import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 const ParentDetail = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const { user } = useAuth();
   const { years } = useAcademicYear();
   const [parent, setParent] = useState(null);
   const [payments, setPayments] = useState([]);
@@ -19,8 +15,6 @@ const ParentDetail = () => {
   const [feeAmount, setFeeAmount] = useState("");
   const [feeYear, setFeeYear] = useState("");
   const [error, setError] = useState("");
-  const [deleting, setDeleting] = useState(false);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState(null);
@@ -103,18 +97,6 @@ const ParentDetail = () => {
     }
   };
 
-  const handleDeleteParent = async () => {
-    setDeleting(true);
-    try {
-      await api.delete(`/parents/${id}`);
-      navigate("/parents");
-    } catch (err) {
-      setDeleting(false);
-      setShowDeleteModal(false);
-      alert(err.response?.data?.message || "Khalad ayaa dhacay.");
-    }
-  };
-
   useEffect(() => {
     if (parent && searchParams.get("edit") === "1" && !editing) {
       startEdit();
@@ -138,11 +120,6 @@ const ParentDetail = () => {
             {!editing && (
               <div className="flex gap-2 shrink-0">
                 <button className="btn-secondary text-sm" onClick={startEdit}>Wax Ka Beddel (Edit)</button>
-                {user?.role === "admin" && (
-                  <button className="btn-danger text-sm" onClick={() => setShowDeleteModal(true)} disabled={deleting}>
-                    {deleting ? "..." : "Tirtir"}
-                  </button>
-                )}
               </div>
             )}
           </div>
@@ -316,14 +293,6 @@ const ParentDetail = () => {
           </tbody>
         </table>
       </div>
-
-      <ConfirmDeleteModal
-        open={showDeleteModal}
-        title="Tirtir Waalidka?"
-        message={`Waxaad tirtirayaa ${parent.fullName}. Tan waxay sidoo kale tirtiraysaa dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa oo dhan — lama soo celin karo.`}
-        onConfirm={handleDeleteParent}
-        onClose={() => setShowDeleteModal(false)}
-      />
     </div>
   );
 };
