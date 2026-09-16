@@ -4,6 +4,7 @@ const {
   getParents,
   getParentById,
   createParent,
+  bulkImportParents,
   updateParent,
   deleteParent,
 } = require("../controllers/parentController");
@@ -11,6 +12,7 @@ const { protect, authorize } = require("../middleware/auth");
 
 router.use(protect);
 router.get("/", getParents);
+router.post("/bulk-import", bulkImportParents);
 router.get("/:id", getParentById);
 router.post("/", createParent);
 router.put("/:id", updateParent);

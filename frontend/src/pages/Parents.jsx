@@ -1,10 +1,14 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, statusLabel, statusBadgeClass } from "../utils/format";
+import { downloadCsv, parseCsv } from "../utils/csv";
 
 const emptyForm = { fullName: "", phone: "", alternativePhone: "", address: "", email: "", notes: "" };
+
+const IMPORT_HEADERS = ["Magaca Waalidka", "Phone", "Alternative Phone", "Address", "Email", "Notes", "Total Fee"];
+const IMPORT_KEYS = ["fullName", "phone", "alternativePhone", "address", "email", "notes", "totalAmount"];
 
 const Parents = () => {
   const { selectedYearId } = useAcademicYear();
@@ -17,6 +21,10 @@ const Parents = () => {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
 
+  const fileInputRef = useRef();
+  const [importing, setImporting] = useState(false);
+  const [importResult, setImportResult] = useState(null);
+
   const load = async () => {
     const res = await api.get("/parents", {
       params: { search, status, sort, academicYearId: selectedYearId },
@@ -28,6 +36,49 @@ const Parents = () => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedYearId, search, status, sort]);
+
+  const handleDownloadTemplate = () => {
+    downloadCsv("waalidiinta-template.csv", IMPORT_HEADERS, [
+      ["Cali Xasan", "615111222", "", "Muqdisho", "cali@example.com", "", "100"],
+    ]);
+  };
+
+  const handleFileSelected = async (e) => {
+    const file = e.target.files[0];
+    e.target.value = "";
+    if (!file) return;
+
+    setImportResult(null);
+    setImporting(true);
+    try {
+      const text = await file.text();
+      const table = parseCsv(text);
+      if (table.length < 2) {
+        setImportResult({ created: 0, errors: [{ row: 1, name: "", message: "Faylka waa madhan yahay ama qaab khalad ah ayuu leeyahay." }] });
+        return;
+      }
+
+      const headerRow = table[0].map((h) => h.trim());
+      const colIndex = IMPORT_HEADERS.map((h) => headerRow.findIndex((c) => c.toLowerCase() === h.toLowerCase()));
+
+      const rows = table.slice(1).map((cells) => {
+        const row = {};
+        IMPORT_KEYS.forEach((key, i) => {
+          const idx = colIndex[i];
+          row[key] = idx >= 0 ? (cells[idx] || "").trim() : "";
+        });
+        return row;
+      });
+
+      const res = await api.post("/parents/bulk-import", { rows, academicYearId: selectedYearId });
+      setImportResult(res.data);
+      load();
+    } catch (err) {
+      setImportResult({ created: 0, errors: [{ row: "-", name: "", message: err.response?.data?.message || "Khalad ayaa dhacay." }] });
+    } finally {
+      setImporting(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,12 +98,38 @@ const Parents = () => {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-xl font-serif">Waalidiinta</h2>
-        <button className="btn-primary" onClick={() => setShowForm((v) => !v)}>
-          {showForm ? "Jooji" : "+ Waalid Cusub"}
-        </button>
+        <div className="flex gap-2 flex-wrap">
+          <button className="btn-secondary text-sm" onClick={handleDownloadTemplate}>⬇ Template</button>
+          <button className="btn-secondary text-sm" onClick={() => fileInputRef.current.click()} disabled={importing}>
+            {importing ? "Waa la geliyaa..." : "⬆ Upload Excel"}
+          </button>
+          <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleFileSelected} />
+          <button className="btn-primary" onClick={() => setShowForm((v) => !v)}>
+            {showForm ? "Jooji" : "+ Waalid Cusub"}
+          </button>
+        </div>
       </div>
+
+      {importResult && (
+        <div className={`card ${importResult.errors.length > 0 ? "border-amber" : "border-success"}`}>
+          <div className="flex items-center justify-between mb-2">
+            <p className="font-medium">
+              {importResult.created} waalid ayaa si guul leh loo daray
+              {importResult.errors.length > 0 ? `, ${importResult.errors.length} saf ayaa la booday` : ""}.
+            </p>
+            <button className="text-sm text-ink/50 hover:text-ink" onClick={() => setImportResult(null)}>✕</button>
+          </div>
+          {importResult.errors.length > 0 && (
+            <ul className="text-sm text-danger space-y-1">
+              {importResult.errors.map((e, i) => (
+                <li key={i}>Saf {e.row} {e.name ? `(${e.name})` : ""}: {e.message}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
 
       {showForm && (
         <form onSubmit={handleSubmit} className="card grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -120,6 +120,71 @@ const updateParent = async (req, res, next) => {
   }
 };
 
+// POST /api/parents/bulk-import  { rows: [{ fullName, phone, alternativePhone, address, email, notes, totalAmount }], academicYearId }
+// Creates one parent per row (and a Fee for academicYearId when totalAmount is
+// given). Bad rows are skipped and reported rather than failing the batch.
+const bulkImportParents = async (req, res, next) => {
+  try {
+    const { rows, academicYearId } = req.body;
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return res.status(400).json({ message: "Rows waa waajib oo ma noqon karo liis madhan." });
+    }
+
+    let created = 0;
+    const errors = [];
+
+    for (let i = 0; i < rows.length; i++) {
+      const row = rows[i];
+      const rowLabel = row.fullName || `Saf ${i + 2}`;
+      try {
+        const fullName = (row.fullName || "").trim();
+        const phone = (row.phone || "").trim();
+        if (!fullName || !phone) {
+          errors.push({ row: i + 2, name: rowLabel, message: "Magaca iyo Phone waa waajib." });
+          continue;
+        }
+
+        const parentId = await nextParentId();
+        const parent = await prisma.parent.create({
+          data: {
+            parentId,
+            fullName,
+            phone,
+            alternativePhone: row.alternativePhone || null,
+            address: row.address || null,
+            email: row.email || null,
+            notes: row.notes || null,
+          },
+        });
+
+        const totalAmount = Number(row.totalAmount);
+        if (academicYearId && totalAmount > 0) {
+          await prisma.fee.create({
+            data: {
+              parentId: parent.id,
+              academicYearId,
+              totalAmount,
+              totalPaid: 0,
+              balance: totalAmount,
+              status: "unpaid",
+            },
+          });
+        }
+
+        created += 1;
+      } catch (err) {
+        const message =
+          err.code === "P2002" ? "Qiimo (email) horey ayaa loo isticmaalay." : "Khalad ayaa dhacay.";
+        errors.push({ row: i + 2, name: rowLabel, message });
+      }
+    }
+
+    res.json({ created, errors });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // DELETE /api/parents/:id
 const deleteParent = async (req, res, next) => {
   try {
@@ -131,4 +196,4 @@ const deleteParent = async (req, res, next) => {
   }
 };
 
-module.exports = { getParents, getParentById, createParent, updateParent, deleteParent };
+module.exports = { getParents, getParentById, createParent, bulkImportParents, updateParent, deleteParent };
