@@ -11,7 +11,8 @@ const IMPORT_HEADERS = ["Magaca Waalidka", "Phone", "Alternative Phone", "Addres
 const IMPORT_KEYS = ["fullName", "phone", "alternativePhone", "address", "email", "notes", "totalAmount"];
 
 const Parents = () => {
-  const { selectedYearId } = useAcademicYear();
+  const { selectedYearId, years } = useAcademicYear();
+  const selectedYearName = years.find((y) => y._id === selectedYearId)?.name;
   const [parents, setParents] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -98,7 +99,13 @@ const Parents = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-serif">Waalidiinta</h2>
+        <div>
+          <h2 className="text-xl font-serif">Waalidiinta</h2>
+          <p className="text-xs text-ink/50 mt-0.5">
+            Lacagta hoos ku qoran waa tii sanadka <span className="font-medium">{selectedYearName || "la doortay"}</span> kaliya.
+            Si aad u aragto wadarta dhammaan sannadaha, eeg <Link to="/reports/parents-summary" className="text-link hover:underline">Wadarta Waalidiinta</Link>.
+          </p>
+        </div>
         <div className="flex gap-2 flex-wrap">
           <button className="btn-secondary text-sm" onClick={handleDownloadTemplate}>⬇ Template</button>
           <button className="btn-secondary text-sm" onClick={() => fileInputRef.current.click()} disabled={importing}>
@@ -192,9 +199,9 @@ const Parents = () => {
               <th>ID</th>
               <th>Magaca Waalidka</th>
               <th>Phone</th>
-              <th className="text-right">Total Fee</th>
-              <th className="text-right">La Bixiyey</th>
-              <th className="text-right">Ku Dhiman</th>
+              <th className="text-right">Total Fee ({selectedYearName || "-"})</th>
+              <th className="text-right">La Bixiyey ({selectedYearName || "-"})</th>
+              <th className="text-right">Ku Dhiman ({selectedYearName || "-"})</th>
               <th>Status</th>
               <th></th>
             </tr>
