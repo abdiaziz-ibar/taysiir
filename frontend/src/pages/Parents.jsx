@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import api from "../api/axios";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, statusLabel, statusBadgeClass } from "../utils/format";
-import { downloadCsv, parseCsv } from "../utils/csv";
+import { downloadExcel, parseExcelFile } from "../utils/excel";
 
 const emptyForm = { fullName: "", phone: "", alternativePhone: "", address: "", email: "", notes: "" };
 
@@ -38,7 +38,7 @@ const Parents = () => {
   }, [selectedYearId, search, status, sort]);
 
   const handleDownloadTemplate = () => {
-    downloadCsv("waalidiinta-template.csv", IMPORT_HEADERS, [
+    downloadExcel("waalidiinta-template.xlsx", IMPORT_HEADERS, [
       ["Cali Xasan", "615111222", "", "Muqdisho", "cali@example.com", "", "100"],
     ]);
   };
@@ -51,8 +51,7 @@ const Parents = () => {
     setImportResult(null);
     setImporting(true);
     try {
-      const text = await file.text();
-      const table = parseCsv(text);
+      const table = await parseExcelFile(file);
       if (table.length < 2) {
         setImportResult({ created: 0, errors: [{ row: 1, name: "", message: "Faylka waa madhan yahay ama qaab khalad ah ayuu leeyahay." }] });
         return;
@@ -105,7 +104,7 @@ const Parents = () => {
           <button className="btn-secondary text-sm" onClick={() => fileInputRef.current.click()} disabled={importing}>
             {importing ? "Waa la geliyaa..." : "⬆ Upload Excel"}
           </button>
-          <input ref={fileInputRef} type="file" accept=".csv" className="hidden" onChange={handleFileSelected} />
+          <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFileSelected} />
           <button className="btn-primary" onClick={() => setShowForm((v) => !v)}>
             {showForm ? "Jooji" : "+ Waalid Cusub"}
           </button>

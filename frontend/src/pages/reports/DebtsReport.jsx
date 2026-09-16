@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../../api/axios";
 import { useAcademicYear } from "../../context/AcademicYearContext";
 import { formatMoney, statusLabel, statusBadgeClass } from "../../utils/format";
-import { downloadCsv } from "../../utils/csv";
+import { downloadExcel } from "../../utils/excel";
 
 const DebtsReport = () => {
   const { selectedYearId, years } = useAcademicYear();
@@ -29,7 +29,7 @@ const DebtsReport = () => {
     ]);
     rows.push(["", "", "", "", "", data.totalDebt, "Wadarta Deynta"]);
     const today = new Date().toISOString().slice(0, 10);
-    downloadCsv(`warbixinta-deymaha-${yearName || today}.csv`, headers, rows);
+    downloadExcel(`warbixinta-deymaha-${yearName || today}.xlsx`, headers, rows);
   };
 
   return (

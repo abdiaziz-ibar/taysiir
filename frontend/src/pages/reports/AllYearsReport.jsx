@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Wallet, CheckCircle2, AlertCircle } from "lucide-react";
 import api from "../../api/axios";
 import { formatMoney } from "../../utils/format";
-import { downloadCsv } from "../../utils/csv";
+import { downloadExcel } from "../../utils/excel";
 
 const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, accent }) => (
   <div className="card">
@@ -35,7 +35,7 @@ const AllYearsReport = () => {
     ]);
     rows.push(["Wadarta Guud", "", data.totals.totalFees, data.totals.totalPaid, data.totals.totalDebt, ""]);
     const today = new Date().toISOString().slice(0, 10);
-    downloadCsv(`dhammaan-sannadaha-${today}.csv`, headers, rows);
+    downloadExcel(`dhammaan-sannadaha-${today}.xlsx`, headers, rows);
   };
 
   return (
