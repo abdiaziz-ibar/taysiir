@@ -1,9 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, statusLabel, statusBadgeClass } from "../utils/format";
 import { downloadExcel, parseExcelFile } from "../utils/excel";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 const emptyForm = { fullName: "", phone: "", alternativePhone: "", address: "", email: "", notes: "", academicYearId: "", totalAmount: "" };
 
@@ -11,9 +13,11 @@ const IMPORT_HEADERS = ["Magaca Waalidka", "Phone", "Alternative Phone", "Addres
 const IMPORT_KEYS = ["fullName", "phone", "alternativePhone", "address", "email", "notes", "totalAmount"];
 
 const Parents = () => {
+  const { user } = useAuth();
   const { selectedYearId, years } = useAcademicYear();
   const selectedYearName = years.find((y) => y._id === selectedYearId)?.name;
   const [parents, setParents] = useState([]);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [sort, setSort] = useState("");
@@ -78,6 +82,12 @@ const Parents = () => {
     } finally {
       setImporting(false);
     }
+  };
+
+  const handleDelete = async () => {
+    await api.delete(`/parents/${deleteTarget._id}`);
+    setDeleteTarget(null);
+    load();
   };
 
   const handleSubmit = async (e) => {
@@ -247,8 +257,11 @@ const Parents = () => {
                 <td className="text-right">{formatMoney(p.totalPaid)}</td>
                 <td className="text-right">{formatMoney(p.balance)}</td>
                 <td><span className={statusBadgeClass(p.feeStatus)}>{statusLabel(p.feeStatus)}</span></td>
-                <td className="text-right">
-                  <Link to={`/parents/${p._id}?edit=1`} className="text-sm text-link hover:underline">Edit</Link>
+                <td className="text-right whitespace-nowrap">
+                  <Link to={`/parents/${p._id}?edit=1`} className="text-sm text-link hover:underline mr-3">Edit</Link>
+                  {user?.role === "admin" && (
+                    <button onClick={() => setDeleteTarget(p)} className="text-sm text-danger hover:underline">Tirtir</button>
+                  )}
                 </td>
               </tr>
             ))}
@@ -258,6 +271,14 @@ const Parents = () => {
           </tbody>
         </table>
       </div>
+
+      <ConfirmDeleteModal
+        open={!!deleteTarget}
+        title="Tirtir Waalidka?"
+        message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.fullName}. Tan waxay sidoo kale tirtiraysaa dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa oo dhan — lama soo celin karo.` : ""}
+        onConfirm={handleDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };
