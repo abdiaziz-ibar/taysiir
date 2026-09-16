@@ -125,7 +125,9 @@ const Users = () => {
                     <td className="capitalize">{u.status}</td>
                     <td className="text-right whitespace-nowrap">
                       <button onClick={() => startEdit(u)} className="text-sm text-link hover:underline mr-3">Edit</button>
-                      <button onClick={() => setDeleteTarget(u)} className="text-sm text-danger hover:underline">Tirtir</button>
+                      {u.username !== "admin" && (
+                        <button onClick={() => setDeleteTarget(u)} className="text-sm text-danger hover:underline">Tirtir</button>
+                      )}
                     </td>
                   </>
                 )}

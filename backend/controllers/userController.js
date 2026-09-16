@@ -50,6 +50,11 @@ const updateUser = async (req, res, next) => {
 // DELETE /api/users/:id
 const deleteUser = async (req, res, next) => {
   try {
+    const user = await prisma.user.findUnique({ where: { id: req.params.id } });
+    if (!user) return res.status(404).json({ message: "Isticmaalaha lama helin." });
+    if (user.username === "admin") {
+      return res.status(403).json({ message: "System Administrator-ka guud lama tirtiri karo bogga (front-end)-ka. Haddii loo baahdo, waa in database-ka toos looga tirtiraa." });
+    }
     await prisma.user.delete({ where: { id: req.params.id } });
     res.json({ message: "Isticmaalaha waa la tirtiray." });
   } catch (err) {
