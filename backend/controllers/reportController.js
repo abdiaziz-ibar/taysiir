@@ -166,6 +166,45 @@ const getAllYearsReport = async (req, res, next) => {
   }
 };
 
+// GET /api/reports/parents-summary  (per parent: totals summed across every academic year, in one place)
+const getParentsSummaryReport = async (req, res, next) => {
+  try {
+    const parents = await prisma.parent.findMany({ orderBy: { fullName: "asc" } });
+    const fees = await prisma.fee.findMany();
+
+    const rows = parents.map((parent) => {
+      const parentFees = fees.filter((f) => f.parentId === parent.id);
+      const totalFees = parentFees.reduce((s, f) => s + f.totalAmount, 0);
+      const totalPaid = parentFees.reduce((s, f) => s + f.totalPaid, 0);
+      const totalDebt = parentFees.reduce((s, f) => s + f.balance, 0);
+
+      return {
+        parentId: parent.id,
+        parentCode: parent.parentId,
+        fullName: parent.fullName,
+        phone: parent.phone,
+        yearsCount: parentFees.length,
+        totalFees,
+        totalPaid,
+        totalDebt,
+      };
+    });
+
+    const totals = rows.reduce(
+      (acc, r) => ({
+        totalFees: acc.totalFees + r.totalFees,
+        totalPaid: acc.totalPaid + r.totalPaid,
+        totalDebt: acc.totalDebt + r.totalDebt,
+      }),
+      { totalFees: 0, totalPaid: 0, totalDebt: 0 }
+    );
+
+    res.json({ parents: rows, totals });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // GET /api/reports/debts?academicYearId=
 const getDebtsReport = async (req, res, next) => {
   try {
@@ -224,6 +263,7 @@ module.exports = {
   getMonthlyReport,
   getYearlyReport,
   getAllYearsReport,
+  getParentsSummaryReport,
   getDebtsReport,
   getParentReport,
 };

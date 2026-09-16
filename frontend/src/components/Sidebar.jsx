@@ -10,6 +10,7 @@ import {
   CalendarDays,
   CalendarRange,
   Layers,
+  Users2,
   FileWarning,
   GraduationCap,
   UserCog,
@@ -89,6 +90,7 @@ const Sidebar = ({ open, onClose }) => {
               <NavItem to="/reports/monthly" icon={CalendarDays} onClick={onClose}>Warbixin Bille</NavItem>
               <NavItem to="/reports/yearly" icon={CalendarRange} onClick={onClose}>Warbixin Sanad Dugsiyeed</NavItem>
               <NavItem to="/reports/all-years" icon={Layers} onClick={onClose}>Dhammaan Sannadaha</NavItem>
+              <NavItem to="/reports/parents-summary" icon={Users2} onClick={onClose}>Wadarta Waalidiinta</NavItem>
               <NavItem to="/reports/debts" icon={FileWarning} onClick={onClose}>Warbixinta Deymaha</NavItem>
             </div>
           )}
