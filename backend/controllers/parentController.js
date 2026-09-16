@@ -2,8 +2,15 @@ const prisma = require("../lib/prisma");
 const { serializeParent } = require("../utils/serialize");
 
 const nextParentId = async () => {
-  const count = await prisma.parent.count();
-  return `P${String(count + 1).padStart(3, "0")}`;
+  // Based on the highest parentId currently in use, not the row count —
+  // count() breaks once any parent has ever been deleted, since it can
+  // regenerate an id that still belongs to a different existing row.
+  const last = await prisma.parent.findFirst({
+    orderBy: { parentId: "desc" },
+    select: { parentId: true },
+  });
+  const lastNum = last ? parseInt(last.parentId.replace(/\D/g, ""), 10) || 0 : 0;
+  return `P${String(lastNum + 1).padStart(3, "0")}`;
 };
 
 // GET /api/parents?search=&status=&academicYearId=&sort=
