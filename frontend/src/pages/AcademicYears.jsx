@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 import { useAcademicYear } from "../context/AcademicYearContext";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 const AcademicYears = () => {
+  const { user } = useAuth();
   const { refreshYears } = useAcademicYear();
   const [years, setYears] = useState([]);
   const [startYear, setStartYear] = useState("");
@@ -11,6 +14,8 @@ const AcademicYears = () => {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [editError, setEditError] = useState("");
+
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const load = async () => {
     const res = await api.get("/academic-years");
@@ -62,6 +67,17 @@ const AcademicYears = () => {
     }
   };
 
+  const handleDelete = async () => {
+    try {
+      await api.delete(`/academic-years/${deleteTarget._id}`);
+      setDeleteTarget(null);
+      load();
+      refreshYears();
+    } catch (err) {
+      alert(err.response?.data?.message || "Khalad ayaa dhacay.");
+    }
+  };
+
   return (
     <div className="space-y-5">
       <h2 className="text-xl font-serif">Sanad Dugsiyeedka (Academic Years)</h2>
@@ -70,7 +86,7 @@ const AcademicYears = () => {
         {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
         <div>
           <label className="label-field">Sanadka Bilowga (e.g. 2026)</label>
-          <input type="number" required className="input-field" value={startYear} onChange={(e) => setStartYear(e.target.value)} />
+          <input type="number" min="2000" max="2100" required className="input-field" value={startYear} onChange={(e) => setStartYear(e.target.value)} />
         </div>
         <button className="btn-primary">+ Samee Sanad Dugsiyeed</button>
       </form>
@@ -105,9 +121,12 @@ const AcademicYears = () => {
                     <td className="text-right whitespace-nowrap">
                       <button onClick={() => startEdit(y)} className="text-sm text-link hover:underline mr-3">Edit</button>
                       {y.isActive ? (
-                        <button onClick={() => handleDeactivate(y._id)} className="text-sm text-danger hover:underline">Deactivate</button>
+                        <button onClick={() => handleDeactivate(y._id)} className="text-sm text-danger hover:underline mr-3">Deactivate</button>
                       ) : (
-                        <button onClick={() => handleActivate(y._id)} className="text-sm text-link hover:underline">Activate</button>
+                        <button onClick={() => handleActivate(y._id)} className="text-sm text-link hover:underline mr-3">Activate</button>
+                      )}
+                      {user?.role === "admin" && (
+                        <button onClick={() => setDeleteTarget(y)} className="text-sm text-danger hover:underline">Tirtir</button>
                       )}
                     </td>
                   </>
@@ -117,6 +136,14 @@ const AcademicYears = () => {
           </tbody>
         </table>
       </div>
+
+      <ConfirmDeleteModal
+        open={!!deleteTarget}
+        title="Tirtir Sanad Dugsiyeedka?"
+        message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.name}. Tan waxay sidoo kale tirtiraysaa dhammaan Fee-yada iyo Lacag-bixinnada sanadkan la xidhiidha oo dhan — lama soo celin karo.` : ""}
+        onConfirm={handleDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };

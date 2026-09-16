@@ -15,14 +15,17 @@ const getAcademicYears = async (req, res, next) => {
 const createAcademicYear = async (req, res, next) => {
   try {
     const { startYear } = req.body;
-    if (!startYear) return res.status(400).json({ message: "startYear waa waajib." });
-    const endYear = Number(startYear) + 1;
-    const name = `${startYear}-${endYear}`;
+    const startYearNum = Number(startYear);
+    if (!startYear || !Number.isInteger(startYearNum) || startYearNum < 2000 || startYearNum > 2100) {
+      return res.status(400).json({ message: "Sanadka Bilowga waa inuu ahaadaa nambar sax ah (tusaale 2000-2100)." });
+    }
+    const endYear = startYearNum + 1;
+    const name = `${startYearNum}-${endYear}`;
 
     const year = await prisma.academicYear.create({
       data: {
         name,
-        startYear: Number(startYear),
+        startYear: startYearNum,
         endYear,
         startMonth: "September",
         endMonth: "August",
