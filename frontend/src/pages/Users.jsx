@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 const emptyForm = { fullName: "", username: "", email: "", password: "", role: "staff" };
 
@@ -12,6 +13,8 @@ const Users = () => {
   const [editingId, setEditingId] = useState(null);
   const [editForm, setEditForm] = useState(null);
   const [editError, setEditError] = useState("");
+
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const load = async () => {
     const res = await api.get("/users");
@@ -33,9 +36,9 @@ const Users = () => {
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!confirm("Ma hubtaa inaad tirtirto isticmaalahan?")) return;
-    await api.delete(`/users/${id}`);
+  const handleDelete = async () => {
+    await api.delete(`/users/${deleteTarget._id}`);
+    setDeleteTarget(null);
     load();
   };
 
@@ -122,7 +125,7 @@ const Users = () => {
                     <td className="capitalize">{u.status}</td>
                     <td className="text-right whitespace-nowrap">
                       <button onClick={() => startEdit(u)} className="text-sm text-link hover:underline mr-3">Edit</button>
-                      <button onClick={() => handleDelete(u._id)} className="text-sm text-danger hover:underline">Tirtir</button>
+                      <button onClick={() => setDeleteTarget(u)} className="text-sm text-danger hover:underline">Tirtir</button>
                     </td>
                   </>
                 )}
@@ -131,6 +134,14 @@ const Users = () => {
           </tbody>
         </table>
       </div>
+
+      <ConfirmDeleteModal
+        open={!!deleteTarget}
+        title="Tirtir Isticmaalaha?"
+        message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.fullName} (${deleteTarget.username}). Ma awoodo mar dambe inuu soo galo system-ka — lama soo celin karo.` : ""}
+        onConfirm={handleDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };
