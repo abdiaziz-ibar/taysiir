@@ -1,12 +1,15 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams, Link } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../utils/format";
 
 const ParentDetail = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const { years } = useAcademicYear();
   const [parent, setParent] = useState(null);
   const [payments, setPayments] = useState([]);
@@ -15,6 +18,7 @@ const ParentDetail = () => {
   const [feeAmount, setFeeAmount] = useState("");
   const [feeYear, setFeeYear] = useState("");
   const [error, setError] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   const [editing, setEditing] = useState(false);
   const [editForm, setEditForm] = useState(null);
@@ -97,6 +101,18 @@ const ParentDetail = () => {
     }
   };
 
+  const handleDeleteParent = async () => {
+    if (!confirm(`Ma hubtaa inaad tirtirto ${parent.fullName}? Tan waxay sidoo kale tirtiraysaa dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa oo dhan — lama soo celin karo.`)) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/parents/${id}`);
+      navigate("/parents");
+    } catch (err) {
+      setDeleting(false);
+      alert(err.response?.data?.message || "Khalad ayaa dhacay.");
+    }
+  };
+
   useEffect(() => {
     if (parent && searchParams.get("edit") === "1" && !editing) {
       startEdit();
@@ -115,10 +131,17 @@ const ParentDetail = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card md:col-span-1">
-          <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center justify-between mb-3 gap-2">
             <h3 className="font-serif text-lg">Xogta Waalidka</h3>
             {!editing && (
-              <button className="btn-secondary text-sm" onClick={startEdit}>Wax Ka Beddel (Edit)</button>
+              <div className="flex gap-2 shrink-0">
+                <button className="btn-secondary text-sm" onClick={startEdit}>Wax Ka Beddel (Edit)</button>
+                {user?.role === "admin" && (
+                  <button className="btn-danger text-sm" onClick={handleDeleteParent} disabled={deleting}>
+                    {deleting ? "..." : "Tirtir"}
+                  </button>
+                )}
+              </div>
             )}
           </div>
 

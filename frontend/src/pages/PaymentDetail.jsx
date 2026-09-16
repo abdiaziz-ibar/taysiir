@@ -1,12 +1,16 @@
 import { useEffect, useState, useRef } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 import { formatMoney, formatDate } from "../utils/format";
 
 const PaymentDetail = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
   const [payment, setPayment] = useState(null);
   const receiptRef = useRef();
+  const [deleting, setDeleting] = useState(false);
 
   const [editing, setEditing] = useState(false);
   const [amount, setAmount] = useState("");
@@ -57,6 +61,18 @@ const PaymentDetail = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!confirm(`Ma hubtaa inaad tirtirto lacag-bixintan (${formatMoney(payment.amount)})? Balance-ka waalidku si toos ah ayuu u kordhi doonaa.`)) return;
+    setDeleting(true);
+    try {
+      await api.delete(`/payments/${id}`);
+      navigate("/payments");
+    } catch (err) {
+      setDeleting(false);
+      alert(err.response?.data?.message || "Khalad ayaa dhacay.");
+    }
+  };
+
   const handlePrint = () => {
     const content = receiptRef.current.innerHTML;
     const win = window.open("", "_blank");
@@ -104,6 +120,11 @@ const PaymentDetail = () => {
         <div className="flex gap-3">
           <button onClick={handlePrint} className="btn-primary">Print Receipt</button>
           <button onClick={startEdit} className="btn-secondary">Wax Ka Beddel (Edit)</button>
+          {user?.role === "admin" && (
+            <button onClick={handleDelete} disabled={deleting} className="btn-danger">
+              {deleting ? "Waa la tirtirayaa..." : "Tirtir"}
+            </button>
+          )}
         </div>
       )}
 
