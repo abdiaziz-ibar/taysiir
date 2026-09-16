@@ -1,11 +1,22 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import { AcademicYearProvider } from "../context/AcademicYearContext";
+import { useAuth } from "../context/AuthContext";
+import useIdleLogout from "../hooks/useIdleLogout";
+
+const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 
 const Layout = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  useIdleLogout(IDLE_TIMEOUT_MS, () => {
+    logout();
+    navigate("/login?expired=1", { replace: true });
+  });
 
   return (
     <AcademicYearProvider>

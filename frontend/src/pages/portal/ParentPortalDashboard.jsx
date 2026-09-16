@@ -3,6 +3,9 @@ import { useNavigate } from "react-router-dom";
 import { Wallet, CheckCircle2, AlertCircle, GraduationCap, Receipt } from "lucide-react";
 import parentApi from "../../api/parentAxios";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../../utils/format";
+import useIdleLogout from "../../hooks/useIdleLogout";
+
+const IDLE_TIMEOUT_MS = 30 * 60 * 1000;
 
 const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, accent }) => (
   <div className="card">
@@ -33,6 +36,12 @@ const ParentPortalDashboard = () => {
     localStorage.removeItem("parent");
     navigate("/portal/login");
   };
+
+  useIdleLogout(IDLE_TIMEOUT_MS, () => {
+    localStorage.removeItem("parentToken");
+    localStorage.removeItem("parent");
+    navigate("/portal/login?expired=1", { replace: true });
+  });
 
   if (error) return <p className="min-h-screen flex items-center justify-center text-danger">{error}</p>;
   if (!data) return <p className="min-h-screen flex items-center justify-center text-ink/50">Waa la soo shubayaa...</p>;
