@@ -51,11 +51,13 @@ const Sidebar = ({ open, onClose }) => {
       )}
 
       <aside
-        className={`w-64 bg-navy-dark flex flex-col shrink-0 print:hidden fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 md:relative md:translate-x-0 md:z-auto ${
+        className={`w-64 bg-gradient-to-b from-navy via-navy-light to-navy-dark flex flex-col shrink-0 print:hidden fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 md:relative md:translate-x-0 md:z-auto relative overflow-hidden ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="px-5 py-6 border-b border-white/10 flex items-center gap-3">
+        <div className="absolute -top-20 -right-20 w-56 h-56 rounded-full bg-white/5 pointer-events-none" />
+
+        <div className="relative px-5 py-6 border-b border-white/10 flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center text-white font-serif font-bold text-sm shrink-0 shadow-sm">
             TF
           </div>
@@ -68,7 +70,7 @@ const Sidebar = ({ open, onClose }) => {
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <nav className="relative flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           <NavItem to="/dashboard" end icon={LayoutDashboard} onClick={onClose}>Dashboard</NavItem>
           <NavItem to="/parents" icon={Users} onClick={onClose}>Waalidiinta</NavItem>
           <NavItem to="/fees" icon={Wallet} onClick={onClose}>Lacagaha School-ka</NavItem>
