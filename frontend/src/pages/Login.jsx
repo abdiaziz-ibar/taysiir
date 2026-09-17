@@ -4,10 +4,10 @@ import { Wallet, Users, BarChart3, BellRing, User, Lock, Eye, EyeOff } from "luc
 import { useAuth } from "../context/AuthContext";
 
 const FEATURES = [
-  { icon: Wallet, label: "Maareynta Lacagaha" },
-  { icon: Users, label: "Diiwaanka Waalidiinta" },
-  { icon: BarChart3, label: "Warbixino Live ah" },
-  { icon: BellRing, label: "Ogeysiis Deymo" },
+  { icon: Wallet, label: "Fee Management" },
+  { icon: Users, label: "Parent Records" },
+  { icon: BarChart3, label: "Live Reports" },
+  { icon: BellRing, label: "Debt Alerts" },
 ];
 
 const Logo = ({ light }) => (
@@ -64,13 +64,13 @@ const Login = () => {
           <Logo light />
 
           <span className="inline-block mt-10 px-3 py-1 rounded-full bg-white/10 text-white/80 text-xs font-medium tracking-wide">
-            NIDAAMKA MAAREYNTA LACAGAHA DUGSIGA
+            SCHOOL FEE MANAGEMENT SYSTEM
           </span>
 
           <h1 className="font-serif text-4xl lg:text-5xl font-bold leading-tight mt-5">
-            Maamul, raadraac,
+            Manage, track,
             <br />
-            oo si fudud u bixi.
+            and collect with ease.
           </h1>
 
           <div className="grid grid-cols-2 gap-4 mt-10 max-w-md">
