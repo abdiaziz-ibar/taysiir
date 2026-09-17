@@ -1,5 +1,6 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { useAcademicYear } from "../context/AcademicYearContext";
@@ -18,6 +19,7 @@ const Parents = () => {
   const selectedYearName = years.find((y) => y._id === selectedYearId)?.name;
   const [parents, setParents] = useState([]);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [idSortDir, setIdSortDir] = useState(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [sort, setSort] = useState("");
@@ -83,6 +85,18 @@ const Parents = () => {
       setImporting(false);
     }
   };
+
+  const toggleIdSort = () => {
+    setIdSortDir((d) => (d === "asc" ? "desc" : "asc"));
+  };
+
+  const displayedParents = useMemo(() => {
+    if (!idSortDir) return parents;
+    const parseIdNum = (parentId) => parseInt((parentId || "").replace(/\D/g, ""), 10) || 0;
+    return [...parents].sort((a, b) =>
+      idSortDir === "asc" ? parseIdNum(a.parentId) - parseIdNum(b.parentId) : parseIdNum(b.parentId) - parseIdNum(a.parentId)
+    );
+  }, [parents, idSortDir]);
 
   const handleDelete = async () => {
     await api.delete(`/parents/${deleteTarget._id}`);
@@ -233,7 +247,18 @@ const Parents = () => {
         <table className="table-base">
           <thead>
             <tr>
-              <th>ID</th>
+              <th>
+                <button
+                  onClick={toggleIdSort}
+                  className="flex items-center gap-1 text-inherit hover:text-ink"
+                  title="Kala sooc ID-ga (low to high / high to low)"
+                >
+                  ID
+                  {idSortDir === "asc" && <ArrowUp size={13} />}
+                  {idSortDir === "desc" && <ArrowDown size={13} />}
+                  {!idSortDir && <ArrowUpDown size={13} className="text-ink/30" />}
+                </button>
+              </th>
               <th>Magaca Waalidka</th>
               <th>Phone</th>
               <th className="text-right">Total Fee ({selectedYearName || "-"})</th>
@@ -244,7 +269,7 @@ const Parents = () => {
             </tr>
           </thead>
           <tbody>
-            {parents.map((p) => (
+            {displayedParents.map((p) => (
               <tr key={p._id}>
                 <td>{p.parentId}</td>
                 <td>
@@ -265,7 +290,7 @@ const Parents = () => {
                 </td>
               </tr>
             ))}
-            {parents.length === 0 && (
+            {displayedParents.length === 0 && (
               <tr><td colSpan={8} className="text-center text-ink/40 py-6">Waalid lama helin.</td></tr>
             )}
           </tbody>
