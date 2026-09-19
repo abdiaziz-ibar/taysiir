@@ -5,7 +5,6 @@ import parentApi from "../../api/parentAxios";
 const ParentPortalRegister = () => {
   const navigate = useNavigate();
   const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -14,8 +13,8 @@ const ParentPortalRegister = () => {
     setError("");
     setLoading(true);
     try {
-      await parentApi.post("/parent-portal/register", { phone, email });
-      navigate("/portal/verify", { state: { email } });
+      await parentApi.post("/parent-portal/register", { phone });
+      navigate("/portal/verify", { state: { phone } });
     } catch (err) {
       setError(err.response?.data?.message || "Khalad ayaa dhacay.");
     } finally {
@@ -42,16 +41,9 @@ const ParentPortalRegister = () => {
               placeholder="Lambarka aad dugsiga ku siisay"
               autoFocus
             />
-          </div>
-          <div>
-            <label className="label-field">Email</label>
-            <input
-              type="email"
-              className="input-field"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
+            <p className="text-xs text-ink/50 mt-1">
+              Koodhka xaqiijinta (OTP) ayaa loogu diri doonaa WhatsApp lambarkan.
+            </p>
           </div>
           <button type="submit" disabled={loading} className="btn-primary w-full">
             {loading ? "Waa la diraayaa..." : "Is-diiwaan Geli"}

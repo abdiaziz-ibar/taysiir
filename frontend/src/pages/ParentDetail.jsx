@@ -154,7 +154,7 @@ const ParentDetail = () => {
               </div>
               <div>
                 <label className="label-field">Address</label>
-                <input className="input-field" value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} />
+                <input className="input-field" required value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} />
               </div>
               <div>
                 <label className="label-field">Email (ikhtiyaari)</label>

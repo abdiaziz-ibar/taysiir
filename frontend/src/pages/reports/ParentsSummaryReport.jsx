@@ -1,8 +1,17 @@
-import { Fragment, useEffect, useState } from "react";
-import { Wallet, CheckCircle2, AlertCircle, ChevronDown, ChevronRight } from "lucide-react";
+import { Fragment, useEffect, useState, useMemo } from "react";
+import { Wallet, CheckCircle2, AlertCircle, ChevronDown, ChevronRight, ArrowUp, ArrowDown, ArrowUpDown } from "lucide-react";
 import api from "../../api/axios";
 import { formatMoney, statusLabel, statusBadgeClass } from "../../utils/format";
 import { downloadExcel } from "../../utils/excel";
+
+const parseIdNum = (parentCode) => parseInt((parentCode || "").replace(/\D/g, ""), 10) || 0;
+
+const SORT_GETTERS = {
+  id: (p) => parseIdNum(p.parentCode),
+  totalFees: (p) => p.totalFees,
+  totalPaid: (p) => p.totalPaid,
+  totalDebt: (p) => p.totalDebt,
+};
 
 const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, accent }) => (
   <div className="card">
@@ -16,21 +25,53 @@ const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, accent }) => (
   </div>
 );
 
+const SortableTh = ({ sortKey: key, activeKey, dir, onClick, align, children }) => (
+  <th className={align === "right" ? "text-right" : ""}>
+    <button
+      onClick={() => onClick(key)}
+      className={`flex items-center gap-1 text-inherit hover:text-ink ${align === "right" ? "ml-auto" : ""}`}
+    >
+      {children}
+      {activeKey === key ? (
+        dir === "asc" ? <ArrowUp size={13} /> : <ArrowDown size={13} />
+      ) : (
+        <ArrowUpDown size={13} className="text-ink/30" />
+      )}
+    </button>
+  </th>
+);
+
 const ParentsSummaryReport = () => {
   const [data, setData] = useState({ parents: [], totals: { totalFees: 0, totalPaid: 0, totalDebt: 0 } });
   const [search, setSearch] = useState("");
   const [expandedId, setExpandedId] = useState(null);
+  const [sortKey, setSortKey] = useState(null);
+  const [sortDir, setSortDir] = useState("asc");
 
   useEffect(() => {
     api.get("/reports/parents-summary").then((res) => setData(res.data));
   }, []);
 
-  const filtered = data.parents.filter(
-    (p) =>
-      p.fullName.toLowerCase().includes(search.toLowerCase()) ||
-      p.phone.toLowerCase().includes(search.toLowerCase()) ||
-      p.parentCode.toLowerCase().includes(search.toLowerCase())
-  );
+  const toggleSort = (key) => {
+    if (sortKey === key) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir("asc");
+    }
+  };
+
+  const filtered = useMemo(() => {
+    const rows = data.parents.filter(
+      (p) =>
+        p.fullName.toLowerCase().includes(search.toLowerCase()) ||
+        p.phone.toLowerCase().includes(search.toLowerCase()) ||
+        p.parentCode.toLowerCase().includes(search.toLowerCase())
+    );
+    if (!sortKey) return rows;
+    const getValue = SORT_GETTERS[sortKey];
+    return [...rows].sort((a, b) => (sortDir === "asc" ? getValue(a) - getValue(b) : getValue(b) - getValue(a)));
+  }, [data.parents, search, sortKey, sortDir]);
 
   const handleExport = () => {
     const headers = ["ID", "Magaca Waalidka", "Phone", "Tirada Sannadaha", "Wadarta Fee", "La Bixiyey", "Ku Dhiman"];
@@ -65,13 +106,13 @@ const ParentsSummaryReport = () => {
           <thead>
             <tr>
               <th></th>
-              <th>ID</th>
+              <SortableTh sortKey="id" activeKey={sortKey} dir={sortDir} onClick={toggleSort}>ID</SortableTh>
               <th>Magaca Waalidka</th>
               <th>Phone</th>
               <th className="text-right">Sannadaha</th>
-              <th className="text-right">Wadarta Fee</th>
-              <th className="text-right">La Bixiyey</th>
-              <th className="text-right">Ku Dhiman</th>
+              <SortableTh sortKey="totalFees" activeKey={sortKey} dir={sortDir} onClick={toggleSort} align="right">Wadarta Fee</SortableTh>
+              <SortableTh sortKey="totalPaid" activeKey={sortKey} dir={sortDir} onClick={toggleSort} align="right">La Bixiyey</SortableTh>
+              <SortableTh sortKey="totalDebt" activeKey={sortKey} dir={sortDir} onClick={toggleSort} align="right">Ku Dhiman</SortableTh>
             </tr>
           </thead>
           <tbody>

@@ -1,50 +1,44 @@
 const prisma = require("../lib/prisma");
 const generateOtp = require("../utils/otp");
-const { sendOtpEmail } = require("../utils/email");
+const { sendOtpWhatsapp } = require("../utils/whatsapp");
 const { generateParentToken } = require("../utils/generateToken");
 const { serializeParent, serializeFee } = require("../utils/serialize");
 
 const OTP_TTL_MINUTES = 10;
 
-// POST /api/parent-portal/register  { phone, email }
-// Links a portal login (email) to the Parent record the school admin
-// already created, matched by phone number. Then sends the first OTP.
+// POST /api/parent-portal/register  { phone }
+// Confirms the phone number matches a Parent record the school admin
+// already created, then sends the first OTP over WhatsApp.
 const register = async (req, res, next) => {
   try {
-    const { phone, email } = req.body;
-    if (!phone || !email) {
-      return res.status(400).json({ message: "Phone iyo email waa waajib." });
+    const { phone } = req.body;
+    if (!phone) {
+      return res.status(400).json({ message: "Phone waa waajib." });
     }
 
     const parent = await prisma.parent.findFirst({ where: { phone } });
     if (!parent) {
       return res.status(404).json({ message: "Lambarkan lagama helin waalid diiwaan gashan. La xiriir maamulka dugsiga." });
     }
-    if (parent.email && parent.email.toLowerCase() !== email.toLowerCase()) {
-      return res.status(400).json({ message: "Waalidkan horey ayuu email kale ugu diiwaan gashanaa. Isticmaal 'Soo Gal' haddii aad horey u is-diiwaan gelisay." });
-    }
 
     const otpCode = generateOtp();
     const otpExpiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
-    await prisma.parent.update({
-      where: { id: parent.id },
-      data: { email, otpCode, otpExpiresAt },
-    });
+    await prisma.parent.update({ where: { id: parent.id }, data: { otpCode, otpExpiresAt } });
 
-    await sendOtpEmail(email, otpCode);
-    res.json({ message: "OTP waa loo diray email-kaaga." });
+    await sendOtpWhatsapp(phone, otpCode);
+    res.json({ message: "OTP waa loogu diray WhatsApp-kaaga." });
   } catch (err) {
     next(err);
   }
 };
 
-// POST /api/parent-portal/request-otp  { email }
+// POST /api/parent-portal/request-otp  { phone }
 const requestOtp = async (req, res, next) => {
   try {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ message: "Email waa waajib." });
+    const { phone } = req.body;
+    if (!phone) return res.status(400).json({ message: "Phone waa waajib." });
 
-    const parent = await prisma.parent.findUnique({ where: { email } });
+    const parent = await prisma.parent.findFirst({ where: { phone } });
     if (!parent) {
       return res.status(404).json({ message: "Xisaabtan lama helin. Fadlan marka hore is-diiwaan geli." });
     }
@@ -53,20 +47,20 @@ const requestOtp = async (req, res, next) => {
     const otpExpiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
     await prisma.parent.update({ where: { id: parent.id }, data: { otpCode, otpExpiresAt } });
 
-    await sendOtpEmail(email, otpCode);
-    res.json({ message: "OTP waa loo diray email-kaaga." });
+    await sendOtpWhatsapp(phone, otpCode);
+    res.json({ message: "OTP waa loogu diray WhatsApp-kaaga." });
   } catch (err) {
     next(err);
   }
 };
 
-// POST /api/parent-portal/verify-otp  { email, otp }
+// POST /api/parent-portal/verify-otp  { phone, otp }
 const verifyOtp = async (req, res, next) => {
   try {
-    const { email, otp } = req.body;
-    if (!email || !otp) return res.status(400).json({ message: "Email iyo OTP waa waajib." });
+    const { phone, otp } = req.body;
+    if (!phone || !otp) return res.status(400).json({ message: "Phone iyo OTP waa waajib." });
 
-    const parent = await prisma.parent.findUnique({ where: { email } });
+    const parent = await prisma.parent.findFirst({ where: { phone } });
     if (!parent || !parent.otpCode || !parent.otpExpiresAt) {
       return res.status(400).json({ message: "OTP khalad ah. Codso mid cusub." });
     }

@@ -92,8 +92,8 @@ const getParentById = async (req, res, next) => {
 const createParent = async (req, res, next) => {
   try {
     const { fullName, phone, alternativePhone, address, email, notes } = req.body;
-    if (!fullName || !phone) {
-      return res.status(400).json({ message: "Magaca iyo Phone waa waajib." });
+    if (!fullName || !phone || !address) {
+      return res.status(400).json({ message: "Magaca, Phone iyo Address waa waajib." });
     }
     const parentId = await nextParentId();
     const parent = await prisma.parent.create({
@@ -109,6 +109,9 @@ const createParent = async (req, res, next) => {
 const updateParent = async (req, res, next) => {
   try {
     const { fullName, phone, alternativePhone, address, email, notes, status } = req.body;
+    if (!fullName || !phone || !address) {
+      return res.status(400).json({ message: "Magaca, Phone iyo Address waa waajib." });
+    }
     const parent = await prisma.parent.update({
       where: { id: req.params.id },
       data: { fullName, phone, alternativePhone, address, email: email || null, notes, status },
@@ -139,8 +142,9 @@ const bulkImportParents = async (req, res, next) => {
       try {
         const fullName = (row.fullName || "").trim();
         const phone = (row.phone || "").trim();
-        if (!fullName || !phone) {
-          errors.push({ row: i + 2, name: rowLabel, message: "Magaca iyo Phone waa waajib." });
+        const address = (row.address || "").trim();
+        if (!fullName || !phone || !address) {
+          errors.push({ row: i + 2, name: rowLabel, message: "Magaca, Phone iyo Address waa waajib." });
           continue;
         }
 
@@ -151,7 +155,7 @@ const bulkImportParents = async (req, res, next) => {
             fullName,
             phone,
             alternativePhone: row.alternativePhone || null,
-            address: row.address || null,
+            address,
             email: row.email || null,
             notes: row.notes || null,
           },

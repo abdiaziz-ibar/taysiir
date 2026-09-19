@@ -5,21 +5,21 @@ import parentApi from "../../api/parentAxios";
 const ParentPortalVerify = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const email = location.state?.email;
+  const phone = location.state?.phone;
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [resending, setResending] = useState(false);
   const [message, setMessage] = useState("");
 
-  if (!email) return <Navigate to="/portal/login" replace />;
+  if (!phone) return <Navigate to="/portal/login" replace />;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
     try {
-      const res = await parentApi.post("/parent-portal/verify-otp", { email, otp });
+      const res = await parentApi.post("/parent-portal/verify-otp", { phone, otp });
       localStorage.setItem("parentToken", res.data.token);
       localStorage.setItem("parent", JSON.stringify(res.data.parent));
       navigate("/portal/dashboard");
@@ -35,7 +35,7 @@ const ParentPortalVerify = () => {
     setMessage("");
     setResending(true);
     try {
-      await parentApi.post("/parent-portal/request-otp", { email });
+      await parentApi.post("/parent-portal/request-otp", { phone });
       setMessage("OTP cusub waa loo diray.");
     } catch (err) {
       setError(err.response?.data?.message || "Khalad ayaa dhacay.");
@@ -49,7 +49,7 @@ const ParentPortalVerify = () => {
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <h1 className="font-serif text-2xl text-white">Taysir Foundation</h1>
-          <p className="text-white/50 text-sm mt-1">Geli koodhka (OTP) loo diray {email}</p>
+          <p className="text-white/50 text-sm mt-1">Geli koodhka (OTP) loogu diray WhatsApp {phone}</p>
         </div>
         <form onSubmit={handleSubmit} className="bg-surface rounded-md p-6 space-y-4 shadow-xl">
           {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}

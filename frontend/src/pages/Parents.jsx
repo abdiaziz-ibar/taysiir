@@ -189,7 +189,7 @@ const Parents = () => {
           </div>
           <div>
             <label className="label-field">Address</label>
-            <input className="input-field" value={form.address} placeholder="Enter address" onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            <input className="input-field" required value={form.address} placeholder="Enter address" onChange={(e) => setForm({ ...form, address: e.target.value })} />
           </div>
           <div>
             <label className="label-field">Email (ikhtiyaari)</label>

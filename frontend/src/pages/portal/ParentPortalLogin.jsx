@@ -4,7 +4,7 @@ import parentApi from "../../api/parentAxios";
 
 const ParentPortalLogin = () => {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -13,8 +13,8 @@ const ParentPortalLogin = () => {
     setError("");
     setLoading(true);
     try {
-      await parentApi.post("/parent-portal/request-otp", { email });
-      navigate("/portal/verify", { state: { email } });
+      await parentApi.post("/parent-portal/request-otp", { phone });
+      navigate("/portal/verify", { state: { phone } });
     } catch (err) {
       setError(err.response?.data?.message || "Khalad ayaa dhacay.");
     } finally {
@@ -32,15 +32,18 @@ const ParentPortalLogin = () => {
         <form onSubmit={handleSubmit} className="bg-surface rounded-md p-6 space-y-4 shadow-xl">
           {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
           <div>
-            <label className="label-field">Email</label>
+            <label className="label-field">Lambarka Telefoonka</label>
             <input
-              type="email"
               className="input-field"
               required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Lambarka aad dugsiga ku siisay"
               autoFocus
             />
+            <p className="text-xs text-ink/50 mt-1">
+              Koodhka xaqiijinta (OTP) ayaa loogu diri doonaa WhatsApp lambarkan.
+            </p>
           </div>
           <button type="submit" disabled={loading} className="btn-primary w-full">
             {loading ? "Waa la diraayaa..." : "Dir OTP"}
