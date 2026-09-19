@@ -21,8 +21,8 @@ parentApi.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem("parentToken");
       localStorage.removeItem("parent");
-      if (!window.location.pathname.includes("/portal/login")) {
-        window.location.href = "/portal/login";
+      if (!window.location.pathname.includes("/login")) {
+        window.location.href = "/login?as=parent";
       }
     }
     return Promise.reject(error);

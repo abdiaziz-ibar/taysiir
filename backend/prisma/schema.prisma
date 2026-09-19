@@ -29,11 +29,10 @@ model Parent {
   phone            String
   alternativePhone String?
   address          String?
-  email            String?   @unique // set once the parent links their portal account
+  email            String?   @unique // optional contact info, unrelated to portal login
   notes            String?
   status           String    @default("active")
-  otpCode          String?
-  otpExpiresAt     DateTime?
+  password         String? // set once the parent creates their own portal password
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
   fees             Fee[]

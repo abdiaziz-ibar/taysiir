@@ -20,7 +20,7 @@ const serializeAcademicYear = (year) => withUnderscoreId(year);
 
 const serializeParent = (parent) => {
   if (!parent) return parent;
-  const { otpCode, otpExpiresAt, ...rest } = parent;
+  const { password, ...rest } = parent;
   return withUnderscoreId(rest);
 };
 

@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { Wallet, Users, BarChart3, BellRing, User, Lock, Eye, EyeOff } from "lucide-react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { Wallet, Users, BarChart3, BellRing, User, Lock, Eye, EyeOff, Phone } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+import parentApi from "../api/parentAxios";
 
 const FEATURES = [
   { icon: Wallet, label: "Fee Management" },
@@ -19,7 +20,7 @@ const Logo = ({ light }) => (
   </div>
 );
 
-const Login = () => {
+const StaffLoginForm = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
@@ -53,6 +54,199 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
+      {forgotNote && (
+        <div className="bg-navy/5 text-ink/70 text-sm rounded-md px-3 py-2">
+          Fadlan la xiriir Admin-ka si password-kaaga loo beddelo.
+        </div>
+      )}
+
+      <div>
+        <label className="label-field">Username</label>
+        <div className="relative">
+          <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/35" />
+          <input
+            className="input-field pl-9"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Geli username-kaaga"
+            autoFocus
+            required
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="label-field">Password</label>
+        <div className="relative">
+          <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/35" />
+          <input
+            type={showPassword ? "text" : "password"}
+            className="input-field pl-9 pr-9"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Geli password-kaaga"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((v) => !v)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/35 hover:text-ink/60"
+            tabIndex={-1}
+          >
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between text-sm">
+        <label className="flex items-center gap-2 text-ink/70">
+          <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
+          I xasuuso (Remember Me)
+        </label>
+        <button type="button" onClick={() => setForgotNote((v) => !v)} className="text-link hover:underline">
+          Password ma illowday?
+        </button>
+      </div>
+
+      <button type="submit" disabled={loading} className="btn-primary w-full">
+        {loading ? "Waa la gelayaa..." : "Soo Gal (Log In)"}
+      </button>
+    </form>
+  );
+};
+
+const ParentLoginForm = () => {
+  const navigate = useNavigate();
+  const [parentMode, setParentMode] = useState("login");
+  const [phone, setPhone] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    if (parentMode === "register" && password !== confirmPassword) {
+      setError("Labada password iskuma eka.");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const endpoint = parentMode === "register" ? "/parent-portal/register" : "/parent-portal/login";
+      const res = await parentApi.post(endpoint, { phone, password });
+      localStorage.setItem("parentToken", res.data.token);
+      localStorage.setItem("parent", JSON.stringify(res.data.parent));
+      navigate("/portal/dashboard");
+    } catch (err) {
+      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <div className="flex gap-2 text-sm">
+        <button
+          type="button"
+          onClick={() => { setParentMode("login"); setError(""); }}
+          className={`flex-1 py-1.5 rounded-full transition-colors ${parentMode === "login" ? "bg-navy text-white" : "text-ink/60 hover:bg-paper"}`}
+        >
+          Soo Gal
+        </button>
+        <button
+          type="button"
+          onClick={() => { setParentMode("register"); setError(""); }}
+          className={`flex-1 py-1.5 rounded-full transition-colors ${parentMode === "register" ? "bg-navy text-white" : "text-ink/60 hover:bg-paper"}`}
+        >
+          Marka Koowaad
+        </button>
+      </div>
+
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
+        {parentMode === "register" && (
+          <div className="bg-navy/5 text-ink/70 text-sm rounded-md px-3 py-2">
+            Waxaad dhigaysaa password aad isticmaali doonto marar dambe. Lambarkaagu waa inuu horey ugu jiraa nidaamka (maamulka dugsigu waa uu diiwaan geliyay).
+          </div>
+        )}
+
+        <div>
+          <label className="label-field">Lambarka Telefoonka</label>
+          <div className="relative">
+            <Phone size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/35" />
+            <input
+              className="input-field pl-9"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="Lambarka aad dugsiga ku siisay"
+              autoFocus
+              required
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className="label-field">{parentMode === "register" ? "Samee Password" : "Password"}</label>
+          <div className="relative">
+            <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/35" />
+            <input
+              type={showPassword ? "text" : "password"}
+              className="input-field pl-9 pr-9"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Geli password-kaaga"
+              minLength={6}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((v) => !v)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/35 hover:text-ink/60"
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+        </div>
+
+        {parentMode === "register" && (
+          <div>
+            <label className="label-field">Xaqiiji Password</label>
+            <div className="relative">
+              <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/35" />
+              <input
+                type={showPassword ? "text" : "password"}
+                className="input-field pl-9"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Mar labaad geli password-ka"
+                minLength={6}
+                required
+              />
+            </div>
+          </div>
+        )}
+
+        <button type="submit" disabled={loading} className="btn-primary w-full">
+          {loading ? "Waa la gelayaa..." : parentMode === "register" ? "Samee Xisaab" : "Soo Gal"}
+        </button>
+      </form>
+    </div>
+  );
+};
+
+const Login = () => {
+  const [searchParams] = useSearchParams();
+  const [mode, setMode] = useState(searchParams.get("as") === "parent" ? "parent" : "staff");
 
   return (
     <div className="min-h-screen grid md:grid-cols-2 bg-paper">
@@ -112,69 +306,29 @@ const Login = () => {
             <Logo />
           </div>
 
-          <h2 className="font-serif text-2xl">Ku Soo Dhawoow</h2>
-          <p className="text-sm text-ink/50 mt-1 mb-6">Gal xisaabtaada si aad u sii wadato.</p>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
-            {forgotNote && (
-              <div className="bg-navy/5 text-ink/70 text-sm rounded-md px-3 py-2">
-                Fadlan la xiriir Admin-ka si password-kaaga loo beddelo.
-              </div>
-            )}
-
-            <div>
-              <label className="label-field">Username</label>
-              <div className="relative">
-                <User size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/35" />
-                <input
-                  className="input-field pl-9"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  placeholder="Geli username-kaaga"
-                  autoFocus
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="label-field">Password</label>
-              <div className="relative">
-                <Lock size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/35" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  className="input-field pl-9 pr-9"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Geli password-kaaga"
-                  required
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/35 hover:text-ink/60"
-                  tabIndex={-1}
-                >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between text-sm">
-              <label className="flex items-center gap-2 text-ink/70">
-                <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} />
-                I xasuuso (Remember Me)
-              </label>
-              <button type="button" onClick={() => setForgotNote((v) => !v)} className="text-link hover:underline">
-                Password ma illowday?
-              </button>
-            </div>
-
-            <button type="submit" disabled={loading} className="btn-primary w-full">
-              {loading ? "Waa la gelayaa..." : "Soo Gal (Log In)"}
+          <div className="flex gap-2 bg-paper rounded-full p-1 mb-6">
+            <button
+              type="button"
+              onClick={() => setMode("staff")}
+              className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors ${mode === "staff" ? "bg-surface shadow-sm text-ink" : "text-ink/50 hover:text-ink"}`}
+            >
+              System Users
             </button>
-          </form>
+            <button
+              type="button"
+              onClick={() => setMode("parent")}
+              className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors ${mode === "parent" ? "bg-surface shadow-sm text-ink" : "text-ink/50 hover:text-ink"}`}
+            >
+              Parents
+            </button>
+          </div>
+
+          <h2 className="font-serif text-2xl">Ku Soo Dhawoow</h2>
+          <p className="text-sm text-ink/50 mt-1 mb-6">
+            {mode === "staff" ? "Gal xisaabtaada si aad u sii wadato." : "Gal xisaabta waalidnimo si aad u aragto lacagtaada."}
+          </p>
+
+          {mode === "staff" ? <StaffLoginForm /> : <ParentLoginForm />}
 
           <p className="text-center text-xs text-ink/40 mt-8">
             © {new Date().getFullYear()} Taysir Foundation

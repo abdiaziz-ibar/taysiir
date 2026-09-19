@@ -31,7 +31,7 @@ const ParentPortalDashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem("parentToken");
     localStorage.removeItem("parent");
-    navigate("/portal/login");
+    navigate("/login?as=parent");
   };
 
   if (error) return <p className="min-h-screen flex items-center justify-center text-danger">{error}</p>;

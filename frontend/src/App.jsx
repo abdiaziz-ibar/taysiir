@@ -4,9 +4,6 @@ import ParentProtectedRoute from "./components/ParentProtectedRoute";
 import Layout from "./components/Layout";
 
 import Login from "./pages/Login";
-import ParentPortalRegister from "./pages/portal/ParentPortalRegister";
-import ParentPortalLogin from "./pages/portal/ParentPortalLogin";
-import ParentPortalVerify from "./pages/portal/ParentPortalVerify";
 import ParentPortalDashboard from "./pages/portal/ParentPortalDashboard";
 import Dashboard from "./pages/Dashboard";
 import Parents from "./pages/Parents";
@@ -29,10 +26,9 @@ function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      <Route path="/portal/register" element={<Navigate to="/login?as=parent" replace />} />
+      <Route path="/portal/login" element={<Navigate to="/login?as=parent" replace />} />
 
-      <Route path="/portal/register" element={<ParentPortalRegister />} />
-      <Route path="/portal/login" element={<ParentPortalLogin />} />
-      <Route path="/portal/verify" element={<ParentPortalVerify />} />
       <Route element={<ParentProtectedRoute />}>
         <Route path="/portal/dashboard" element={<ParentPortalDashboard />} />
       </Route>
