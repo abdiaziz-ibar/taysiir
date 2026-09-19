@@ -1,58 +1,61 @@
 import { useEffect, useRef, useState } from "react";
-import { MessageSquare, Paperclip, Send, ChevronDown, ChevronRight } from "lucide-react";
+import { Receipt, Paperclip, Send, ChevronDown, ChevronRight } from "lucide-react";
 import parentApi from "../../api/parentAxios";
-import { formatDate } from "../../utils/format";
+import { formatMoney, formatDate } from "../../utils/format";
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
 
-const statusBadge = (status) =>
-  status === "resolved" ? "badge badge-paid" : "badge badge-unpaid";
+const statusBadge = (status) => (status === "confirmed" ? "badge badge-paid" : "badge badge-partial");
+const statusLabel = (status) => (status === "confirmed" ? "La Xaqiijiyay" : "La Sugayo");
 
-const ParentTickets = ({ payments }) => {
-  const [tickets, setTickets] = useState([]);
+const ParentPaymentProofs = ({ payments }) => {
+  const [proofs, setProofs] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [paymentId, setPaymentId] = useState("");
+  const [amount, setAmount] = useState("");
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const fileInputRef = useRef();
 
-  const [openTicketId, setOpenTicketId] = useState(null);
+  const [openId, setOpenId] = useState(null);
   const [threads, setThreads] = useState({});
   const [replyText, setReplyText] = useState("");
   const [replying, setReplying] = useState(false);
 
-  const loadTickets = () => {
-    parentApi.get("/parent-portal/tickets").then((res) => setTickets(res.data));
+  const load = () => {
+    parentApi.get("/parent-portal/payment-proofs").then((res) => setProofs(res.data));
   };
 
   useEffect(() => {
-    loadTickets();
+    load();
   }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     if (!message.trim()) {
-      setError("Fadlan sharax dhibaatada.");
+      setError("Fadlan sharax lacag-bixinta aad sameysay.");
       return;
     }
     setSubmitting(true);
     try {
       const form = new FormData();
       form.append("message", message.trim());
+      if (amount) form.append("amount", amount);
       if (paymentId) form.append("paymentId", paymentId);
       if (fileInputRef.current?.files[0]) form.append("screenshot", fileInputRef.current.files[0]);
 
-      await parentApi.post("/parent-portal/tickets", form, {
+      await parentApi.post("/parent-portal/payment-proofs", form, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       setMessage("");
+      setAmount("");
       setPaymentId("");
       if (fileInputRef.current) fileInputRef.current.value = "";
       setShowForm(false);
-      loadTickets();
+      load();
     } catch (err) {
       setError(err.response?.data?.message || "Khalad ayaa dhacay.");
     } finally {
@@ -60,28 +63,28 @@ const ParentTickets = ({ payments }) => {
     }
   };
 
-  const toggleThread = async (ticketId) => {
-    if (openTicketId === ticketId) {
-      setOpenTicketId(null);
+  const toggleThread = async (id) => {
+    if (openId === id) {
+      setOpenId(null);
       return;
     }
-    setOpenTicketId(ticketId);
+    setOpenId(id);
     setReplyText("");
-    if (!threads[ticketId]) {
-      const res = await parentApi.get(`/parent-portal/tickets/${ticketId}`);
-      setThreads((t) => ({ ...t, [ticketId]: res.data }));
+    if (!threads[id]) {
+      const res = await parentApi.get(`/parent-portal/payment-proofs/${id}`);
+      setThreads((t) => ({ ...t, [id]: res.data }));
     }
   };
 
-  const handleReply = async (ticketId) => {
+  const handleReply = async (id) => {
     if (!replyText.trim()) return;
     setReplying(true);
     try {
-      await parentApi.post(`/parent-portal/tickets/${ticketId}/messages`, { message: replyText.trim() });
-      const res = await parentApi.get(`/parent-portal/tickets/${ticketId}`);
-      setThreads((t) => ({ ...t, [ticketId]: res.data }));
+      await parentApi.post(`/parent-portal/payment-proofs/${id}/messages`, { message: replyText.trim() });
+      const res = await parentApi.get(`/parent-portal/payment-proofs/${id}`);
+      setThreads((t) => ({ ...t, [id]: res.data }));
       setReplyText("");
-      loadTickets();
+      load();
     } finally {
       setReplying(false);
     }
@@ -91,42 +94,59 @@ const ParentTickets = ({ payments }) => {
     <div className="card">
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-serif text-lg flex items-center gap-2">
-          <MessageSquare size={18} className="text-navy" />
-          Dhibaatooyinka Lacagta
+          <Receipt size={18} className="text-navy" />
+          Caddaynta Lacag Bixinta
         </h3>
         <button className="btn-secondary text-sm" onClick={() => setShowForm((v) => !v)}>
-          {showForm ? "Jooji" : "+ Soo Gudbi Dhibaato"}
+          {showForm ? "Jooji" : "+ Soo Gudbi Caddayn"}
         </button>
       </div>
+      <p className="text-xs text-ink/50 -mt-2 mb-3">
+        Haddii aad lacag bixisay (tusaale EVC Plus/Zaad), halkan ku soo gudbi caddayntiisa (invoice/screenshot) si maamulku u ogaado in lacagta la dhiibay.
+      </p>
 
       {showForm && (
         <form onSubmit={handleSubmit} className="bg-paper rounded-md p-4 space-y-3 mb-4">
           {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
-          <div>
-            <label className="label-field">Lacag Bixin (ikhtiyaari)</label>
-            <select className="input-field" value={paymentId} onChange={(e) => setPaymentId(e.target.value)}>
-              <option value="">-- Ha dooran --</option>
-              {payments.map((p) => (
-                <option key={p._id} value={p._id}>
-                  {p.receiptNumber} — {formatDate(p.paymentDate)}
-                </option>
-              ))}
-            </select>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="label-field">Lacagta La Bixiyay ($)</label>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                className="input-field"
+                value={amount}
+                placeholder="Tusaale: 50"
+                onChange={(e) => setAmount(e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="label-field">Lacag Bixin (ikhtiyaari)</label>
+              <select className="input-field" value={paymentId} onChange={(e) => setPaymentId(e.target.value)}>
+                <option value="">-- Ha dooran --</option>
+                {payments.map((p) => (
+                  <option key={p._id} value={p._id}>
+                    {p.receiptNumber} — {formatDate(p.paymentDate)}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div>
-            <label className="label-field">Sharaxaad</label>
+            <label className="label-field">Faahfaahin</label>
             <textarea
               className="input-field"
               rows={3}
               required
               value={message}
-              placeholder="Tusaale: lacagta waan bixiyey laakiin ma muuqato system-ka."
+              placeholder="Tusaale: Waxaan ku bixiyey EVC Plus 19/09/2026."
               onChange={(e) => setMessage(e.target.value)}
             />
           </div>
           <div>
             <label className="label-field flex items-center gap-1.5">
-              <Paperclip size={14} /> Screenshot-ka Caddaynta (PNG/JPG, ikhtiyaari)
+              <Paperclip size={14} /> Invoice/Screenshot (PNG/JPG)
             </label>
             <input ref={fileInputRef} type="file" accept="image/png,image/jpeg" className="input-field" />
           </div>
@@ -137,32 +157,35 @@ const ParentTickets = ({ payments }) => {
       )}
 
       <div className="space-y-2">
-        {tickets.map((t) => {
-          const isOpen = openTicketId === t._id;
-          const thread = threads[t._id];
+        {proofs.map((p) => {
+          const isOpen = openId === p._id;
+          const thread = threads[p._id];
           return (
-            <div key={t._id} className="border border-line rounded-md overflow-hidden">
+            <div key={p._id} className="border border-line rounded-md overflow-hidden">
               <button
-                onClick={() => toggleThread(t._id)}
+                onClick={() => toggleThread(p._id)}
                 className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-paper"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   {isOpen ? <ChevronDown size={15} className="text-ink/40 shrink-0" /> : <ChevronRight size={15} className="text-ink/40 shrink-0" />}
-                  <span className="truncate text-sm">{t.message}</span>
+                  <span className="truncate text-sm">
+                    {p.amount ? `${formatMoney(p.amount)} — ` : ""}
+                    {p.message}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs text-ink/40">{formatDate(t.createdAt)}</span>
-                  <span className={statusBadge(t.status)}>{t.status === "resolved" ? "La Xaliyay" : "Furan"}</span>
+                  <span className="text-xs text-ink/40">{formatDate(p.createdAt)}</span>
+                  <span className={statusBadge(p.status)}>{statusLabel(p.status)}</span>
                 </div>
               </button>
 
               {isOpen && (
                 <div className="border-t border-line p-4 space-y-3 bg-paper">
-                  {t.screenshotUrl && (
-                    <a href={`${API_ORIGIN}${t.screenshotUrl}`} target="_blank" rel="noreferrer">
+                  {p.screenshotUrl && (
+                    <a href={`${API_ORIGIN}${p.screenshotUrl}`} target="_blank" rel="noreferrer">
                       <img
-                        src={`${API_ORIGIN}${t.screenshotUrl}`}
-                        alt="Screenshot caddaynta"
+                        src={`${API_ORIGIN}${p.screenshotUrl}`}
+                        alt="Caddaynta lacag bixinta"
                         className="max-h-48 rounded-md border border-line"
                       />
                     </a>
@@ -188,7 +211,7 @@ const ParentTickets = ({ payments }) => {
                   <form
                     onSubmit={(e) => {
                       e.preventDefault();
-                      handleReply(t._id);
+                      handleReply(p._id);
                     }}
                     className="flex gap-2"
                   >
@@ -207,12 +230,12 @@ const ParentTickets = ({ payments }) => {
             </div>
           );
         })}
-        {tickets.length === 0 && !showForm && (
-          <p className="text-sm text-ink/40 text-center py-4">Weli dhibaato lama soo gudbin.</p>
+        {proofs.length === 0 && !showForm && (
+          <p className="text-sm text-ink/40 text-center py-4">Weli caddayn lacag bixin lama soo gudbin.</p>
         )}
       </div>
     </div>
   );
 };
 
-export default ParentTickets;
+export default ParentPaymentProofs;

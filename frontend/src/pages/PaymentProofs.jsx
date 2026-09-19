@@ -1,14 +1,15 @@
 import { useEffect, useState } from "react";
-import { MessageSquare, ChevronDown, ChevronRight, Send, CheckCircle2, RotateCcw } from "lucide-react";
+import { Receipt, ChevronDown, ChevronRight, Send, CheckCircle2, RotateCcw } from "lucide-react";
 import api from "../api/axios";
-import { formatDate } from "../utils/format";
+import { formatMoney, formatDate } from "../utils/format";
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
 
-const statusBadge = (status) => (status === "resolved" ? "badge badge-paid" : "badge badge-unpaid");
+const statusBadge = (status) => (status === "confirmed" ? "badge badge-paid" : "badge badge-partial");
+const statusLabel = (status) => (status === "confirmed" ? "La Xaqiijiyay" : "La Sugayo");
 
-const Tickets = () => {
-  const [tickets, setTickets] = useState([]);
+const PaymentProofs = () => {
+  const [proofs, setProofs] = useState([]);
   const [status, setStatus] = useState("");
   const [openId, setOpenId] = useState(null);
   const [thread, setThread] = useState(null);
@@ -17,7 +18,7 @@ const Tickets = () => {
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const load = () => {
-    api.get("/tickets", { params: { status: status || undefined } }).then((res) => setTickets(res.data));
+    api.get("/payment-proofs", { params: { status: status || undefined } }).then((res) => setProofs(res.data));
   };
 
   useEffect(() => {
@@ -33,7 +34,7 @@ const Tickets = () => {
     }
     setOpenId(id);
     setReplyText("");
-    const res = await api.get(`/tickets/${id}`);
+    const res = await api.get(`/payment-proofs/${id}`);
     setThread(res.data);
   };
 
@@ -42,8 +43,8 @@ const Tickets = () => {
     if (!replyText.trim()) return;
     setReplying(true);
     try {
-      await api.post(`/tickets/${openId}/messages`, { message: replyText.trim() });
-      const res = await api.get(`/tickets/${openId}`);
+      await api.post(`/payment-proofs/${openId}/messages`, { message: replyText.trim() });
+      const res = await api.get(`/payment-proofs/${openId}`);
       setThread(res.data);
       setReplyText("");
       load();
@@ -56,9 +57,9 @@ const Tickets = () => {
     if (!thread) return;
     setUpdatingStatus(true);
     try {
-      const newStatus = thread.status === "resolved" ? "open" : "resolved";
-      await api.put(`/tickets/${openId}`, { status: newStatus });
-      const res = await api.get(`/tickets/${openId}`);
+      const newStatus = thread.status === "confirmed" ? "pending" : "confirmed";
+      await api.put(`/payment-proofs/${openId}`, { status: newStatus });
+      const res = await api.get(`/payment-proofs/${openId}`);
       setThread(res.data);
       load();
     } finally {
@@ -70,35 +71,37 @@ const Tickets = () => {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-xl font-serif flex items-center gap-2">
-          <MessageSquare size={20} className="text-navy" />
-          Dhibaatooyinka Lacagta
+          <Receipt size={20} className="text-navy" />
+          Caddaynta Lacag Bixinta
         </h2>
         <select className="input-field !w-auto" value={status} onChange={(e) => setStatus(e.target.value)}>
           <option value="">Dhammaan</option>
-          <option value="open">Furan</option>
-          <option value="resolved">La Xaliyay</option>
+          <option value="pending">La Sugayo</option>
+          <option value="confirmed">La Xaqiijiyay</option>
         </select>
       </div>
 
       <div className="space-y-2">
-        {tickets.map((t) => {
-          const isOpen = openId === t._id;
+        {proofs.map((p) => {
+          const isOpen = openId === p._id;
           return (
-            <div key={t._id} className="card !p-0 overflow-hidden">
+            <div key={p._id} className="card !p-0 overflow-hidden">
               <button
-                onClick={() => toggleOpen(t._id)}
+                onClick={() => toggleOpen(p._id)}
                 className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-paper"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   {isOpen ? <ChevronDown size={15} className="text-ink/40 shrink-0" /> : <ChevronRight size={15} className="text-ink/40 shrink-0" />}
                   <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{t.parentId?.fullName} — {t.parentId?.phone}</p>
-                    <p className="text-xs text-ink/50 truncate">{t.message}</p>
+                    <p className="text-sm font-medium truncate">
+                      {p.parentId?.fullName} — {p.parentId?.phone} {p.amount ? `· ${formatMoney(p.amount)}` : ""}
+                    </p>
+                    <p className="text-xs text-ink/50 truncate">{p.message}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs text-ink/40 hidden sm:inline">{formatDate(t.createdAt)}</span>
-                  <span className={statusBadge(t.status)}>{t.status === "resolved" ? "La Xaliyay" : "Furan"}</span>
+                  <span className="text-xs text-ink/40 hidden sm:inline">{formatDate(p.createdAt)}</span>
+                  <span className={statusBadge(p.status)}>{statusLabel(p.status)}</span>
                 </div>
               </button>
 
@@ -113,8 +116,8 @@ const Tickets = () => {
                       disabled={updatingStatus}
                       className="btn-secondary text-xs flex items-center gap-1.5"
                     >
-                      {thread.status === "resolved" ? <RotateCcw size={13} /> : <CheckCircle2 size={13} />}
-                      {thread.status === "resolved" ? "Dib u Fur" : "Calaamadi La Xaliyay"}
+                      {thread.status === "confirmed" ? <RotateCcw size={13} /> : <CheckCircle2 size={13} />}
+                      {thread.status === "confirmed" ? "Dib u Fur (Sugaya)" : "Calaamadi La Xaqiijiyay"}
                     </button>
                   </div>
 
@@ -122,7 +125,7 @@ const Tickets = () => {
                     <a href={`${API_ORIGIN}${thread.screenshotUrl}`} target="_blank" rel="noreferrer">
                       <img
                         src={`${API_ORIGIN}${thread.screenshotUrl}`}
-                        alt="Screenshot caddaynta"
+                        alt="Caddaynta lacag bixinta"
                         className="max-h-56 rounded-md border border-line"
                       />
                     </a>
@@ -162,12 +165,12 @@ const Tickets = () => {
             </div>
           );
         })}
-        {tickets.length === 0 && (
-          <p className="text-center text-ink/40 py-8">Dhibaato lama soo gudbin.</p>
+        {proofs.length === 0 && (
+          <p className="text-center text-ink/40 py-8">Weli caddayn lacag bixin lama soo gudbin.</p>
         )}
       </div>
     </div>
   );
 };
 
-export default Tickets;
+export default PaymentProofs;

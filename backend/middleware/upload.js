@@ -3,7 +3,7 @@ const path = require("path");
 const crypto = require("crypto");
 const multer = require("multer");
 
-const uploadDir = path.join(__dirname, "..", "uploads", "tickets");
+const uploadDir = path.join(__dirname, "..", "uploads", "payment-proofs");
 fs.mkdirSync(uploadDir, { recursive: true });
 
 const ALLOWED_TYPES = {

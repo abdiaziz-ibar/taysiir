@@ -12,7 +12,7 @@ const paymentRoutes = require("./routes/payments");
 const reportRoutes = require("./routes/reports");
 const userRoutes = require("./routes/users");
 const parentPortalRoutes = require("./routes/parentPortal");
-const ticketRoutes = require("./routes/tickets");
+const paymentProofRoutes = require("./routes/paymentProofs");
 
 const app = express();
 
@@ -53,7 +53,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/parent-portal", parentPortalRoutes);
-app.use("/api/tickets", ticketRoutes);
+app.use("/api/payment-proofs", paymentProofRoutes);
 
 app.use(notFound);
 app.use(errorHandler);
