@@ -108,6 +108,7 @@ model PaymentProof {
   id            String   @id @default(uuid())
   parentId      String
   paymentId     String?
+  type          String   @default("invoice") // "invoice" | "complaint"
   screenshotUrl String?
   amount        Float?
   message       String

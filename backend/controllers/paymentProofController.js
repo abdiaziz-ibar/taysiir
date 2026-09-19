@@ -6,14 +6,18 @@ const proofWithMessages = { ...proofInclude, messages: { orderBy: { createdAt: "
 
 // ---- Parent-facing (protectParent) ----
 
-// POST /api/parent-portal/payment-proofs  (multipart: screenshot, message, amount?, paymentId?)
-// A parent notifying the school that they paid — the screenshot/invoice is
-// their proof, staff review it and confirm it against the real payment.
+// POST /api/parent-portal/payment-proofs  (multipart: type, screenshot?, message, amount?, paymentId?)
+// A parent either (a) submitting an invoice/screenshot as proof they paid,
+// or (b) filing a complaint about a payment — same thread/status mechanics
+// either way, so it's one model with a "type" flag rather than two.
 const createProof = async (req, res, next) => {
   try {
-    const { message, amount, paymentId } = req.body;
+    const { type, message, amount, paymentId } = req.body;
+    if (!["invoice", "complaint"].includes(type)) {
+      return res.status(400).json({ message: "Fadlan dooro nooca (Invoice ama Cabasho)." });
+    }
     if (!message || !message.trim()) {
-      return res.status(400).json({ message: "Fadlan sharax lacag-bixinta aad sameysay." });
+      return res.status(400).json({ message: "Fadlan sharax dhibaatada/lacag-bixinta." });
     }
 
     let validPaymentId = null;
@@ -28,6 +32,7 @@ const createProof = async (req, res, next) => {
       data: {
         parentId: req.parentId,
         paymentId: validPaymentId,
+        type,
         screenshotUrl,
         amount: amount ? Number(amount) : null,
         message: message.trim(),
@@ -102,9 +107,12 @@ const addMyProofMessage = async (req, res, next) => {
 // GET /api/payment-proofs?status=
 const getProofs = async (req, res, next) => {
   try {
-    const { status } = req.query;
+    const { status, type } = req.query;
+    const where = {};
+    if (status) where.status = status;
+    if (type) where.type = type;
     const proofs = await prisma.paymentProof.findMany({
-      where: status ? { status } : {},
+      where,
       include: proofInclude,
       orderBy: { createdAt: "desc" },
     });

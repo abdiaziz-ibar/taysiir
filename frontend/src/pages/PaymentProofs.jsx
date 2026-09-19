@@ -7,10 +7,13 @@ const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://localhost:5000/api")
 
 const statusBadge = (status) => (status === "confirmed" ? "badge badge-paid" : "badge badge-partial");
 const statusLabel = (status) => (status === "confirmed" ? "La Xaqiijiyay" : "La Sugayo");
+const typeBadge = (type) => (type === "complaint" ? "badge badge-unpaid" : "badge bg-navy/10 text-navy");
+const typeLabel = (type) => (type === "complaint" ? "Cabasho" : "Invoice");
 
 const PaymentProofs = () => {
   const [proofs, setProofs] = useState([]);
   const [status, setStatus] = useState("");
+  const [type, setType] = useState("");
   const [openId, setOpenId] = useState(null);
   const [thread, setThread] = useState(null);
   const [replyText, setReplyText] = useState("");
@@ -18,13 +21,15 @@ const PaymentProofs = () => {
   const [updatingStatus, setUpdatingStatus] = useState(false);
 
   const load = () => {
-    api.get("/payment-proofs", { params: { status: status || undefined } }).then((res) => setProofs(res.data));
+    api
+      .get("/payment-proofs", { params: { status: status || undefined, type: type || undefined } })
+      .then((res) => setProofs(res.data));
   };
 
   useEffect(() => {
     load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status]);
+  }, [status, type]);
 
   const toggleOpen = async (id) => {
     if (openId === id) {
@@ -72,13 +77,20 @@ const PaymentProofs = () => {
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-xl font-serif flex items-center gap-2">
           <Receipt size={20} className="text-navy" />
-          Caddaynta Lacag Bixinta
+          Lacag Bixinta &amp; Cabashooyinka
         </h2>
-        <select className="input-field !w-auto" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="">Dhammaan</option>
-          <option value="pending">La Sugayo</option>
-          <option value="confirmed">La Xaqiijiyay</option>
-        </select>
+        <div className="flex gap-2">
+          <select className="input-field !w-auto" value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="">Nooca Oo Dhan</option>
+            <option value="invoice">Invoice</option>
+            <option value="complaint">Cabasho</option>
+          </select>
+          <select className="input-field !w-auto" value={status} onChange={(e) => setStatus(e.target.value)}>
+            <option value="">Dhammaan Status</option>
+            <option value="pending">La Sugayo</option>
+            <option value="confirmed">La Xaqiijiyay</option>
+          </select>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -92,6 +104,7 @@ const PaymentProofs = () => {
               >
                 <div className="flex items-center gap-2 min-w-0">
                   {isOpen ? <ChevronDown size={15} className="text-ink/40 shrink-0" /> : <ChevronRight size={15} className="text-ink/40 shrink-0" />}
+                  <span className={typeBadge(p.type)}>{typeLabel(p.type)}</span>
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">
                       {p.parentId?.fullName} — {p.parentId?.phone} {p.amount ? `· ${formatMoney(p.amount)}` : ""}
