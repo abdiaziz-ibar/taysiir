@@ -15,6 +15,7 @@ import {
   GraduationCap,
   UserCog,
   Settings as SettingsIcon,
+  MessageSquare,
   ChevronDown,
   ChevronRight,
   X,
@@ -76,6 +77,7 @@ const Sidebar = ({ open, onClose }) => {
           <NavItem to="/fees" icon={Wallet} onClick={onClose}>Lacagaha School-ka</NavItem>
           <NavItem to="/payments" icon={CreditCard} onClick={onClose}>Lacag Bixinta</NavItem>
           <NavItem to="/debts" icon={AlertTriangle} onClick={onClose}>Deymaha</NavItem>
+          <NavItem to="/tickets" icon={MessageSquare} onClick={onClose}>Dhibaatooyinka Lacagta</NavItem>
 
           <button
             onClick={() => setReportsOpen((o) => !o)}

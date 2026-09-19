@@ -37,6 +37,7 @@ model Parent {
   updatedAt        DateTime  @updatedAt
   fees             Fee[]
   payments         Payment[]
+  tickets          PaymentTicket[]
 
   @@map("parents")
 }
@@ -95,6 +96,40 @@ model Payment {
   academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
   fee          Fee          @relation(fields: [feeId], references: [id], onDelete: Cascade)
   createdBy    User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  tickets      PaymentTicket[]
 
   @@map("payments")
+}
+
+// A parent's report of a problem with one of their payments — e.g. "I paid
+// but it's not showing" — with a proof-of-payment screenshot and a message
+// thread so staff can go back and forth with the parent to resolve it.
+model PaymentTicket {
+  id            String   @id @default(uuid())
+  parentId      String
+  paymentId     String?
+  screenshotUrl String?
+  message       String
+  status        String   @default("open") // "open" | "resolved"
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  parent   Parent          @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  payment  Payment?        @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  messages TicketMessage[]
+
+  @@map("payment_tickets")
+}
+
+model TicketMessage {
+  id         String   @id @default(uuid())
+  ticketId   String
+  senderType String // "parent" | "staff"
+  senderName String
+  message    String
+  createdAt  DateTime @default(now())
+
+  ticket PaymentTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@map("ticket_messages")
 }

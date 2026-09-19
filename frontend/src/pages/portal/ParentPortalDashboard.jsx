@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Wallet, CheckCircle2, AlertCircle, GraduationCap, Receipt } from "lucide-react";
 import parentApi from "../../api/parentAxios";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../../utils/format";
+import ParentTickets from "./ParentTickets";
 
 const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, accent }) => (
   <div className="card">
@@ -142,6 +143,8 @@ const ParentPortalDashboard = () => {
             </tbody>
           </table>
         </div>
+
+        <ParentTickets payments={payments} />
       </main>
     </div>
   );

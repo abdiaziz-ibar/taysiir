@@ -1,3 +1,4 @@
+const path = require("path");
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -11,6 +12,7 @@ const paymentRoutes = require("./routes/payments");
 const reportRoutes = require("./routes/reports");
 const userRoutes = require("./routes/users");
 const parentPortalRoutes = require("./routes/parentPortal");
+const ticketRoutes = require("./routes/tickets");
 
 const app = express();
 
@@ -36,6 +38,8 @@ app.use(
 app.use(express.json());
 if (process.env.NODE_ENV !== "production") app.use(morgan("dev"));
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+
 app.get("/", (req, res) => {
   res.json({ message: "School Fee Parent Debt Management System API is running." });
 });
@@ -49,6 +53,7 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/reports", reportRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/parent-portal", parentPortalRoutes);
+app.use("/api/tickets", ticketRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

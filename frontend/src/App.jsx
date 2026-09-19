@@ -21,6 +21,7 @@ import DebtsReport from "./pages/reports/DebtsReport";
 import AcademicYears from "./pages/AcademicYears";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
+import Tickets from "./pages/Tickets";
 
 function App() {
   return (
@@ -48,6 +49,8 @@ function App() {
           <Route path="/payments/:id" element={<PaymentDetail />} />
 
           <Route path="/debts" element={<Debts />} />
+
+          <Route path="/tickets" element={<Tickets />} />
 
           <Route path="/reports/monthly" element={<MonthlyReport />} />
           <Route path="/reports/yearly" element={<YearlyReport />} />

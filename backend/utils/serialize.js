@@ -46,6 +46,18 @@ const serializePayment = (payment) => {
   return out;
 };
 
+const serializeTicketMessage = (msg) => withUnderscoreId(msg);
+
+const serializeTicket = (ticket) => {
+  if (!ticket) return ticket;
+  const { parent, payment, messages, ...rest } = ticket;
+  const out = withUnderscoreId(rest);
+  if (parent) out.parentId = serializeParent(parent);
+  if (payment) out.paymentId = serializePayment(payment);
+  if (messages) out.messages = messages.map(serializeTicketMessage);
+  return out;
+};
+
 module.exports = {
   withUnderscoreId,
   serializeUser,
@@ -53,4 +65,6 @@ module.exports = {
   serializeParent,
   serializeFee,
   serializePayment,
+  serializeTicket,
+  serializeTicketMessage,
 };
