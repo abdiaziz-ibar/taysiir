@@ -4,7 +4,7 @@ import api from "../api/axios";
 
 // Step-up confirmation for irreversible deletes: the admin currently
 // logged in must re-type their own password before the delete proceeds.
-const ConfirmDeleteModal = ({ open, title, message, onConfirm, onClose }) => {
+const ConfirmDeleteModal = ({ open, title, message, onConfirm, onClose, children, disabled }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(false);
@@ -49,6 +49,8 @@ const ConfirmDeleteModal = ({ open, title, message, onConfirm, onClose }) => {
           </div>
         </div>
 
+        {children}
+
         <form onSubmit={handleSubmit} className="space-y-3">
           {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
           <div>
@@ -66,7 +68,7 @@ const ConfirmDeleteModal = ({ open, title, message, onConfirm, onClose }) => {
             <button type="button" className="btn-secondary text-sm" onClick={handleClose} disabled={checking}>
               Jooji
             </button>
-            <button type="submit" className="btn-danger text-sm" disabled={checking}>
+            <button type="submit" className="btn-danger text-sm" disabled={checking || disabled}>
               {checking ? "Waa la xaqiijinayaa..." : "Haa, Tirtir"}
             </button>
           </div>

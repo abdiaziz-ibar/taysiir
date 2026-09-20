@@ -192,6 +192,17 @@ const bulkImportParents = async (req, res, next) => {
 // DELETE /api/parents/:id
 const deleteParent = async (req, res, next) => {
   try {
+    // With ?academicYearId= only that year's Fee (and, by cascade, its
+    // payments) is removed — the parent and their other years stay.
+    const { academicYearId } = req.query;
+    if (academicYearId) {
+      const fee = await prisma.fee.findUnique({
+        where: { parentId_academicYearId: { parentId: req.params.id, academicYearId } },
+      });
+      if (!fee) return res.status(404).json({ message: "Waalidkan Fee ma laha sanadkan." });
+      await prisma.fee.delete({ where: { id: fee.id } });
+      return res.json({ message: "Sanad dugsiyeedka waa laga tirtiray waalidka." });
+    }
     await prisma.parent.delete({ where: { id: req.params.id } });
     res.json({ message: "Waalidka waa la tirtiray." });
   } catch (err) {

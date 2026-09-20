@@ -19,6 +19,8 @@ const Parents = () => {
   const selectedYearName = years.find((y) => y._id === selectedYearId)?.name;
   const [parents, setParents] = useState([]);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteFees, setDeleteFees] = useState(null);
+  const [deleteYear, setDeleteYear] = useState("");
   const [idSortDir, setIdSortDir] = useState(null);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
@@ -98,8 +100,30 @@ const Parents = () => {
     );
   }, [parents, idSortDir]);
 
+  useEffect(() => {
+    setDeleteYear("");
+    setDeleteFees(null);
+    if (!deleteTarget) return;
+    api.get(`/parents/${deleteTarget._id}`).then((res) => setDeleteFees(res.data.fees));
+  }, [deleteTarget]);
+
+  const deleteYearName = deleteFees?.find((f) => f.academicYearId?._id === deleteYear)?.academicYearId?.name;
+
+  const deleteMessage = () => {
+    if (!deleteTarget) return "";
+    if (deleteYear === "all") {
+      return `Waxaad tirtirayaa ${deleteTarget.fullName} oo dhan, iyo dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa sannad kasta — lama soo celin karo.`;
+    }
+    if (deleteYear) {
+      return `Waxaad ka tirtirayaa sanadka ${deleteYearName} Fee-giisa iyo lacag-bixinnadiisa kaliya. ${deleteTarget.fullName} iyo sannadaha kale way hadhayaan.`;
+    }
+    return `Dooro sanadka aad ka tirtirayso ${deleteTarget.fullName}, ama "Dhammaan" si aad u tirtirto waalidka oo dhan.`;
+  };
+
   const handleDelete = async () => {
-    await api.delete(`/parents/${deleteTarget._id}`);
+    await api.delete(`/parents/${deleteTarget._id}`, {
+      params: deleteYear === "all" ? {} : { academicYearId: deleteYear },
+    });
     setDeleteTarget(null);
     load();
   };
@@ -300,10 +324,28 @@ const Parents = () => {
       <ConfirmDeleteModal
         open={!!deleteTarget}
         title="Tirtir Waalidka?"
-        message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.fullName}. Tan waxay sidoo kale tirtiraysaa dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa oo dhan — lama soo celin karo.` : ""}
+        message={deleteMessage()}
+        disabled={!deleteYear}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
-      />
+      >
+        <div>
+          <label className="label-field">Sanad dugsiyeedka la tirtirayo</label>
+          {deleteFees === null ? (
+            <p className="text-sm text-ink/50">Waa la soo shubayaa...</p>
+          ) : (
+            <select className="input-field" value={deleteYear} onChange={(e) => setDeleteYear(e.target.value)}>
+              <option value="">-- Dooro --</option>
+              {deleteFees.map((f) => (
+                <option key={f._id} value={f.academicYearId?._id}>
+                  {f.academicYearId?.name} (Fee {f.totalAmount})
+                </option>
+              ))}
+              <option value="all">Dhammaan (waalidka oo dhan)</option>
+            </select>
+          )}
+        </div>
+      </ConfirmDeleteModal>
     </div>
   );
 };
