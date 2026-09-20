@@ -1,7 +1,0 @@
-<?xml version='1.0' encoding='utf-8'?>
-<resources>
-    <string name="app_name">Taysir Foundation</string>
-    <string name="title_activity_main">Taysir Foundation</string>
-    <string name="package_name">com.taysirfoundation.app</string>
-    <string name="custom_url_scheme">com.taysirfoundation.app</string>
-</resources>

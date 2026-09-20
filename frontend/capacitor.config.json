@@ -1,9 +1,0 @@
-{
-  "appId": "com.taysirfoundation.app",
-  "appName": "Taysir Foundation",
-  "webDir": "dist",
-  "server": {
-    "url": "https://taysiir.idraakict.com",
-    "cleartext": false
-  }
-}
