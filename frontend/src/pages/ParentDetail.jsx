@@ -1,13 +1,18 @@
 import { useEffect, useState } from "react";
-import { useParams, useSearchParams, Link } from "react-router-dom";
+import { useParams, useSearchParams, useNavigate, Link } from "react-router-dom";
 import api from "../api/axios";
+import { useAuth } from "../context/AuthContext";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../utils/format";
+import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 
 const ParentDetail = () => {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const { years } = useAcademicYear();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const [deleteTarget, setDeleteTarget] = useState(null); // { type: "year", fee } | { type: "all" }
   const [parent, setParent] = useState(null);
   const [payments, setPayments] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
@@ -97,6 +102,17 @@ const ParentDetail = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (deleteTarget.type === "year") {
+      await api.delete(`/parents/${id}`, { params: { academicYearId: deleteTarget.fee.academicYearId._id } });
+      setDeleteTarget(null);
+      load();
+    } else {
+      await api.delete(`/parents/${id}`);
+      navigate("/parents");
+    }
+  };
+
   useEffect(() => {
     if (parent && searchParams.get("edit") === "1" && !editing) {
       startEdit();
@@ -120,6 +136,9 @@ const ParentDetail = () => {
             {!editing && (
               <div className="flex gap-2 shrink-0">
                 <button className="btn-secondary text-sm" onClick={startEdit}>Wax Ka Beddel (Edit)</button>
+                {user?.role === "admin" && (
+                  <button className="btn-danger text-sm" onClick={() => setDeleteTarget({ type: "all" })}>Tirtir</button>
+                )}
               </div>
             )}
           </div>
@@ -252,7 +271,12 @@ const ParentDetail = () => {
                         <button onClick={() => setFeeEditingId(null)} className="text-sm text-ink/60 hover:underline">Jooji</button>
                       </>
                     ) : (
-                      <button onClick={() => startFeeEdit(f)} className="text-sm text-link hover:underline">Edit</button>
+                      <>
+                        <button onClick={() => startFeeEdit(f)} className="text-sm text-link hover:underline">Edit</button>
+                        {user?.role === "admin" && (
+                          <button onClick={() => setDeleteTarget({ type: "year", fee: f })} className="text-sm text-danger hover:underline ml-3">Tirtir</button>
+                        )}
+                      </>
                     )}
                   </td>
                 </tr>
@@ -293,6 +317,18 @@ const ParentDetail = () => {
           </tbody>
         </table>
       </div>
+
+      <ConfirmDeleteModal
+        open={!!deleteTarget}
+        title={deleteTarget?.type === "year" ? "Tirtir Sanad Dugsiyeedka?" : "Tirtir Waalidka?"}
+        message={
+          deleteTarget?.type === "year"
+            ? `Waxaad ka tirtirayaa sanadka ${deleteTarget.fee.academicYearId?.name} Fee-giisa iyo lacag-bixinnadiisa kaliya. ${parent.fullName} iyo sannadaha kale way hadhayaan.`
+            : `Waxaad tirtirayaa ${parent.fullName} oo dhan, iyo dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa sannad kasta — lama soo celin karo.`
+        }
+        onConfirm={handleDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 };
