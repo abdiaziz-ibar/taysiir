@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const prisma = require("../lib/prisma");
 const { generateParentToken } = require("../utils/generateToken");
 const { serializeParent, serializeFee } = require("../utils/serialize");
+const { getLockRemaining, failureResult, reset, lockedMessage } = require("../utils/loginLimiter");
 
 // POST /api/parent-portal/register  { phone, password }
 // First-time password setup for the Parent record the school admin already
@@ -43,6 +44,9 @@ const login = async (req, res, next) => {
       return res.status(400).json({ message: "Phone iyo Password waa waajib." });
     }
 
+    const lockedFor = getLockRemaining("parent", phone);
+    if (lockedFor > 0) return res.status(429).json({ message: lockedMessage(lockedFor) });
+
     const parent = await prisma.parent.findFirst({ where: { phone } });
     if (!parent || !parent.password) {
       return res.status(404).json({ message: "Xisaabtan lama helin. Fadlan marka hore dhig password-kaaga." });
@@ -50,9 +54,11 @@ const login = async (req, res, next) => {
 
     const isMatch = await bcrypt.compare(password, parent.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Phone ama Password khalad ah." });
+      const { status, message } = failureResult("parent", phone, "Phone ama Password khalad ah.");
+      return res.status(status).json({ message });
     }
 
+    reset("parent", phone);
     const token = generateParentToken(parent.id);
     res.json({ token, parent: serializeParent(parent) });
   } catch (err) {

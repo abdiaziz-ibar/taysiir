@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const prisma = require("../lib/prisma");
 const generateToken = require("../utils/generateToken");
 const { serializeUser } = require("../utils/serialize");
+const { getLockRemaining, failureResult, reset, lockedMessage } = require("../utils/loginLimiter");
 
 // POST /api/auth/login
 const login = async (req, res, next) => {
@@ -10,14 +11,16 @@ const login = async (req, res, next) => {
     if (!username || !password) {
       return res.status(400).json({ message: "Fadlan geli username iyo password." });
     }
+    const lockedFor = getLockRemaining("staff", username);
+    if (lockedFor > 0) return res.status(429).json({ message: lockedMessage(lockedFor) });
+
     const user = await prisma.user.findUnique({ where: { username: username.toLowerCase() } });
-    if (!user || user.status !== "active") {
-      return res.status(401).json({ message: "Username ama password khalad ah." });
-    }
-    const isMatch = await bcrypt.compare(password, user.password);
+    const isMatch = user && user.status === "active" && (await bcrypt.compare(password, user.password));
     if (!isMatch) {
-      return res.status(401).json({ message: "Username ama password khalad ah." });
+      const { status, message } = failureResult("staff", username, "Username ama password khalad ah.");
+      return res.status(status).json({ message });
     }
+    reset("staff", username);
     const token = generateToken(user.id);
     res.json({ token, user: serializeUser(user) });
   } catch (err) {
@@ -42,11 +45,16 @@ const verifyPassword = async (req, res, next) => {
       return res.status(403).json({ message: "Kaliya admin ayaa tallaabadan sameyn kara." });
     }
 
+    const lockedFor = getLockRemaining("verify", req.user._id);
+    if (lockedFor > 0) return res.status(429).json({ message: lockedMessage(lockedFor) });
+
     const user = await prisma.user.findUnique({ where: { id: req.user._id } });
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(401).json({ message: "Password-ku waa khalad." });
+      const { status, message } = failureResult("verify", req.user._id, "Password-ku waa khalad.");
+      return res.status(status).json({ message });
     }
+    reset("verify", req.user._id);
     res.json({ valid: true });
   } catch (err) {
     next(err);
