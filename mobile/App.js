@@ -6,12 +6,13 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
 import LoginScreen from "./src/screens/LoginScreen";
 import DashboardScreen from "./src/screens/DashboardScreen";
+import StaffNavigator from "./src/navigation/StaffNavigator";
 import { COLORS } from "./src/utils/format";
 
 const Stack = createNativeStackNavigator();
 
 const RootNavigator = () => {
-  const { parent, loading } = useAuth();
+  const { parent, staff, loading } = useAuth();
 
   if (loading) {
     return (
@@ -25,6 +26,8 @@ const RootNavigator = () => {
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {parent ? (
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
+      ) : staff ? (
+        <Stack.Screen name="Staff" component={StaffNavigator} />
       ) : (
         <Stack.Screen name="Login" component={LoginScreen} />
       )}

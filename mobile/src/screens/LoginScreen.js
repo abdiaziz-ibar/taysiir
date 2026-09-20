@@ -14,7 +14,9 @@ import { useAuth } from "../context/AuthContext";
 import { COLORS } from "../utils/format";
 
 const LoginScreen = () => {
-  const { login, register } = useAuth();
+  const { login, register, staffLogin } = useAuth();
+  const [role, setRole] = useState("staff");
+  const [username, setUsername] = useState("");
   const [mode, setMode] = useState("login");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
@@ -24,6 +26,21 @@ const LoginScreen = () => {
 
   const handleSubmit = async () => {
     setError("");
+    if (role === "staff") {
+      if (!username.trim() || !password) {
+        setError("Username iyo Password waa waajib.");
+        return;
+      }
+      setLoading(true);
+      try {
+        await staffLogin(username.trim().toLowerCase(), password);
+      } catch (err) {
+        setError(err.response?.data?.message || "Login-ku wuu fashilmay.");
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     if (!phone.trim() || !password) {
       setError("Phone iyo Password waa waajib.");
       return;
@@ -53,9 +70,60 @@ const LoginScreen = () => {
           <Text style={styles.logoText}>TF</Text>
         </View>
         <Text style={styles.title}>Taysir Foundation</Text>
-        <Text style={styles.subtitle}>Xisaabta Waalidka</Text>
+        <Text style={styles.subtitle}>Parent Fee &amp; Debt Management</Text>
 
         <View style={styles.card}>
+          <View style={styles.roleRow}>
+            <TouchableOpacity
+              style={[styles.roleTab, role === "staff" && styles.roleTabActive]}
+              onPress={() => {
+                setRole("staff");
+                setError("");
+                setPassword("");
+              }}
+            >
+              <Text style={[styles.roleText, role === "staff" && styles.roleTextActive]}>System Users</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.roleTab, role === "parent" && styles.roleTabActive]}
+              onPress={() => {
+                setRole("parent");
+                setError("");
+                setPassword("");
+              }}
+            >
+              <Text style={[styles.roleText, role === "parent" && styles.roleTextActive]}>Parents</Text>
+            </TouchableOpacity>
+          </View>
+
+          {role === "staff" ? (
+            <>
+              {error ? <Text style={styles.error}>{error}</Text> : null}
+              <Text style={styles.label}>Username</Text>
+              <TextInput
+                style={styles.input}
+                value={username}
+                onChangeText={setUsername}
+                placeholder="Geli username-kaaga"
+                placeholderTextColor="#9CA3AF"
+                autoCapitalize="none"
+                autoCorrect={false}
+              />
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                placeholder="Geli password-kaaga"
+                placeholderTextColor="#9CA3AF"
+                secureTextEntry
+              />
+              <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
+                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Soo Gal (Log In)</Text>}
+              </TouchableOpacity>
+            </>
+          ) : (
+          <>
           <View style={styles.tabRow}>
             <TouchableOpacity
               style={[styles.tab, mode === "login" && styles.tabActive]}
@@ -127,6 +195,8 @@ const LoginScreen = () => {
               <Text style={styles.buttonText}>{mode === "register" ? "Samee Xisaab" : "Soo Gal"}</Text>
             )}
           </TouchableOpacity>
+          </>
+          )}
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -148,6 +218,11 @@ const styles = StyleSheet.create({
   logoText: { color: "#fff", fontWeight: "700", fontSize: 20 },
   title: { color: "#fff", fontSize: 22, fontWeight: "700", marginBottom: 2 },
   subtitle: { color: "rgba(255,255,255,0.5)", fontSize: 13, marginBottom: 24 },
+  roleRow: { flexDirection: "row", backgroundColor: COLORS.paper, borderRadius: 999, padding: 4, marginBottom: 16 },
+  roleTab: { flex: 1, paddingVertical: 9, borderRadius: 999, alignItems: "center" },
+  roleTabActive: { backgroundColor: COLORS.surface, shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 3, elevation: 2 },
+  roleText: { color: "rgba(20,24,33,0.5)", fontSize: 13, fontWeight: "600" },
+  roleTextActive: { color: COLORS.ink },
   card: { backgroundColor: COLORS.surface, borderRadius: 12, padding: 20, width: "100%", maxWidth: 380 },
   tabRow: { flexDirection: "row", backgroundColor: COLORS.paper, borderRadius: 999, padding: 4, marginBottom: 16 },
   tab: { flex: 1, paddingVertical: 8, borderRadius: 999, alignItems: "center" },
