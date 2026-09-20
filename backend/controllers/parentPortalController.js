@@ -66,6 +66,42 @@ const login = async (req, res, next) => {
   }
 };
 
+// POST /api/parent-portal/change-password  (protectParent)  { currentPassword, newPassword }
+// Wrong current passwords count toward the same 3-strike login lock, so a
+// stolen token can't be used to guess the password without hitting the limiter.
+const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Password-ka hadda iyo kan cusub waa waajib." });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "Password-ku waa inuu ahaadaa ugu yaraan 6 xaraf." });
+    }
+
+    const parent = await prisma.parent.findUnique({ where: { id: req.parentId } });
+    if (!parent || !parent.password) return res.status(404).json({ message: "Waalidka lama helin." });
+
+    const lockedFor = getLockRemaining("parent", parent.phone);
+    if (lockedFor > 0) return res.status(429).json({ message: lockedMessage(lockedFor) });
+
+    const isMatch = await bcrypt.compare(currentPassword, parent.password);
+    if (!isMatch) {
+      const { status, message } = failureResult("parent", parent.phone, "Password-ka hadda jira waa khalad.");
+      return res.status(status).json({ message });
+    }
+    if (currentPassword === newPassword) {
+      return res.status(400).json({ message: "Password-ka cusub waa inuu ka duwanaadaa kan hadda jira." });
+    }
+
+    await prisma.parent.update({ where: { id: parent.id }, data: { password: await bcrypt.hash(newPassword, 10) } });
+    reset("parent", parent.phone);
+    res.json({ message: "Password-ka waa la beddelay." });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // GET /api/parent-portal/me  (protectParent) — only ever reads req.parentId,
 // never a client-supplied id, so a parent can only ever see their own data.
 const getMe = async (req, res, next) => {
@@ -98,4 +134,4 @@ const getMe = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getMe };
+module.exports = { register, login, changePassword, getMe };

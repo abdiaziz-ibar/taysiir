@@ -4,6 +4,7 @@ import { Wallet, CheckCircle2, AlertCircle, GraduationCap, Receipt } from "lucid
 import parentApi from "../../api/parentAxios";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../../utils/format";
 import ParentPaymentProofs from "./ParentPaymentProofs";
+import ChangePasswordModal from "./ChangePasswordModal";
 
 const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, accent }) => (
   <div className="card">
@@ -21,6 +22,7 @@ const ParentPortalDashboard = () => {
   const navigate = useNavigate();
   const [data, setData] = useState(null);
   const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   useEffect(() => {
     parentApi
@@ -46,7 +48,7 @@ const ParentPortalDashboard = () => {
 
   return (
     <div className="min-h-screen bg-paper">
-      <header className="bg-navy-dark px-6 py-5 flex items-center justify-between">
+      <header className="bg-navy-dark px-6 py-5 flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-sky-500 to-emerald-500 flex items-center justify-center text-white font-serif font-bold text-sm shrink-0 shadow-sm">
             TF
@@ -56,12 +58,20 @@ const ParentPortalDashboard = () => {
             <p className="text-white/50 text-xs mt-0.5">Xisaabta Waalidka</p>
           </div>
         </div>
-        <button
-          onClick={handleLogout}
-          className="text-sm text-white/80 border border-white/20 rounded-full px-4 py-1.5 hover:bg-white/10 hover:text-white transition-colors"
-        >
-          Ka Bax
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setShowPassword(true)}
+            className="text-sm text-white/80 border border-white/20 rounded-full px-4 py-1.5 hover:bg-white/10 hover:text-white transition-colors"
+          >
+            Beddel Password
+          </button>
+          <button
+            onClick={handleLogout}
+            className="text-sm text-white/80 border border-white/20 rounded-full px-4 py-1.5 hover:bg-white/10 hover:text-white transition-colors"
+          >
+            Ka Bax
+          </button>
+        </div>
       </header>
 
       <main className="max-w-4xl mx-auto p-6 space-y-6">
@@ -146,6 +156,8 @@ const ParentPortalDashboard = () => {
 
         <ParentPaymentProofs payments={payments} />
       </main>
+
+      <ChangePasswordModal open={showPassword} onClose={() => setShowPassword(false)} />
     </div>
   );
 };

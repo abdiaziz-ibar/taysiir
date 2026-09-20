@@ -18,7 +18,8 @@ parentApi.interceptors.request.use((config) => {
 parentApi.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const isPasswordChange = error.config?.url?.includes("/change-password");
+    if (error.response?.status === 401 && !isPasswordChange) {
       localStorage.removeItem("parentToken");
       localStorage.removeItem("parent");
       if (!window.location.pathname.includes("/login")) {
