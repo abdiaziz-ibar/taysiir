@@ -24,10 +24,14 @@ export default defineConfig({
         ],
       },
       workbox: {
-        // Only precache the static app shell — never cache /api responses,
-        // so fee/payment data shown offline can never be stale.
-        globPatterns: ["**/*.{js,css,html,svg,png,ico}"],
-        navigateFallbackDenylist: [/^\/api\//],
+        // Precache only the hashed JS/CSS/images. index.html is deliberately
+        // NOT cached and there is no navigation fallback: pages always come
+        // from the network, so a deploy shows up on the next normal refresh
+        // instead of after the old cached shell is replaced. /api is never
+        // cached either, so fee/payment data can't go stale.
+        globPatterns: ["**/*.{js,css,svg,png,ico}"],
+        navigateFallback: null,
+        cleanupOutdatedCaches: true,
       },
     }),
   ],
