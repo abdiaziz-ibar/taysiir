@@ -47,6 +47,19 @@ const reset = (scope, id) => {
   store.delete(keyOf(scope, id));
 };
 
+// Currently locked identifiers, for the admin "unlock" screen.
+const listLocked = () => {
+  const now = Date.now();
+  const out = [];
+  for (const [key, entry] of store) {
+    if (entry.lockedUntil > now) {
+      const i = key.indexOf(":");
+      out.push({ scope: key.slice(0, i), identifier: key.slice(i + 1), remainingMs: entry.lockedUntil - now });
+    }
+  }
+  return out;
+};
+
 // Records a failure and returns the HTTP status + message to send back.
 const failureResult = (scope, id, baseMessage) => {
   const r = recordFailure(scope, id);
@@ -63,4 +76,4 @@ setInterval(() => {
   }
 }, 60 * 1000).unref();
 
-module.exports = { getLockRemaining, failureResult, reset, lockedMessage, MAX_ATTEMPTS, LOCK_MS };
+module.exports = { getLockRemaining, failureResult, reset, listLocked, lockedMessage, MAX_ATTEMPTS, LOCK_MS };

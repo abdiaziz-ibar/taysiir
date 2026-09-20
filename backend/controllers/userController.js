@@ -1,6 +1,7 @@
 const bcrypt = require("bcryptjs");
 const prisma = require("../lib/prisma");
 const { serializeUser } = require("../utils/serialize");
+const { listLocked, reset } = require("../utils/loginLimiter");
 
 // GET /api/users
 const getUsers = async (req, res, next) => {
@@ -63,4 +64,40 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-module.exports = { getUsers, createUser, updateUser, deleteUser };
+// GET /api/users/locked  — logins currently blocked by the wrong-password lock
+const getLockedAccounts = async (req, res, next) => {
+  try {
+    const rows = await Promise.all(
+      listLocked().map(async (l) => {
+        let name = null;
+        if (l.scope === "staff") {
+          name = (await prisma.user.findUnique({ where: { username: l.identifier } }))?.fullName;
+        } else if (l.scope === "parent") {
+          name = (await prisma.parent.findFirst({ where: { phone: l.identifier } }))?.fullName;
+        } else if (l.scope === "verify") {
+          name = (await prisma.user.findUnique({ where: { id: l.identifier } }))?.fullName;
+        }
+        return { ...l, name: name || null };
+      })
+    );
+    res.json(rows);
+  } catch (err) {
+    next(err);
+  }
+};
+
+// POST /api/users/unlock  { scope, identifier }
+const unlockAccount = async (req, res, next) => {
+  try {
+    const { scope, identifier } = req.body;
+    if (!["staff", "parent", "verify"].includes(scope) || !identifier) {
+      return res.status(400).json({ message: "scope iyo identifier waa waajib." });
+    }
+    reset(scope, identifier);
+    res.json({ message: "Xanibaadda waa laga qaaday." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { getUsers, createUser, updateUser, deleteUser, getLockedAccounts, unlockAccount };

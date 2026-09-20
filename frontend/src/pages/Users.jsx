@@ -15,13 +15,24 @@ const Users = () => {
   const [editError, setEditError] = useState("");
 
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [locked, setLocked] = useState([]);
 
   const load = async () => {
     const res = await api.get("/users");
     setUsers(res.data);
   };
 
-  useEffect(() => { load(); }, []);
+  const loadLocked = async () => {
+    const res = await api.get("/users/locked");
+    setLocked(res.data);
+  };
+
+  useEffect(() => { load(); loadLocked(); }, []);
+
+  const handleUnlock = async (item) => {
+    await api.post("/users/unlock", { scope: item.scope, identifier: item.identifier });
+    loadLocked();
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -89,6 +100,35 @@ const Users = () => {
       )}
 
       {editError && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{editError}</div>}
+
+      <div className="card">
+        <div className="flex items-center justify-between mb-2">
+          <h3 className="font-serif text-lg">Akoonno Xiran (password khaldan)</h3>
+          <button onClick={loadLocked} className="text-sm text-link hover:underline">Cusboonaysii</button>
+        </div>
+        {locked.length === 0 ? (
+          <p className="text-sm text-ink/40">Ma jiro akoon xiran hadda.</p>
+        ) : (
+          <div className="divide-y divide-line">
+            {locked.map((l) => (
+              <div key={`${l.scope}:${l.identifier}`} className="flex items-center justify-between gap-3 py-2">
+                <div className="min-w-0">
+                  <p className="text-sm font-medium truncate">
+                    {l.name || l.identifier}
+                    <span className="text-ink/40 font-normal">
+                      {" "}· {l.scope === "parent" ? "Waalid" : l.scope === "verify" ? "Password-ka tirtirka" : "System User"}
+                    </span>
+                  </p>
+                  <p className="text-xs text-ink/50">
+                    {l.name ? `${l.identifier} · ` : ""}wuu furmayaa ~{Math.ceil(l.remainingMs / 60000)} daqiiqo
+                  </p>
+                </div>
+                <button onClick={() => handleUnlock(l)} className="btn-secondary text-sm shrink-0">Fur</button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       <div className="card overflow-x-auto">
         <table className="table-base">
