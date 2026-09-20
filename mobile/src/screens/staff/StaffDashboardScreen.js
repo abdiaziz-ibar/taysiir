@@ -3,7 +3,7 @@ import { View, Text, ScrollView, StyleSheet, RefreshControl, ActivityIndicator }
 import staffApi from "../../api/staffClient";
 import { useAuth } from "../../context/AuthContext";
 import { useStaff } from "../../context/StaffContext";
-import { StaffHeader, YearChips } from "../../components/StaffUI";
+import { StaffHeader, YearChips, Card, MonthBars } from "../../components/StaffUI";
 import { formatMoney, COLORS } from "../../utils/format";
 
 const Stat = ({ label, value, color }) => (
@@ -17,12 +17,15 @@ const StaffDashboardScreen = () => {
   const { staff } = useAuth();
   const { selectedYearId } = useStaff();
   const [data, setData] = useState(null);
+  const [monthly, setMonthly] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
     if (!selectedYearId) return;
     const res = await staffApi.get("/reports/dashboard", { params: { academicYearId: selectedYearId } });
     setData(res.data);
+    const m = await staffApi.get("/reports/monthly", { params: { academicYearId: selectedYearId } });
+    setMonthly(m.data);
   }, [selectedYearId]);
 
   useEffect(() => {
@@ -68,6 +71,11 @@ const StaffDashboardScreen = () => {
             <Stat label="Partial" value={data.partialCount} color={COLORS.amber} />
             <Stat label="Unpaid" value={data.unpaidCount} color={COLORS.danger} />
           </View>
+
+          <Card>
+            <Text style={styles.chartTitle}>Lacagta La Bixiyey Bishii Kasta</Text>
+            <MonthBars data={monthly} valueKey="totalPaid" />
+          </Card>
         </ScrollView>
       )}
     </View>
@@ -93,6 +101,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.line,
   },
+  chartTitle: { fontSize: 15, fontWeight: "700", color: COLORS.ink, marginBottom: 12 },
   statLabel: { fontSize: 10, color: "rgba(20,24,33,0.5)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
   statValue: { fontSize: 20, fontWeight: "700", color: COLORS.ink },
 });

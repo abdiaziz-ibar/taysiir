@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -26,6 +26,7 @@ const StaffParentsScreen = ({ navigation }) => {
   const [parents, setParents] = useState([]);
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
+  const [idSort, setIdSort] = useState(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
@@ -52,6 +53,12 @@ const StaffParentsScreen = ({ navigation }) => {
     const unsub = navigation.addListener("focus", load);
     return unsub;
   }, [navigation, load]);
+
+  const shown = useMemo(() => {
+    if (!idSort) return parents;
+    const n = (c) => parseInt((c || "").replace(/\D/g, ""), 10) || 0;
+    return [...parents].sort((a, b) => (idSort === "asc" ? n(a.parentId) - n(b.parentId) : n(b.parentId) - n(a.parentId)));
+  }, [parents, idSort]);
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -124,6 +131,11 @@ const StaffParentsScreen = ({ navigation }) => {
         <Chip label="Unpaid" active={status === "unpaid"} onPress={() => setStatus("unpaid")} />
         <Chip label="Partial" active={status === "partial"} onPress={() => setStatus("partial")} />
         <Chip label="Paid" active={status === "paid"} onPress={() => setStatus("paid")} />
+        <Chip
+          label={`ID${idSort === "asc" ? " ↑" : idSort === "desc" ? " ↓" : ""}`}
+          active={!!idSort}
+          onPress={() => setIdSort((d) => (d === "asc" ? "desc" : "asc"))}
+        />
       </View>
       <Text style={styles.hint}>Lacagta waa tii sanadka {yearName || "..."} kaliya.</Text>
 
@@ -133,7 +145,7 @@ const StaffParentsScreen = ({ navigation }) => {
         </View>
       ) : (
         <FlatList
-          data={parents}
+          data={shown}
           keyExtractor={(p) => p._id}
           renderItem={renderItem}
           contentContainerStyle={{ padding: 12, paddingBottom: 30 }}

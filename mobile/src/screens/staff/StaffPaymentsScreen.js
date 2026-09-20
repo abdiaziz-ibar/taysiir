@@ -58,6 +58,11 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
     load();
   }, [load]);
 
+  useEffect(() => {
+    const unsub = navigation.addListener("focus", load);
+    return unsub;
+  }, [navigation, load]);
+
   const onRefresh = async () => {
     setRefreshing(true);
     await load();
@@ -169,7 +174,7 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           ListEmptyComponent={<Text style={styles.empty}>Weli lacag lama bixin sanadkan.</Text>}
           renderItem={({ item: p }) => (
-            <View style={styles.row}>
+            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate("PaymentDetail", { id: p._id })}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.name}>{p.parentId?.fullName}</Text>
                 <Text style={styles.sub}>
@@ -177,7 +182,7 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
                 </Text>
               </View>
               <Text style={styles.amount}>{formatMoney(p.amount)}</Text>
-            </View>
+            </TouchableOpacity>
           )}
         />
       )}

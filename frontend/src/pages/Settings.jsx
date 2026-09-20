@@ -4,6 +4,7 @@ import api from "../api/axios";
 
 const Settings = () => {
   const { user } = useAuth();
+  const [currentPassword, setCurrentPassword] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [message, setMessage] = useState("");
@@ -18,8 +19,9 @@ const Settings = () => {
       return;
     }
     try {
-      await api.put(`/users/${user.id}`, { password });
+      await api.post("/auth/change-password", { currentPassword, newPassword: password });
       setMessage("Password-ka waa la beddelay.");
+      setCurrentPassword("");
       setPassword("");
       setConfirm("");
     } catch (err) {
@@ -44,6 +46,7 @@ const Settings = () => {
         <h3 className="font-serif">Beddel Password</h3>
         {message && <div className="bg-success/10 text-success text-sm rounded-md px-3 py-2">{message}</div>}
         {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
+        <div><label className="label-field">Password-ka Hadda Jira</label><input type="password" required className="input-field" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} /></div>
         <div><label className="label-field">Password Cusub</label><input type="password" required className="input-field" value={password} onChange={(e) => setPassword(e.target.value)} /></div>
         <div><label className="label-field">Xaqiiji Password</label><input type="password" required className="input-field" value={confirm} onChange={(e) => setConfirm(e.target.value)} /></div>
         <button className="btn-primary">Kaydi</button>

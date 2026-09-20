@@ -5,6 +5,7 @@ import api from "../api/client";
 import { useAuth } from "../context/AuthContext";
 import { formatMoney, formatDate, statusLabel, COLORS } from "../utils/format";
 import PaymentProofsSection from "../components/PaymentProofsSection";
+import ParentChangePasswordModal from "../components/ParentChangePasswordModal";
 
 const StatCard = ({ label, value, accent }) => (
   <View style={styles.statCard}>
@@ -17,6 +18,7 @@ const DashboardScreen = () => {
   const { parent, logout } = useAuth();
   const [data, setData] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const load = useCallback(async () => {
     const res = await api.get("/parent-portal/me");
@@ -61,9 +63,14 @@ const DashboardScreen = () => {
             <Text style={styles.headerSubtitle}>Xisaabta Waalidka</Text>
           </View>
         </View>
-        <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-          <Text style={styles.logoutText}>Ka Bax</Text>
-        </TouchableOpacity>
+        <View style={styles.headerActions}>
+          <TouchableOpacity style={styles.logoutBtn} onPress={() => setShowPassword(true)}>
+            <Text style={styles.logoutText}>Password</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
+            <Text style={styles.logoutText}>Ka Bax</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <ScrollView
@@ -122,6 +129,8 @@ const DashboardScreen = () => {
 
         <PaymentProofsSection payments={payments} />
       </ScrollView>
+
+      <ParentChangePasswordModal visible={showPassword} onClose={() => setShowPassword(false)} />
     </View>
   );
 };
@@ -137,12 +146,15 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    flexWrap: "wrap",
+    rowGap: 10,
   },
   headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
   logoBadge: { width: 38, height: 38, borderRadius: 10, backgroundColor: "#0ea5e9", alignItems: "center", justifyContent: "center", marginRight: 10 },
   logoText: { color: "#fff", fontWeight: "700" },
   headerTitle: { color: "#fff", fontSize: 16, fontWeight: "700" },
   headerSubtitle: { color: "rgba(255,255,255,0.5)", fontSize: 11 },
+  headerActions: { flexDirection: "row", gap: 8 },
   logoutBtn: { borderWidth: 1, borderColor: "rgba(255,255,255,0.2)", borderRadius: 999, paddingHorizontal: 14, paddingVertical: 7 },
   logoutText: { color: "rgba(255,255,255,0.8)", fontSize: 13 },
   content: { padding: 16, paddingBottom: 48 },

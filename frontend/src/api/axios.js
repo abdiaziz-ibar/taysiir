@@ -15,7 +15,7 @@ api.interceptors.request.use((config) => {
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const isPasswordCheck = error.config?.url?.includes("/auth/verify-password");
+    const isPasswordCheck = ["/auth/verify-password", "/auth/change-password"].some((u) => error.config?.url?.includes(u));
     if (error.response?.status === 401 && !isPasswordCheck) {
       localStorage.removeItem("token");
       localStorage.removeItem("user");

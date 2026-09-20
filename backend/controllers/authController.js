@@ -61,4 +61,37 @@ const verifyPassword = async (req, res, next) => {
   }
 };
 
-module.exports = { login, getMe, verifyPassword };
+// POST /api/auth/change-password  { currentPassword, newPassword }
+// For the logged-in user's own password. A wrong current password counts
+// toward the same 3-strike lock as login.
+const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ message: "Password-ka hadda iyo kan cusub waa waajib." });
+    }
+    if (newPassword.length < 6) {
+      return res.status(400).json({ message: "Password-ku waa inuu ahaadaa ugu yaraan 6 xaraf." });
+    }
+
+    const lockedFor = getLockRemaining("staff", req.user.username);
+    if (lockedFor > 0) return res.status(429).json({ message: lockedMessage(lockedFor) });
+
+    const user = await prisma.user.findUnique({ where: { id: req.user._id } });
+    if (!(await bcrypt.compare(currentPassword, user.password))) {
+      const { status, message } = failureResult("staff", req.user.username, "Password-ka hadda jira waa khalad.");
+      return res.status(status).json({ message });
+    }
+    if (currentPassword === newPassword) {
+      return res.status(400).json({ message: "Password-ka cusub waa inuu ka duwanaadaa kan hadda jira." });
+    }
+
+    await prisma.user.update({ where: { id: user.id }, data: { password: await bcrypt.hash(newPassword, 10) } });
+    reset("staff", req.user.username);
+    res.json({ message: "Password-ka waa la beddelay." });
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports = { login, getMe, verifyPassword, changePassword };

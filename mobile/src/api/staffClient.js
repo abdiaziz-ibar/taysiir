@@ -18,8 +18,12 @@ staffApi.interceptors.request.use(async (config) => {
 staffApi.interceptors.response.use(
   (res) => res,
   async (error) => {
-    const isLoginCall = error.config?.url?.includes("/auth/login");
-    if (error.response?.status === 401 && !isLoginCall) {
+    // Wrong passwords on these come back as 401 too, but must show the
+    // error, not end the session.
+    const isPasswordCall = ["/auth/login", "/auth/verify-password", "/auth/change-password"].some((u) =>
+      error.config?.url?.includes(u)
+    );
+    if (error.response?.status === 401 && !isPasswordCall) {
       await AsyncStorage.removeItem("staffToken");
       if (onUnauthorized) onUnauthorized();
     }
