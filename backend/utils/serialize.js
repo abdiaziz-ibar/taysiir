@@ -52,6 +52,8 @@ const serializePaymentProof = (proof) => {
   if (!proof) return proof;
   const { parent, payment, messages, ...rest } = proof;
   const out = withUnderscoreId(rest);
+  // Stored as /uploads/...; clients get a URL that goes through /api (see app.js).
+  if (out.screenshotUrl?.startsWith("/uploads/")) out.screenshotUrl = `/api${out.screenshotUrl}`;
   if (parent) out.parentId = serializeParent(parent);
   if (payment) out.paymentId = serializePayment(payment);
   if (messages) out.messages = messages.map(serializePaymentProofMessage);

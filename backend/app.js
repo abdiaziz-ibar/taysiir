@@ -38,7 +38,11 @@ app.use(
 app.use(express.json());
 if (process.env.NODE_ENV !== "production") app.use(morgan("dev"));
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Also under /api: the production nginx only forwards /api to this server, so
+// /uploads/... there returns the web app's HTML instead of the image.
+const uploadsDir = path.join(__dirname, "uploads");
+app.use("/uploads", express.static(uploadsDir));
+app.use("/api/uploads", express.static(uploadsDir));
 
 app.get("/", (req, res) => {
   res.json({ message: "School Fee Parent Debt Management System API is running." });

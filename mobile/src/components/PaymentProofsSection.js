@@ -60,7 +60,7 @@ const PaymentProofsSection = ({ payments }) => {
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.7,
+      quality: 0.4, // keeps typical phone screenshots under the server's 1MB upload limit
     });
     if (!result.canceled) setImage(result.assets[0]);
   };
