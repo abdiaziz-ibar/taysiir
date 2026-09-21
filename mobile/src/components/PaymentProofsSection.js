@@ -8,6 +8,7 @@ import {
   Image,
   ActivityIndicator,
   Modal,
+  Alert,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
@@ -119,6 +120,25 @@ const PaymentProofsSection = ({ payments }) => {
     setReplyText("");
     const res = await api.get(`/parent-portal/payment-proofs/${proof._id}`);
     setThread(res.data);
+  };
+
+  const handleDelete = (id) => {
+    Alert.alert("Tirtir", "Ma hubtaa inaad tirtirto caddayntan/cabashadan?", [
+      { text: "Maya", style: "cancel" },
+      {
+        text: "Tirtir",
+        style: "destructive",
+        onPress: async () => {
+          try {
+            await api.delete(`/parent-portal/payment-proofs/${id}`);
+            setOpenProof(null);
+            load();
+          } catch (err) {
+            Alert.alert("Khalad", err.response?.data?.message || "Khalad ayaa dhacay.");
+          }
+        },
+      },
+    ]);
   };
 
   const handleReply = async (id) => {
@@ -257,6 +277,12 @@ const PaymentProofsSection = ({ payments }) => {
                     {replying ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.replyBtnText}>Dir</Text>}
                   </TouchableOpacity>
                 </View>
+
+                {p.status !== "confirmed" && (
+                  <TouchableOpacity onPress={() => handleDelete(p._id)} style={styles.deleteBtn}>
+                    <Text style={styles.deleteBtnText}>Tirtir</Text>
+                  </TouchableOpacity>
+                )}
               </View>
             )}
           </View>
@@ -273,6 +299,8 @@ const PaymentProofsSection = ({ payments }) => {
 };
 
 const styles = StyleSheet.create({
+  deleteBtn: { alignSelf: "flex-start", marginTop: 12, paddingVertical: 4 },
+  deleteBtnText: { color: COLORS.danger, fontSize: 13, fontWeight: "600" },
   section: { backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: COLORS.line },
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   sectionTitle: { fontSize: 16, fontWeight: "700", color: COLORS.ink, flexShrink: 1 },

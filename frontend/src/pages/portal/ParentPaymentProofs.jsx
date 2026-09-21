@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Receipt, Paperclip, Send, ChevronDown, ChevronRight } from "lucide-react";
+import { Receipt, Paperclip, Send, ChevronDown, ChevronRight, Trash2 } from "lucide-react";
 import parentApi from "../../api/parentAxios";
 import { formatMoney, formatDate } from "../../utils/format";
 
@@ -95,6 +95,17 @@ const ParentPaymentProofs = ({ payments }) => {
       load();
     } finally {
       setReplying(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Ma hubtaa inaad tirtirto caddayntan/cabashadan?")) return;
+    try {
+      await parentApi.delete(`/parent-portal/payment-proofs/${id}`);
+      setOpenId(null);
+      load();
+    } catch (err) {
+      window.alert(err.response?.data?.message || "Khalad ayaa dhacay.");
     }
   };
 
@@ -269,6 +280,16 @@ const ParentPaymentProofs = ({ payments }) => {
                       <Send size={16} />
                     </button>
                   </form>
+
+                  {p.status !== "confirmed" && (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(p._id)}
+                      className="inline-flex items-center gap-1.5 text-sm text-danger hover:underline"
+                    >
+                      <Trash2 size={14} /> Tirtir
+                    </button>
+                  )}
                 </div>
               )}
             </div>

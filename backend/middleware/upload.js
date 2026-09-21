@@ -50,5 +50,13 @@ const saveBase64Screenshot = (body) => {
   return `/uploads/payment-proofs/${filename}`;
 };
 
+// Best-effort delete of a stored "/uploads/payment-proofs/<file>" image.
+const removeScreenshotFile = (screenshotUrl) => {
+  if (!screenshotUrl) return;
+  const file = path.join(uploadDir, path.basename(screenshotUrl));
+  fs.unlink(file, () => {});
+};
+
 module.exports = uploadScreenshot;
+module.exports.removeScreenshotFile = removeScreenshotFile;
 module.exports.saveBase64Screenshot = saveBase64Screenshot;

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { register, login, changePassword, getMe } = require("../controllers/parentPortalController");
-const { createProof, getMyProofs, getMyProofById, addMyProofMessage } = require("../controllers/paymentProofController");
+const { createProof, getMyProofs, getMyProofById, addMyProofMessage, deleteMyProof } = require("../controllers/paymentProofController");
 const { protectParent } = require("../middleware/parentAuth");
 const uploadScreenshot = require("../middleware/upload");
 
@@ -14,5 +14,6 @@ router.post("/payment-proofs", protectParent, uploadScreenshot, createProof);
 router.get("/payment-proofs", protectParent, getMyProofs);
 router.get("/payment-proofs/:id", protectParent, getMyProofById);
 router.post("/payment-proofs/:id/messages", protectParent, addMyProofMessage);
+router.delete("/payment-proofs/:id", protectParent, deleteMyProof);
 
 module.exports = router;

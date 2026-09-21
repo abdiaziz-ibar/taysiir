@@ -1,5 +1,5 @@
 const prisma = require("../lib/prisma");
-const { saveBase64Screenshot } = require("../middleware/upload");
+const { saveBase64Screenshot, removeScreenshotFile } = require("../middleware/upload");
 const { serializePaymentProof, serializePaymentProofMessage } = require("../utils/serialize");
 
 const proofInclude = { parent: true, payment: true };
@@ -103,6 +103,23 @@ const addMyProofMessage = async (req, res, next) => {
   }
 };
 
+// DELETE /api/parent-portal/payment-proofs/:id
+// A parent can withdraw their own submission until staff confirm it.
+const deleteMyProof = async (req, res, next) => {
+  try {
+    const proof = await prisma.paymentProof.findFirst({ where: { id: req.params.id, parentId: req.parentId } });
+    if (!proof) return res.status(404).json({ message: "Lama helin." });
+    if (proof.status === "confirmed") {
+      return res.status(400).json({ message: "Caddayn la xaqiijiyay lama tirtiri karo." });
+    }
+    await prisma.paymentProof.delete({ where: { id: proof.id } }); // messages cascade
+    removeScreenshotFile(proof.screenshotUrl);
+    res.json({ message: "La tirtiray." });
+  } catch (err) {
+    next(err);
+  }
+};
+
 // ---- Staff-facing (protect) ----
 
 // GET /api/payment-proofs?status=
@@ -182,6 +199,7 @@ module.exports = {
   getMyProofs,
   getMyProofById,
   addMyProofMessage,
+  deleteMyProof,
   getProofs,
   getProofById,
   addProofMessage,
