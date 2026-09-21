@@ -35,7 +35,8 @@ app.use(
   })
 );
 
-app.use(express.json());
+// 2mb: the mobile app can send a (resized) screenshot as base64 JSON.
+app.use(express.json({ limit: "2mb" }));
 if (process.env.NODE_ENV !== "production") app.use(morgan("dev"));
 
 // Also under /api: the production nginx only forwards /api to this server, so

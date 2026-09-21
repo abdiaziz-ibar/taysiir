@@ -11,7 +11,9 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import * as ImagePicker from "expo-image-picker";
-import api, { API_ORIGIN } from "../api/client";
+import * as ImageManipulator from "expo-image-manipulator";
+import api from "../api/client";
+import ProofImage from "./ProofImage";
 import { formatMoney, formatDate, COLORS } from "../utils/format";
 
 const statusColor = (status) => (status === "confirmed" ? COLORS.success : COLORS.amber);
@@ -60,7 +62,7 @@ const PaymentProofsSection = ({ payments }) => {
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      quality: 0.4, // keeps typical phone screenshots under the server's 1MB upload limit
+      quality: 1, // resized/compressed on submit
     });
     if (!result.canceled) setImage(result.assets[0]);
   };
@@ -79,20 +81,25 @@ const PaymentProofsSection = ({ payments }) => {
     }
     setSubmitting(true);
     try {
-      const form = new FormData();
-      form.append("type", type);
-      form.append("message", message.trim());
-      if (amount) form.append("amount", amount);
+      const payload = { type, message: message.trim() };
+      if (amount) payload.amount = amount;
       if (image) {
-        form.append("screenshot", {
-          uri: image.uri,
-          name: image.fileName || "screenshot.jpg",
-          type: image.mimeType || "image/jpeg",
-        });
+        // Shrink to ~1280px wide JPEG and send as base64 JSON: small enough for
+        // the server's upload limit, and avoids multipart uploads from the app.
+        const shrunk = await ImageManipulator.manipulateAsync(
+          image.uri,
+          image.width > 1280 ? [{ resize: { width: 1280 } }] : [],
+          { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG, base64: true }
+        );
+        payload.screenshotBase64 = shrunk.base64;
+        payload.screenshotMime = "image/jpeg";
       }
-      await api.post("/parent-portal/payment-proofs", form, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await api.post("/parent-portal/payment-proofs", payload);
+      if (image && !res.data?.screenshotUrl) {
+        load(); // the proof itself was saved; only the image is missing
+        setError("Sawirka ma gaadhin server-ka. Fadlan isku day mar kale.");
+        return;
+      }
       resetForm();
       setShowForm(false);
       load();
@@ -220,11 +227,7 @@ const PaymentProofsSection = ({ payments }) => {
 
             {isOpen && thread && (
               <View style={styles.threadBox}>
-                {thread.screenshotUrl && (
-                  <TouchableOpacity onPress={() => setViewerUri(`${API_ORIGIN}${thread.screenshotUrl}`)}>
-                    <Image source={{ uri: `${API_ORIGIN}${thread.screenshotUrl}` }} style={styles.threadImg} />
-                  </TouchableOpacity>
-                )}
+                <ProofImage screenshotUrl={thread.screenshotUrl} height={160} onOpen={setViewerUri} />
                 {thread.messages?.map((m) => {
                   const isParent = m.senderType === "parent";
                   return (
@@ -299,7 +302,6 @@ const styles = StyleSheet.create({
   proofMessage: { fontSize: 13, color: COLORS.ink },
   proofDate: { fontSize: 11, color: "rgba(20,24,33,0.4)", marginTop: 4 },
   threadBox: { borderTopWidth: 1, borderTopColor: COLORS.line, padding: 12, backgroundColor: COLORS.paper },
-  threadImg: { width: "100%", height: 160, borderRadius: 8, marginBottom: 10, resizeMode: "cover" },
   msgBubble: { maxWidth: "82%", borderRadius: 10, padding: 8, marginBottom: 6 },
   msgParent: { backgroundColor: COLORS.navy, alignSelf: "flex-end" },
   msgStaff: { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.line, alignSelf: "flex-start" },

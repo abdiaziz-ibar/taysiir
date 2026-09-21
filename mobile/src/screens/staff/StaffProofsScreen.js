@@ -12,7 +12,7 @@ import {
   RefreshControl,
 } from "react-native";
 import staffApi from "../../api/staffClient";
-import { API_ORIGIN } from "../../api/client";
+import ProofImage from "../../components/ProofImage";
 import { StaffHeader, Chip, Badge } from "../../components/StaffUI";
 import { formatMoney, formatDate, COLORS } from "../../utils/format";
 
@@ -131,11 +131,7 @@ const StaffProofsScreen = ({ navigation }) => {
                   </Text>
                 </TouchableOpacity>
 
-                {thread.screenshotUrl && (
-                  <TouchableOpacity onPress={() => setViewerUri(`${API_ORIGIN}${thread.screenshotUrl}`)}>
-                    <Image source={{ uri: `${API_ORIGIN}${thread.screenshotUrl}` }} style={styles.img} />
-                  </TouchableOpacity>
-                )}
+                <ProofImage screenshotUrl={thread.screenshotUrl} height={180} onOpen={setViewerUri} />
 
                 {thread.messages?.map((m) => {
                   const isStaff = m.senderType === "staff";
@@ -221,7 +217,6 @@ const styles = StyleSheet.create({
   thread: { borderTopWidth: 1, borderTopColor: COLORS.line, padding: 12, backgroundColor: COLORS.paper },
   statusBtn: { borderWidth: 1, borderColor: COLORS.line, borderRadius: 999, paddingVertical: 8, alignItems: "center", backgroundColor: COLORS.surface, marginBottom: 10 },
   statusBtnText: { fontSize: 12, color: COLORS.navy, fontWeight: "600" },
-  img: { width: "100%", height: 180, borderRadius: 8, marginBottom: 10, resizeMode: "cover" },
   bubble: { maxWidth: "82%", borderRadius: 10, padding: 8, marginBottom: 6 },
   bubbleStaff: { backgroundColor: COLORS.navy, alignSelf: "flex-end" },
   bubbleParent: { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.line, alignSelf: "flex-start" },

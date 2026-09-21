@@ -1,4 +1,5 @@
 const prisma = require("../lib/prisma");
+const { saveBase64Screenshot } = require("../middleware/upload");
 const { serializePaymentProof, serializePaymentProofMessage } = require("../utils/serialize");
 
 const proofInclude = { parent: true, payment: true };
@@ -26,7 +27,7 @@ const createProof = async (req, res, next) => {
       if (payment) validPaymentId = payment.id;
     }
 
-    const screenshotUrl = req.file ? `/uploads/payment-proofs/${req.file.filename}` : null;
+    const screenshotUrl = req.file ? `/uploads/payment-proofs/${req.file.filename}` : saveBase64Screenshot(req.body);
 
     const proof = await prisma.paymentProof.create({
       data: {
