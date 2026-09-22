@@ -1,7 +1,9 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import api from "../api/axios";
+import useIdleLogout from "../hooks/useIdleLogout";
 
 const AuthContext = createContext(null);
+const IDLE_TIMEOUT_MS = 60 * 60 * 1000; // 1 hour of no activity
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
@@ -40,6 +42,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
     setUser(null);
   };
+
+  useIdleLogout(!!user, IDLE_TIMEOUT_MS, () => {
+    logout();
+    if (!window.location.pathname.includes("/login")) {
+      window.location.href = "/login?expired=1";
+    }
+  });
 
   return (
     <AuthContext.Provider value={{ user, login, logout, loading }}>

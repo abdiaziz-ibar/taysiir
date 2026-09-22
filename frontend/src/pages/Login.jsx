@@ -247,6 +247,7 @@ const ParentLoginForm = () => {
 const Login = () => {
   const [searchParams] = useSearchParams();
   const [mode, setMode] = useState(searchParams.get("as") === "parent" ? "parent" : "staff");
+  const expired = searchParams.get("expired") === "1";
 
   return (
     <div className="min-h-screen grid md:grid-cols-2 bg-paper">
@@ -322,6 +323,12 @@ const Login = () => {
               Parents
             </button>
           </div>
+
+          {expired && (
+            <div className="mb-4 px-4 py-3 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm">
+              Waqti aad wax ku samayn wayday awgeed, session-kaagii wuu dhacay. Fadlan mar kale soo gal.
+            </div>
+          )}
 
           <h2 className="font-serif text-2xl">Ku Soo Dhawoow</h2>
           <p className="text-sm text-ink/50 mt-1 mb-6">
