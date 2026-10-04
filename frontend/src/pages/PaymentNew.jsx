@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney } from "../utils/format";
+import { t } from "../i18n";
 
 const PaymentNew = () => {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ const PaymentNew = () => {
     setError("");
 
     if (!fee && !(Number(newFeeAmount) > 0)) {
-      setError("Waalidkan Fee lama dhigin sanad dugsiyeedkan. Fadlan geli Wadarta Fee.");
+      setError(t("Waalidkan Fee lama dhigin sanad dugsiyeedkan. Fadlan geli Wadarta Fee."));
       return;
     }
 
@@ -71,7 +72,7 @@ const PaymentNew = () => {
       });
       navigate(`/payments/${res.data.payment._id}`);
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -79,15 +80,15 @@ const PaymentNew = () => {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <h2 className="text-xl font-serif">Lacag Bixin Cusub</h2>
+      <h2 className="text-xl font-serif">{t("Lacag Bixin Cusub")}</h2>
 
       <form onSubmit={handleSubmit} className="card space-y-4">
         {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
 
         <div>
-          <label className="label-field">1. Dooro Waalidka</label>
+          <label className="label-field">{t("1. Dooro Waalidka")}</label>
           <select className="input-field" required value={parentId} onChange={(e) => setParentId(e.target.value)}>
-            <option value="">Dooro Waalid...</option>
+            <option value="">{t("Dooro Waalid...")}</option>
             {parents.map((p) => (
               <option key={p._id} value={p._id}>{p.fullName} — {p.phone}</option>
             ))}
@@ -95,9 +96,9 @@ const PaymentNew = () => {
         </div>
 
         <div>
-          <label className="label-field">2. Dooro Sanad Dugsiyeedka</label>
+          <label className="label-field">{t("2. Dooro Sanad Dugsiyeedka")}</label>
           <select className="input-field" required value={academicYearId} onChange={(e) => setAcademicYearId(e.target.value)}>
-            <option value="">Dooro Sanad Dugsiyeed...</option>
+            <option value="">{t("Dooro Sanad Dugsiyeed...")}</option>
             {years.map((y) => (
               <option key={y._id} value={y._id}>{y.name}</option>
             ))}
@@ -108,15 +109,15 @@ const PaymentNew = () => {
           <div className="bg-paper rounded-md p-3 text-sm">
             {fee ? (
               <div className="grid grid-cols-3 gap-3">
-                <div><p className="text-ink/50">Wadarta Fee</p><p className="font-medium">{formatMoney(fee.totalAmount)}</p></div>
-                <div><p className="text-ink/50">La Bixiyey</p><p className="font-medium">{formatMoney(fee.totalPaid)}</p></div>
-                <div><p className="text-ink/50">Ku Dhiman</p><p className="font-medium">{formatMoney(fee.balance)}</p></div>
+                <div><p className="text-ink/50">{t("Wadarta Fee")}</p><p className="font-medium">{formatMoney(fee.totalAmount)}</p></div>
+                <div><p className="text-ink/50">{t("La Bixiyey")}</p><p className="font-medium">{formatMoney(fee.totalPaid)}</p></div>
+                <div><p className="text-ink/50">{t("Ku Dhiman")}</p><p className="font-medium">{formatMoney(fee.balance)}</p></div>
               </div>
             ) : (
               <div className="space-y-2">
-                <p className="text-amber">Waalidkan Fee lama dhigin sanad dugsiyeedkan ee la doortay. Geli Wadarta Fee si aad hal mar u sameyso Fee-ga iyo lacag-bixinta.</p>
+                <p className="text-amber">{t("Waalidkan Fee lama dhigin sanad dugsiyeedkan ee la doortay. Geli Wadarta Fee si aad hal mar u sameyso Fee-ga iyo lacag-bixinta.")}</p>
                 <div>
-                  <label className="label-field">Wadarta Fee (Sanad Dugsiyeedkan)</label>
+                  <label className="label-field">{t("Wadarta Fee (Sanad Dugsiyeedkan)")}</label>
                   <input type="number" min="0.01" step="0.01" required className="input-field" value={newFeeAmount} onChange={(e) => setNewFeeAmount(e.target.value)} />
                 </div>
               </div>
@@ -125,41 +126,41 @@ const PaymentNew = () => {
         )}
 
         <div>
-          <label className="label-field">3. Geli Lacagta La Bixiyey</label>
+          <label className="label-field">{t("3. Geli Lacagta La Bixiyey")}</label>
           <input type="number" min="0.01" step="0.01" required className="input-field" value={amount} onChange={(e) => setAmount(e.target.value)} />
         </div>
 
         <div>
-          <label className="label-field">4. Taariikhda</label>
+          <label className="label-field">{t("4. Taariikhda")}</label>
           <input type="date" required className="input-field" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
         </div>
 
         <div>
-          <label className="label-field">5. Habka Lacagta (Payment Method)</label>
+          <label className="label-field">{t("5. Habka Lacagta (Payment Method)")}</label>
           <select className="input-field" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-            <option>Cash</option>
-            <option>Mobile Money</option>
-            <option>Bank</option>
-            <option>Other</option>
+            <option value="Cash">{t("Cash")}</option>
+            <option value="Mobile Money">{t("Mobile Money")}</option>
+            <option value="Bank">{t("Bank")}</option>
+            <option value="Other">{t("Other")}</option>
           </select>
         </div>
 
         <div>
-          <label className="label-field">6. Reference Number (haddii loo baahdo)</label>
+          <label className="label-field">{t("6. Reference Number (haddii loo baahdo)")}</label>
           <input className="input-field" value={referenceNumber} onChange={(e) => setReferenceNumber(e.target.value)} />
         </div>
 
         <div>
-          <label className="label-field">Notes</label>
+          <label className="label-field">{t("Notes")}</label>
           <textarea className="input-field" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
         </div>
 
         <label className="flex items-center gap-2 text-sm text-ink/70">
           <input type="checkbox" checked={allowOverpayment} onChange={(e) => setAllowOverpayment(e.target.checked)} />
-          Ogolow overpayment (lacag ka badan Ku Dhiman-ka)
+          {t("Ogolow overpayment (lacag ka badan Ku Dhiman-ka)")}
         </label>
 
-        <button className="btn-primary" disabled={saving}>{saving ? "Waa la kaydinayaa..." : "7. Save"}</button>
+        <button className="btn-primary" disabled={saving}>{saving ? t("Waa la kaydinayaa...") : t("7. Save")}</button>
       </form>
     </div>
   );

@@ -3,6 +3,7 @@ import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+import { t } from "../i18n";
 
 const AcademicYears = () => {
   const { user } = useAuth();
@@ -33,7 +34,7 @@ const AcademicYears = () => {
       load();
       refreshYears();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     }
   };
 
@@ -63,7 +64,7 @@ const AcademicYears = () => {
       load();
       refreshYears();
     } catch (err) {
-      setEditError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setEditError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     }
   };
 
@@ -74,21 +75,21 @@ const AcademicYears = () => {
       load();
       refreshYears();
     } catch (err) {
-      alert(err.response?.data?.message || "Khalad ayaa dhacay.");
+      alert(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     }
   };
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-serif">Sanad Dugsiyeedka (Academic Years)</h2>
+      <h2 className="text-xl font-serif">{t("Sanad Dugsiyeedka (Academic Years)")}</h2>
 
       <form onSubmit={handleCreate} className="card flex items-end gap-3">
         {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
         <div>
-          <label className="label-field">Sanadka Bilowga (e.g. 2026)</label>
+          <label className="label-field">{t("Sanadka Bilowga (e.g. 2026)")}</label>
           <input type="number" min="2000" max="2100" required className="input-field" value={startYear} onChange={(e) => setStartYear(e.target.value)} />
         </div>
-        <button className="btn-primary">+ Samee Sanad Dugsiyeed</button>
+        <button className="btn-primary">{t("+ Samee Sanad Dugsiyeed")}</button>
       </form>
 
       {editError && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{editError}</div>}
@@ -96,7 +97,7 @@ const AcademicYears = () => {
       <div className="card overflow-x-auto">
         <table className="table-base">
           <thead>
-            <tr><th>Sanad</th><th>Bilowga</th><th>Dhammaadka</th><th>Xaalad</th><th></th></tr>
+            <tr><th>{t("Sanad")}</th><th>{t("Bilowga")}</th><th>{t("Dhammaadka")}</th><th>{t("Xaalad")}</th><th></th></tr>
           </thead>
           <tbody>
             {years.map((y) => (
@@ -106,27 +107,27 @@ const AcademicYears = () => {
                     <td><input className="input-field" value={editForm.name} onChange={(e) => setEditForm({ ...editForm, name: e.target.value })} /></td>
                     <td><input className="input-field" value={editForm.startMonth} onChange={(e) => setEditForm({ ...editForm, startMonth: e.target.value })} /></td>
                     <td><input className="input-field" value={editForm.endMonth} onChange={(e) => setEditForm({ ...editForm, endMonth: e.target.value })} /></td>
-                    <td>{y.isActive ? <span className="badge badge-paid">Firfircoon</span> : <span className="text-ink/40">Aan firfircoon</span>}</td>
-                    <td className="text-right whitespace-nowrap">
-                      <button onClick={() => handleEditSave(y._id)} className="text-sm text-success hover:underline mr-3">Kaydi</button>
-                      <button onClick={() => setEditingId(null)} className="text-sm text-ink/60 hover:underline">Jooji</button>
+                    <td>{y.isActive ? <span className="badge badge-paid">{t("Firfircoon")}</span> : <span className="text-ink/40">{t("Aan firfircoon")}</span>}</td>
+                    <td className="text-end whitespace-nowrap">
+                      <button onClick={() => handleEditSave(y._id)} className="text-sm text-success hover:underline me-3">{t("Kaydi")}</button>
+                      <button onClick={() => setEditingId(null)} className="text-sm text-ink/60 hover:underline">{t("Jooji")}</button>
                     </td>
                   </>
                 ) : (
                   <>
                     <td>{y.name}</td>
-                    <td>{y.startMonth}</td>
-                    <td>{y.endMonth}</td>
-                    <td>{y.isActive ? <span className="badge badge-paid">Firfircoon</span> : <span className="text-ink/40">Aan firfircoon</span>}</td>
-                    <td className="text-right whitespace-nowrap">
-                      <button onClick={() => startEdit(y)} className="text-sm text-link hover:underline mr-3">Edit</button>
+                    <td>{t(y.startMonth)}</td>
+                    <td>{t(y.endMonth)}</td>
+                    <td>{y.isActive ? <span className="badge badge-paid">{t("Firfircoon")}</span> : <span className="text-ink/40">{t("Aan firfircoon")}</span>}</td>
+                    <td className="text-end whitespace-nowrap">
+                      <button onClick={() => startEdit(y)} className="text-sm text-link hover:underline me-3">{t("Edit")}</button>
                       {y.isActive ? (
-                        <button onClick={() => handleDeactivate(y._id)} className="text-sm text-danger hover:underline mr-3">Deactivate</button>
+                        <button onClick={() => handleDeactivate(y._id)} className="text-sm text-danger hover:underline me-3">{t("Deactivate")}</button>
                       ) : (
-                        <button onClick={() => handleActivate(y._id)} className="text-sm text-link hover:underline mr-3">Activate</button>
+                        <button onClick={() => handleActivate(y._id)} className="text-sm text-link hover:underline me-3">{t("Activate")}</button>
                       )}
                       {user?.role === "admin" && (
-                        <button onClick={() => setDeleteTarget(y)} className="text-sm text-danger hover:underline">Tirtir</button>
+                        <button onClick={() => setDeleteTarget(y)} className="text-sm text-danger hover:underline">{t("Tirtir")}</button>
                       )}
                     </td>
                   </>
@@ -139,8 +140,8 @@ const AcademicYears = () => {
 
       <ConfirmDeleteModal
         open={!!deleteTarget}
-        title="Tirtir Sanad Dugsiyeedka?"
-        message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.name}. Tan waxay sidoo kale tirtiraysaa dhammaan Fee-yada iyo Lacag-bixinnada sanadkan la xidhiidha oo dhan — lama soo celin karo.` : ""}
+        title={t("Tirtir Sanad Dugsiyeedka?")}
+        message={deleteTarget ? t("Waxaad tirtirayaa {name}. Tan waxay sidoo kale tirtiraysaa dhammaan Fee-yada iyo Lacag-bixinnada sanadkan la xidhiidha oo dhan — lama soo celin karo.", { name: deleteTarget.name }) : ""}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
       />

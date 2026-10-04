@@ -6,6 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import { formatMoney, formatDate, statusLabel, COLORS } from "../utils/format";
 import PaymentProofsSection from "../components/PaymentProofsSection";
 import ParentChangePasswordModal from "../components/ParentChangePasswordModal";
+import LanguageButton from "../i18n/LanguageButton";
+import { t } from "../i18n";
 
 const StatCard = ({ label, value, accent }) => (
   <View style={styles.statCard}>
@@ -60,15 +62,16 @@ const DashboardScreen = () => {
           </View>
           <View>
             <Text style={styles.headerTitle}>Taysir Foundation</Text>
-            <Text style={styles.headerSubtitle}>Xisaabta Waalidka</Text>
+            <Text style={styles.headerSubtitle}>{t("Xisaabta Waalidka")}</Text>
           </View>
         </View>
         <View style={styles.headerActions}>
+          <LanguageButton light />
           <TouchableOpacity style={styles.logoutBtn} onPress={() => setShowPassword(true)}>
-            <Text style={styles.logoutText}>Password</Text>
+            <Text style={styles.logoutText}>{t("Password")}</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-            <Text style={styles.logoutText}>Ka Bax</Text>
+            <Text style={styles.logoutText}>{t("Ka Bax")}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -78,23 +81,23 @@ const DashboardScreen = () => {
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       >
         <View style={styles.hero}>
-          <Text style={styles.heroGreeting}>Salaan,</Text>
+          <Text style={styles.heroGreeting}>{t("Salaan,")}</Text>
           <Text style={styles.heroName}>{parent?.fullName}</Text>
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { width: `${paidPct}%` }]} />
           </View>
-          <Text style={styles.heroPct}>{paidPct}% ee lacagta guud ayaa la bixiyey</Text>
+          <Text style={styles.heroPct}>{paidPct}{t("% ee lacagta guud ayaa la bixiyey")}</Text>
         </View>
 
         <View style={styles.statsRow}>
-          <StatCard label="Wadarta Lacagta" value={formatMoney(totalFee)} />
-          <StatCard label="La Bixiyey" value={formatMoney(totalPaid)} accent={COLORS.success} />
+          <StatCard label={t("Wadarta Lacagta")} value={formatMoney(totalFee)} />
+          <StatCard label={t("La Bixiyey")} value={formatMoney(totalPaid)} accent={COLORS.success} />
         </View>
-        <StatCard label="Ku Dhiman" value={formatMoney(totalBalance)} accent={COLORS.danger} />
+        <StatCard label={t("Ku Dhiman")} value={formatMoney(totalBalance)} accent={COLORS.danger} />
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Sanad Dugsiyeedka</Text>
-          {fees.length === 0 && <Text style={styles.emptyText}>Weli Fee lama dhigin.</Text>}
+          <Text style={styles.sectionTitle}>{t("Sanad Dugsiyeedka")}</Text>
+          {fees.length === 0 && <Text style={styles.emptyText}>{t("Weli Fee lama dhigin.")}</Text>}
           {fees.map((f) => (
             <View key={f._id} style={styles.row}>
               <View style={styles.rowMain}>
@@ -112,14 +115,14 @@ const DashboardScreen = () => {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Taariikhda Lacag Bixinta</Text>
-          {payments.length === 0 && <Text style={styles.emptyText}>Weli lacag lama bixin.</Text>}
+          <Text style={styles.sectionTitle}>{t("Taariikhda Lacag Bixinta")}</Text>
+          {payments.length === 0 && <Text style={styles.emptyText}>{t("Weli lacag lama bixin.")}</Text>}
           {payments.map((p) => (
             <View key={p._id} style={styles.row}>
               <View style={styles.rowMain}>
                 <Text style={styles.rowTitle}>{p.receiptNumber}</Text>
                 <Text style={styles.rowSub}>
-                  {formatDate(p.paymentDate)} · {p.paymentMethod}
+                  {formatDate(p.paymentDate)} · {t(p.paymentMethod)}
                 </Text>
               </View>
               <Text style={styles.rowAmount}>{formatMoney(p.amount)}</Text>

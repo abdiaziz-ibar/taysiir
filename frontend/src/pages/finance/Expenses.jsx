@@ -8,6 +8,7 @@ import Employees from "./Employees";
 import { formatMoney, formatDate } from "../../utils/format";
 import { downloadExcel } from "../../utils/excel";
 import { EXPENSE_CATEGORIES, EMPLOYEE_TYPES, PAYMENT_METHODS, currentMonth, shiftMonth, monthLabel, todayISO } from "../../utils/finance";
+import { t } from "../../i18n";
 
 // Not a stored expense category: choosing it switches to salary payments to
 // teachers / staff (their own table), so everything the school pays out lives on this one page.
@@ -16,9 +17,9 @@ const SALARY_LABEL = "Mushaharka (Shaqaalaha)";
 
 // Same rule as the server: a description is real text, not just a number.
 const descriptionError = (text) => {
-  const t = text.trim();
-  if (t.length < 3) return "Sharaxaadda aad bay u gaaban tahay (ugu yaraan 3 xaraf).";
-  if (!/\p{L}/u.test(t)) return "Sharaxaadda waa inay noqotaa qoraal (ereyo), ma aha lambar kaliya.";
+  const v = text.trim();
+  if (v.length < 3) return t("Sharaxaadda aad bay u gaaban tahay (ugu yaraan 3 xaraf).");
+  if (!/\p{L}/u.test(v)) return t("Sharaxaadda waa inay noqotaa qoraal (ereyo), ma aha lambar kaliya.");
   return "";
 };
 
@@ -62,8 +63,8 @@ const SalaryEntryForm = ({ initialPeriod, onSaved, onNeedEmployees }) => {
     setAmount(row && row.balance > 0 ? String(row.balance) : "");
   };
 
-  const changeType = (t) => {
-    setEmpType(t);
+  const changeType = (type) => {
+    setEmpType(type);
     setEmployeeId("");
     setAmount("");
   };
@@ -71,13 +72,13 @@ const SalaryEntryForm = ({ initialPeriod, onSaved, onNeedEmployees }) => {
   const submit = async (e) => {
     e.preventDefault();
     setError("");
-    if (!employeeId) return setError(`Fadlan dooro ${EMPLOYEE_TYPES[empType].toLowerCase()}.`);
+    if (!employeeId) return setError(t("Fadlan dooro {type}.", { type: EMPLOYEE_TYPES[empType] }));
     setSaving(true);
     try {
       await api.post("/salaries", { employeeId, period, amount: Number(amount), paymentDate, paymentMethod, notes, allowOverpayment });
       onSaved(period);
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
       setSaving(false);
     }
   };
@@ -87,7 +88,7 @@ const SalaryEntryForm = ({ initialPeriod, onSaved, onNeedEmployees }) => {
       {error && <div className="md:col-span-2 bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
 
       <div className="md:col-span-2">
-        <label className="label-field">Dooro *</label>
+        <label className="label-field">{t("Dooro *")}</label>
         <div className="flex gap-2">
           {Object.entries(EMPLOYEE_TYPES).map(([key, label]) => (
             <button
@@ -103,25 +104,25 @@ const SalaryEntryForm = ({ initialPeriod, onSaved, onNeedEmployees }) => {
       </div>
 
       <div>
-        <label className="label-field">Bisha mushaharka *</label>
+        <label className="label-field">{t("Bisha mushaharka *")}</label>
         <input type="month" required className="input-field" value={period} onChange={(e) => e.target.value && setPeriod(e.target.value)} />
       </div>
       <div>
         <label className="label-field">{EMPLOYEE_TYPES[empType]} *</label>
         <select className="input-field" value={employeeId} onChange={(e) => pickEmployee(e.target.value)} disabled={!rows}>
-          <option value="">{rows ? `Dooro ${EMPLOYEE_TYPES[empType].toLowerCase()}...` : "Waa la soo shubayaa..."}</option>
+          <option value="">{rows ? t("Dooro {type}...", { type: EMPLOYEE_TYPES[empType] }) : t("Waa la soo shubayaa...")}</option>
           {candidates.map((r) => (
             <option key={r.employee._id} value={r.employee._id} disabled={r.payments.length > 0}>
               {r.employee.employeeId} — {r.employee.fullName}{" "}
-              {r.payments.length > 0 ? "(bishan horey la bixiyey — Edit ka samee)" : `(mushahar ${formatMoney(r.monthlySalary)})`}
+              {r.payments.length > 0 ? t("(bishan horey la bixiyey — Edit ka samee)") : t("(mushahar {amount})", { amount: formatMoney(r.monthlySalary) })}
             </option>
           ))}
         </select>
         {rows && candidates.length === 0 && (
           <p className="text-xs text-ink/50 mt-1">
-            {EMPLOYEE_TYPES[empType]} Active ah ma jiro.{" "}
+            {EMPLOYEE_TYPES[empType]} {t("Active ah ma jiro.")}{" "}
             <button type="button" className="text-link hover:underline" onClick={onNeedEmployees}>
-              Ku dar halkan
+              {t("Ku dar halkan")}
             </button>
           </p>
         )}
@@ -129,37 +130,37 @@ const SalaryEntryForm = ({ initialPeriod, onSaved, onNeedEmployees }) => {
 
       {selected && (
         <p className="md:col-span-2 text-xs text-ink/50 -mt-2">
-          Mushaharka bishii: {formatMoney(selected.monthlySalary)}
+          {t("Mushaharka bishii:")} {formatMoney(selected.monthlySalary)}
         </p>
       )}
 
       <div>
-        <label className="label-field">Lacagta ($) *</label>
+        <label className="label-field">{t("Lacagta ($) *")}</label>
         <input required type="number" min="0.01" step="0.01" className="input-field" value={amount} onChange={(e) => setAmount(e.target.value)} />
       </div>
       <div>
-        <label className="label-field">Taariikhda</label>
+        <label className="label-field">{t("Taariikhda")}</label>
         <input type="date" required className="input-field" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
       </div>
       <div>
-        <label className="label-field">Habka Lacag Bixinta</label>
+        <label className="label-field">{t("Habka Lacag Bixinta")}</label>
         <select className="input-field" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
           {PAYMENT_METHODS.map((m) => (
-            <option key={m}>{m}</option>
+            <option key={m} value={m}>{t(m)}</option>
           ))}
         </select>
       </div>
       <div>
-        <label className="label-field">Faallo (ikhtiyaari)</label>
+        <label className="label-field">{t("Faallo (ikhtiyaari)")}</label>
         <input className="input-field" value={notes} onChange={(e) => setNotes(e.target.value)} />
       </div>
-      <p className="md:col-span-2 text-xs text-ink/50 -mt-1">Hal mar bishii ayaa la bixiyaa. Haddii aad rabto inaad wax ka beddesho, ka dooro Mushaharka oo Edit samee.</p>
+      <p className="md:col-span-2 text-xs text-ink/50 -mt-1">{t("Hal mar bishii ayaa la bixiyaa. Haddii aad rabto inaad wax ka beddesho, ka dooro Mushaharka oo Edit samee.")}</p>
       <label className="md:col-span-2 flex items-center gap-2 text-sm text-ink/70">
         <input type="checkbox" checked={allowOverpayment} onChange={(e) => setAllowOverpayment(e.target.checked)} />
-        Ogolow in ka badato mushaharka (tusaale bonus)
+        {t("Ogolow in ka badato mushaharka (tusaale bonus)")}
       </label>
       <div className="md:col-span-2">
-        <button className="btn-primary" disabled={saving}>{saving ? "Waa la kaydinayaa..." : "Bixi Mushaharka"}</button>
+        <button className="btn-primary" disabled={saving}>{saving ? t("Waa la kaydinayaa...") : t("Bixi Mushaharka")}</button>
       </div>
     </form>
   );
@@ -246,7 +247,7 @@ const Expenses = () => {
       closeForm();
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -298,27 +299,27 @@ const Expenses = () => {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <h2 className="text-xl font-serif">
-          {isSalaryView ? "Mushaharka" : "Qarashaadka"} {month ? `— ${monthLabel(month)}` : "— Dhammaan"}
+          {isSalaryView ? t("Mushaharka") : t("Qarashaadka")} {month ? `— ${monthLabel(month)}` : t("— Dhammaan")}
         </h2>
         <button className="btn-primary" onClick={showForm ? closeForm : openNew}>
-          {showForm ? "Jooji" : "+ Kharash Cusub"}
+          {showForm ? t("Jooji") : t("+ Kharash Cusub")}
         </button>
       </div>
 
       {showForm && (
         <div className="card space-y-4">
-          <h3 className="font-serif text-lg">{editingId ? "Wax Ka Beddel Kharashka" : "Kharash Cusub"}</h3>
+          <h3 className="font-serif text-lg">{editingId ? t("Wax Ka Beddel Kharashka") : t("Kharash Cusub")}</h3>
 
           <div>
-            <label className="label-field">Nooca *</label>
+            <label className="label-field">{t("Nooca *")}</label>
             <select
               className="input-field md:max-w-sm"
               value={form.category}
               onChange={(e) => setForm({ ...form, category: e.target.value })}
             >
-              {!editingId && <option value={SALARY_KEY}>{SALARY_LABEL}</option>}
+              {!editingId && <option value={SALARY_KEY}>{t(SALARY_LABEL)}</option>}
               {expenseCategoryOptions.map((c) => (
-                <option key={c}>{c}</option>
+                <option key={c} value={c}>{t(c)}</option>
               ))}
             </select>
           </div>
@@ -330,35 +331,35 @@ const Expenses = () => {
               {error && <div className="md:col-span-2 bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
               {!editingId && form.category !== "Kale" && (
                 <p className="md:col-span-2 text-xs text-ink/50">
-                  Nooc kasta hal mar bishii ayaa la diiwaan gelin karaa. Haddii aad rabto inaad wax ka beddesho, liiska ka dooro oo Edit samee.
+                  {t("Nooc kasta hal mar bishii ayaa la diiwaan gelin karaa. Haddii aad rabto inaad wax ka beddesho, liiska ka dooro oo Edit samee.")}
                 </p>
               )}
               <div>
-                <label className="label-field">Lacagta ($) *</label>
+                <label className="label-field">{t("Lacagta ($) *")}</label>
                 <input required type="number" min="0.01" step="0.01" className="input-field" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
               </div>
               <div>
-                <label className="label-field">Taariikhda</label>
+                <label className="label-field">{t("Taariikhda")}</label>
                 <input type="date" required className="input-field" value={form.expenseDate} onChange={(e) => setForm({ ...form, expenseDate: e.target.value })} />
               </div>
               <div className="md:col-span-2">
-                <label className="label-field">Sharaxaad *</label>
-                <input required className="input-field" placeholder="Tusaale: Biilka korontada bisha Sebtembar" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+                <label className="label-field">{t("Sharaxaad *")}</label>
+                <input required className="input-field" placeholder={t("Tusaale: Biilka korontada bisha Sebtembar")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
               </div>
               <div>
-                <label className="label-field">Habka Lacag Bixinta</label>
+                <label className="label-field">{t("Habka Lacag Bixinta")}</label>
                 <select className="input-field" value={form.paymentMethod} onChange={(e) => setForm({ ...form, paymentMethod: e.target.value })}>
                   {PAYMENT_METHODS.map((m) => (
-                    <option key={m}>{m}</option>
+                    <option key={m} value={m}>{t(m)}</option>
                   ))}
                 </select>
               </div>
               <div>
-                <label className="label-field">Faallo (ikhtiyaari)</label>
+                <label className="label-field">{t("Faallo (ikhtiyaari)")}</label>
                 <input className="input-field" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
               </div>
               <div className="md:col-span-2">
-                <button className="btn-primary" disabled={saving}>{saving ? "Waa la kaydinayaa..." : "Kaydi"}</button>
+                <button className="btn-primary" disabled={saving}>{saving ? t("Waa la kaydinayaa...") : t("Kaydi")}</button>
               </div>
             </form>
           )}
@@ -367,30 +368,30 @@ const Expenses = () => {
 
       <div className="card flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
-          <button className="btn-secondary !px-3 !py-2" disabled={!month} onClick={() => setMonth(shiftMonth(month, -1))} aria-label="Bishii hore">
-            <ChevronLeft size={16} />
+          <button className="btn-secondary !px-3 !py-2" disabled={!month} onClick={() => setMonth(shiftMonth(month, -1))} aria-label={t("Bishii hore")}>
+            <ChevronLeft size={16} className="rtl:rotate-180" />
           </button>
           <input type="month" className="input-field !w-auto" value={month} onChange={(e) => setMonth(e.target.value)} />
-          <button className="btn-secondary !px-3 !py-2" disabled={!month} onClick={() => setMonth(shiftMonth(month, 1))} aria-label="Bisha xigta">
-            <ChevronRight size={16} />
+          <button className="btn-secondary !px-3 !py-2" disabled={!month} onClick={() => setMonth(shiftMonth(month, 1))} aria-label={t("Bisha xigta")}>
+            <ChevronRight size={16} className="rtl:rotate-180" />
           </button>
           {!isSalaryView && (
             <button className="btn-secondary text-sm" onClick={() => setMonth(month ? "" : currentMonth())}>
-              {month ? "Dhammaan bilaha" : "Bishan"}
+              {month ? t("Dhammaan bilaha") : t("Bishan")}
             </button>
           )}
         </div>
         <select className="input-field md:max-w-[230px]" value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option value="">Dhammaan noocyada</option>
-          <option value={SALARY_KEY}>{SALARY_LABEL}</option>
+          <option value="">{t("Dhammaan noocyada")}</option>
+          <option value={SALARY_KEY}>{t(SALARY_LABEL)}</option>
           {EXPENSE_CATEGORIES.map((c) => (
-            <option key={c}>{c}</option>
+            <option key={c} value={c}>{t(c)}</option>
           ))}
         </select>
         {!isSalaryView && (
           <>
-            <input className="input-field md:max-w-[200px]" placeholder="Raadi sharaxaad..." value={search} onChange={(e) => setSearch(e.target.value)} />
-            <button className="btn-secondary text-sm inline-flex items-center gap-1.5 md:ml-auto" onClick={exportExcel} disabled={!data || data.expenses.length === 0}>
+            <input className="input-field md:max-w-[200px]" placeholder={t("Raadi sharaxaad...")} value={search} onChange={(e) => setSearch(e.target.value)} />
+            <button className="btn-secondary text-sm inline-flex items-center gap-1.5 md:ms-auto" onClick={exportExcel} disabled={!data || data.expenses.length === 0}>
               <Download size={15} /> Excel
             </button>
           </>
@@ -400,7 +401,7 @@ const Expenses = () => {
       {isSalaryView ? (
         <>
           <div className="flex gap-2">
-            {[["payroll", `Mushaharka ${month ? monthLabel(month) : ""}`], ["employees", "Shaqaalaha (liiska)"]].map(([key, label]) => (
+            {[["payroll", t("Mushaharka") + (month ? " " + monthLabel(month) : "")], ["employees", t("Shaqaalaha (liiska)")]].map(([key, label]) => (
               <button
                 key={key}
                 type="button"
@@ -418,12 +419,12 @@ const Expenses = () => {
           )}
         </>
       ) : !data ? (
-        <p className="text-ink/50">Waa la soo shubayaa...</p>
+        <p className="text-ink/50">{t("Waa la soo shubayaa...")}</p>
       ) : (
         <>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <StatCard
-              label="Wadarta Qarashaadka"
+              label={t("Wadarta Qarashaadka")}
               value={formatMoney(data.total + (showSalaryCard ? salaryPaid : 0))}
               accent="text-danger"
               icon={TrendingDown}
@@ -431,19 +432,19 @@ const Expenses = () => {
               iconColor="text-danger"
             />
             {showSalaryCard && (
-              <button type="button" className="text-left" onClick={() => setCategory(SALARY_KEY)} title="Fur mushaharka">
-                <StatCard label="Mushaharka La Bixiyey (fur →)" value={formatMoney(salaryPaid)} icon={Banknote} />
+              <button type="button" className="text-start" onClick={() => setCategory(SALARY_KEY)} title={t("Fur mushaharka")}>
+                <StatCard label={t("Mushaharka La Bixiyey (fur →)")} value={formatMoney(salaryPaid)} icon={Banknote} />
               </button>
             )}
             <div className={`card ${showSalaryCard ? "" : "md:col-span-2"}`}>
-              <p className="text-xs uppercase tracking-wide text-ink/50 mb-2">Qarashaadka Kale</p>
+              <p className="text-xs uppercase tracking-wide text-ink/50 mb-2">{t("Qarashaadka Kale")}</p>
               {data.byCategory.length === 0 ? (
                 <p className="text-sm text-ink/40">-</p>
               ) : (
                 <div className="flex flex-wrap gap-2">
                   {data.byCategory.map((c) => (
                     <span key={c.category} className="badge bg-navy/10 text-navy !text-sm !px-3 !py-1">
-                      {c.category}: {formatMoney(c.total)}
+                      {t(c.category)}: {formatMoney(c.total)}
                     </span>
                   ))}
                 </div>
@@ -455,12 +456,12 @@ const Expenses = () => {
             <table className="table-base">
               <thead>
                 <tr>
-                  <th>Voucher</th>
-                  <th>Taariikh</th>
-                  <th>Nooca</th>
-                  <th>Sharaxaad</th>
-                  <th>Habka</th>
-                  <th className="text-right">Lacag</th>
+                  <th>{t("Voucher")}</th>
+                  <th>{t("Taariikh")}</th>
+                  <th>{t("Nooca")}</th>
+                  <th>{t("Sharaxaad")}</th>
+                  <th>{t("Habka")}</th>
+                  <th className="text-end">{t("Lacag")}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -469,21 +470,21 @@ const Expenses = () => {
                   <tr key={x._id}>
                     <td className="text-ink/60">{x.voucherNumber}</td>
                     <td>{formatDate(x.expenseDate)}</td>
-                    <td>{x.category}</td>
+                    <td>{t(x.category)}</td>
                     <td>
                       {x.description}
                       {x.notes && <span className="block text-xs text-ink/50">{x.notes}</span>}
                     </td>
-                    <td>{x.paymentMethod}</td>
-                    <td className="text-right font-medium">{formatMoney(x.amount)}</td>
-                    <td className="text-right whitespace-nowrap">
-                      <button onClick={() => openEdit(x)} className="text-sm text-link hover:underline mr-3">Edit</button>
-                      <button onClick={() => setDeleteTarget(x)} className="text-sm text-danger hover:underline">Tirtir</button>
+                    <td>{t(x.paymentMethod)}</td>
+                    <td className="text-end font-medium">{formatMoney(x.amount)}</td>
+                    <td className="text-end whitespace-nowrap">
+                      <button onClick={() => openEdit(x)} className="text-sm text-link hover:underline me-3">{t("Edit")}</button>
+                      <button onClick={() => setDeleteTarget(x)} className="text-sm text-danger hover:underline">{t("Tirtir")}</button>
                     </td>
                   </tr>
                 ))}
                 {data.expenses.length === 0 && (
-                  <tr><td colSpan={7} className="text-center text-ink/40 py-6">Kharash lama diiwaan gelin.</td></tr>
+                  <tr><td colSpan={7} className="text-center text-ink/40 py-6">{t("Kharash lama diiwaan gelin.")}</td></tr>
                 )}
               </tbody>
             </table>
@@ -493,8 +494,8 @@ const Expenses = () => {
 
       <ConfirmDeleteModal
         open={!!deleteTarget}
-        title="Tirtir Kharashka?"
-        message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.voucherNumber} (${deleteTarget.description} — ${formatMoney(deleteTarget.amount)}). Lama soo celin karo.` : ""}
+        title={t("Tirtir Kharashka?")}
+        message={deleteTarget ? t("Waxaad tirtirayaa {voucher} ({description} — {amount}). Lama soo celin karo.", { voucher: deleteTarget.voucherNumber, description: deleteTarget.description, amount: formatMoney(deleteTarget.amount) }) : ""}
         verify={verifyFinancePassword}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}

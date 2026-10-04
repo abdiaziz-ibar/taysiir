@@ -16,11 +16,12 @@ import * as ImageManipulator from "expo-image-manipulator";
 import api from "../api/client";
 import ProofImage from "./ProofImage";
 import { formatMoney, formatDate, COLORS } from "../utils/format";
+import { t } from "../i18n";
 
 const statusColor = (status) => (status === "confirmed" ? COLORS.success : COLORS.amber);
-const statusLabel = (status) => (status === "confirmed" ? "La Xaqiijiyay" : "La Sugayo");
+const statusLabel = (status) => (status === "confirmed" ? t("La Xaqiijiyay") : t("La Sugayo"));
 const typeColor = (type) => (type === "complaint" ? COLORS.danger : COLORS.navy);
-const typeLabel = (type) => (type === "complaint" ? "Cabasho" : "Invoice");
+const typeLabel = (type) => (type === "complaint" ? t("Cabasho") : t("Invoice"));
 
 const Badge = ({ text, color }) => (
   <View style={[styles.badge, { backgroundColor: `${color}1A` }]}>
@@ -58,7 +59,7 @@ const PaymentProofsSection = ({ payments }) => {
   const pickImage = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (!perm.granted) {
-      setError("Fadlan ogolow galitaanka sawirrada (photos) si aad screenshot u soo gudbiso.");
+      setError(t("Fadlan ogolow galitaanka sawirrada (photos) si aad screenshot u soo gudbiso."));
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -77,7 +78,7 @@ const PaymentProofsSection = ({ payments }) => {
   const handleSubmit = async () => {
     setError("");
     if (!message.trim()) {
-      setError(type === "complaint" ? "Fadlan sharax cabashadaada." : "Fadlan sharax lacag-bixinta aad sameysay.");
+      setError(type === "complaint" ? t("Fadlan sharax cabashadaada.") : t("Fadlan sharax lacag-bixinta aad sameysay."));
       return;
     }
     setSubmitting(true);
@@ -98,14 +99,14 @@ const PaymentProofsSection = ({ payments }) => {
       const res = await api.post("/parent-portal/payment-proofs", payload);
       if (image && !res.data?.screenshotUrl) {
         load(); // the proof itself was saved; only the image is missing
-        setError("Sawirka ma gaadhin server-ka. Fadlan isku day mar kale.");
+        setError(t("Sawirka ma gaadhin server-ka. Fadlan isku day mar kale."));
         return;
       }
       resetForm();
       setShowForm(false);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSubmitting(false);
     }
@@ -123,10 +124,10 @@ const PaymentProofsSection = ({ payments }) => {
   };
 
   const handleDelete = (id) => {
-    Alert.alert("Tirtir", "Ma hubtaa inaad tirtirto caddayntan/cabashadan?", [
-      { text: "Maya", style: "cancel" },
+    Alert.alert(t("Tirtir"), t("Ma hubtaa inaad tirtirto caddayntan/cabashadan?"), [
+      { text: t("Maya"), style: "cancel" },
       {
-        text: "Tirtir",
+        text: t("Tirtir"),
         style: "destructive",
         onPress: async () => {
           try {
@@ -134,7 +135,7 @@ const PaymentProofsSection = ({ payments }) => {
             setOpenProof(null);
             load();
           } catch (err) {
-            Alert.alert("Khalad", err.response?.data?.message || "Khalad ayaa dhacay.");
+            Alert.alert(t("Khalad"), t(err.response?.data?.message || "Khalad ayaa dhacay."));
           }
         },
       },
@@ -158,9 +159,9 @@ const PaymentProofsSection = ({ payments }) => {
   return (
     <View style={styles.section}>
       <View style={styles.headerRow}>
-        <Text style={styles.sectionTitle}>Lacag Bixinta &amp; Cabashooyinka</Text>
+        <Text style={styles.sectionTitle}>{t("Lacag Bixinta & Cabashooyinka")}</Text>
         <TouchableOpacity style={styles.smallBtn} onPress={() => setShowForm((v) => !v)}>
-          <Text style={styles.smallBtnText}>{showForm ? "Jooji" : "+ Soo Gudbi"}</Text>
+          <Text style={styles.smallBtnText}>{showForm ? t("Jooji") : t("+ Soo Gudbi")}</Text>
         </TouchableOpacity>
       </View>
 
@@ -174,7 +175,7 @@ const PaymentProofsSection = ({ payments }) => {
                 setError("");
               }}
             >
-              <Text style={[styles.tabText, type === "invoice" && styles.tabTextActive]}>Soo Gudbi Invoice</Text>
+              <Text style={[styles.tabText, type === "invoice" && styles.tabTextActive]}>{t("Soo Gudbi Invoice")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tab, type === "complaint" && styles.tabActive]}
@@ -183,7 +184,7 @@ const PaymentProofsSection = ({ payments }) => {
                 setError("");
               }}
             >
-              <Text style={[styles.tabText, type === "complaint" && styles.tabTextActive]}>Qor Cabasho</Text>
+              <Text style={[styles.tabText, type === "complaint" && styles.tabTextActive]}>{t("Qor Cabasho")}</Text>
             </TouchableOpacity>
           </View>
 
@@ -191,41 +192,41 @@ const PaymentProofsSection = ({ payments }) => {
 
           {type === "invoice" && (
             <>
-              <Text style={styles.label}>Lacagta La Bixiyay ($)</Text>
+              <Text style={styles.label}>{t("Lacagta La Bixiyay ($)")}</Text>
               <TextInput
                 style={styles.input}
                 value={amount}
                 onChangeText={setAmount}
-                placeholder="Tusaale: 50"
+                placeholder={t("Tusaale: 50")}
                 placeholderTextColor="#9CA3AF"
                 keyboardType="numeric"
               />
             </>
           )}
 
-          <Text style={styles.label}>{type === "complaint" ? "Sharax Cabashadaada" : "Faahfaahin"}</Text>
+          <Text style={styles.label}>{type === "complaint" ? t("Sharax Cabashadaada") : t("Faahfaahin")}</Text>
           <TextInput
             style={[styles.input, styles.textarea]}
             value={message}
             onChangeText={setMessage}
-            placeholder={type === "complaint" ? "Tusaale: Lacagtii aan bixiyey lama xisaabin." : "Tusaale: Waxaan ku bixiyey EVC Plus."}
+            placeholder={type === "complaint" ? t("Tusaale: Lacagtii aan bixiyey lama xisaabin.") : t("Tusaale: Waxaan ku bixiyey EVC Plus.")}
             placeholderTextColor="#9CA3AF"
             multiline
           />
 
-          <Text style={styles.label}>{type === "complaint" ? "Caddayn (ikhtiyaari)" : "Invoice/Screenshot"}</Text>
+          <Text style={styles.label}>{type === "complaint" ? t("Caddayn (ikhtiyaari)") : "Invoice/Screenshot"}</Text>
           <TouchableOpacity style={styles.pickBtn} onPress={pickImage}>
-            <Text style={styles.pickBtnText}>{image ? "Beddel Sawirka" : "Dooro Sawir"}</Text>
+            <Text style={styles.pickBtnText}>{image ? t("Beddel Sawirka") : t("Dooro Sawir")}</Text>
           </TouchableOpacity>
           {image && <Image source={{ uri: image.uri }} style={styles.previewImg} />}
 
           <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit} disabled={submitting}>
-            {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitBtnText}>Soo Gudbi</Text>}
+            {submitting ? <ActivityIndicator color="#fff" /> : <Text style={styles.submitBtnText}>{t("Soo Gudbi")}</Text>}
           </TouchableOpacity>
         </View>
       )}
 
-      {proofs.length === 0 && !showForm && <Text style={styles.emptyText}>Weli lacag-bixin ama cabasho lama soo gudbin.</Text>}
+      {proofs.length === 0 && !showForm && <Text style={styles.emptyText}>{t("Weli lacag-bixin ama cabasho lama soo gudbin.")}</Text>}
 
       {proofs.map((p) => {
         const isOpen = openProof === p._id;
@@ -253,20 +254,20 @@ const PaymentProofsSection = ({ payments }) => {
                   return (
                     <View key={m._id} style={[styles.msgBubble, isParent ? styles.msgParent : styles.msgStaff]}>
                       <Text style={[styles.msgSender, isParent ? styles.msgTextLight : styles.msgTextDark]}>
-                        {isParent ? "Adiga" : m.senderName}
+                        {isParent ? t("Adiga") : m.senderName}
                       </Text>
                       <Text style={isParent ? styles.msgTextLight : styles.msgTextDark}>{m.message}</Text>
                     </View>
                   );
                 })}
-                {thread.messages?.length === 0 && <Text style={styles.emptyText}>Weli jawaab lama bixin.</Text>}
+                {thread.messages?.length === 0 && <Text style={styles.emptyText}>{t("Weli jawaab lama bixin.")}</Text>}
 
                 <View style={styles.replyRow}>
                   <TextInput
                     style={[styles.input, styles.replyInput]}
                     value={replyText}
                     onChangeText={setReplyText}
-                    placeholder="Qor fariin..."
+                    placeholder={t("Qor fariin...")}
                     placeholderTextColor="#9CA3AF"
                   />
                   <TouchableOpacity
@@ -274,13 +275,13 @@ const PaymentProofsSection = ({ payments }) => {
                     onPress={() => handleReply(p._id)}
                     disabled={replying}
                   >
-                    {replying ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.replyBtnText}>Dir</Text>}
+                    {replying ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.replyBtnText}>{t("Dir")}</Text>}
                   </TouchableOpacity>
                 </View>
 
                 {p.status !== "confirmed" && (
                   <TouchableOpacity onPress={() => handleDelete(p._id)} style={styles.deleteBtn}>
-                    <Text style={styles.deleteBtnText}>Tirtir</Text>
+                    <Text style={styles.deleteBtnText}>{t("Tirtir")}</Text>
                   </TouchableOpacity>
                 )}
               </View>

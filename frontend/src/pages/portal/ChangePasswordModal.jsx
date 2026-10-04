@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { KeyRound } from "lucide-react";
 import parentApi from "../../api/parentAxios";
+import { t } from "../../i18n";
 
 const emptyForm = { currentPassword: "", newPassword: "", confirmPassword: "" };
 
@@ -23,7 +24,7 @@ const ChangePasswordModal = ({ open, onClose, api = parentApi, path = "/parent-p
     e.preventDefault();
     setError("");
     if (form.newPassword !== form.confirmPassword) {
-      setError("Labada password ee cusub iskuma eka.");
+      setError(t("Labada password ee cusub iskuma eka."));
       return;
     }
     setSaving(true);
@@ -34,7 +35,7 @@ const ChangePasswordModal = ({ open, onClose, api = parentApi, path = "/parent-p
       });
       setDone(true);
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -49,33 +50,33 @@ const ChangePasswordModal = ({ open, onClose, api = parentApi, path = "/parent-p
           <span className="w-10 h-10 rounded-full bg-navy/10 flex items-center justify-center shrink-0">
             <KeyRound size={20} className="text-navy" />
           </span>
-          <h3 className="font-serif text-lg">Beddel Password</h3>
+          <h3 className="font-serif text-lg">{t("Beddel Password")}</h3>
         </div>
 
         {done ? (
           <div className="space-y-4">
-            <div className="bg-success/10 text-success text-sm rounded-md px-3 py-2">Password-ka waa la beddelay.</div>
-            <button className="btn-primary w-full" onClick={handleClose}>Xir</button>
+            <div className="bg-success/10 text-success text-sm rounded-md px-3 py-2">{t("Password-ka waa la beddelay.")}</div>
+            <button className="btn-primary w-full" onClick={handleClose}>{t("Xir")}</button>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-3">
             {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
             <div>
-              <label className="label-field">Password-ka hadda jira</label>
+              <label className="label-field">{t("Password-ka hadda jira")}</label>
               <input type="password" autoFocus required className="input-field" value={form.currentPassword} onChange={set("currentPassword")} />
             </div>
             <div>
-              <label className="label-field">Password cusub (ugu yaraan 6 xaraf)</label>
+              <label className="label-field">{t("Password cusub (ugu yaraan 6 xaraf)")}</label>
               <input type="password" required minLength={6} className="input-field" value={form.newPassword} onChange={set("newPassword")} />
             </div>
             <div>
-              <label className="label-field">Xaqiiji password cusub</label>
+              <label className="label-field">{t("Xaqiiji password cusub")}</label>
               <input type="password" required minLength={6} className="input-field" value={form.confirmPassword} onChange={set("confirmPassword")} />
             </div>
             <div className="flex justify-end gap-2 pt-1">
-              <button type="button" className="btn-secondary text-sm" onClick={handleClose} disabled={saving}>Jooji</button>
+              <button type="button" className="btn-secondary text-sm" onClick={handleClose} disabled={saving}>{t("Jooji")}</button>
               <button type="submit" className="btn-primary text-sm" disabled={saving}>
-                {saving ? "Waa la kaydinayaa..." : "Kaydi"}
+                {saving ? t("Waa la kaydinayaa...") : t("Kaydi")}
               </button>
             </div>
           </form>

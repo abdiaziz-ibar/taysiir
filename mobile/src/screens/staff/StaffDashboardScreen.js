@@ -5,6 +5,7 @@ import { useAuth } from "../../context/AuthContext";
 import { useStaff } from "../../context/StaffContext";
 import { StaffHeader, YearChips, Card, MonthBars } from "../../components/StaffUI";
 import { formatMoney, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const Stat = ({ label, value, color }) => (
   <View style={styles.stat}>
@@ -42,7 +43,7 @@ const StaffDashboardScreen = () => {
 
   return (
     <View style={styles.flex}>
-      <StaffHeader title="Dashboard" />
+      <StaffHeader title={t("Dashboard")} />
       <YearChips />
       {!data ? (
         <View style={styles.center}>
@@ -54,26 +55,26 @@ const StaffDashboardScreen = () => {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
         >
           <View style={styles.hero}>
-            <Text style={styles.heroSmall}>Ku Soo Dhawoow,</Text>
-            <Text style={styles.heroName}>{staff?.fullName?.split(" ")[0] || "Admin"}</Text>
+            <Text style={styles.heroSmall}>{t("Ku Soo Dhawoow,")}</Text>
+            <Text style={styles.heroName}>{staff?.fullName?.split(" ")[0] || t("Admin")}</Text>
             <View style={styles.track}>
               <View style={[styles.fill, { width: `${Math.min(rate, 100)}%` }]} />
             </View>
-            <Text style={styles.heroSmall}>Collection Rate: {rate}%</Text>
+            <Text style={styles.heroSmall}>{t("Collection Rate:")} {rate}%</Text>
           </View>
 
           <View style={styles.grid}>
-            <Stat label="Waalidiinta" value={data.totalParents} />
-            <Stat label="Wadarta Fee" value={formatMoney(data.totalFees)} />
-            <Stat label="La Bixiyey" value={formatMoney(data.totalPaid)} color={COLORS.success} />
-            <Stat label="Deynta" value={formatMoney(data.totalDebt)} color={COLORS.danger} />
-            <Stat label="Paid" value={data.paidCount} color={COLORS.success} />
-            <Stat label="Partial" value={data.partialCount} color={COLORS.amber} />
-            <Stat label="Unpaid" value={data.unpaidCount} color={COLORS.danger} />
+            <Stat label={t("Waalidiinta")} value={data.totalParents} />
+            <Stat label={t("Wadarta Fee")} value={formatMoney(data.totalFees)} />
+            <Stat label={t("La Bixiyey")} value={formatMoney(data.totalPaid)} color={COLORS.success} />
+            <Stat label={t("Deynta")} value={formatMoney(data.totalDebt)} color={COLORS.danger} />
+            <Stat label={t("Paid")} value={data.paidCount} color={COLORS.success} />
+            <Stat label={t("Partial")} value={data.partialCount} color={COLORS.amber} />
+            <Stat label={t("Unpaid")} value={data.unpaidCount} color={COLORS.danger} />
           </View>
 
           <Card>
-            <Text style={styles.chartTitle}>Lacagta La Bixiyey Bishii Kasta</Text>
+            <Text style={styles.chartTitle}>{t("Lacagta La Bixiyey Bishii Kasta")}</Text>
             <MonthBars data={monthly} valueKey="totalPaid" />
           </Card>
         </ScrollView>

@@ -5,6 +5,8 @@ import parentApi from "../../api/parentAxios";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../../utils/format";
 import ParentPaymentProofs from "./ParentPaymentProofs";
 import ChangePasswordModal from "./ChangePasswordModal";
+import { t } from "../../i18n";
+import LanguageSwitcher from "../../i18n/LanguageSwitcher";
 
 const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, accent }) => (
   <div className="card">
@@ -28,7 +30,7 @@ const ParentPortalDashboard = () => {
     parentApi
       .get("/parent-portal/me")
       .then((res) => setData(res.data))
-      .catch((err) => setError(err.response?.data?.message || "Khalad ayaa dhacay."));
+      .catch((err) => setError(t(err.response?.data?.message || "Khalad ayaa dhacay.")));
   }, []);
 
   const handleLogout = () => {
@@ -38,7 +40,7 @@ const ParentPortalDashboard = () => {
   };
 
   if (error) return <p className="min-h-screen flex items-center justify-center text-danger">{error}</p>;
-  if (!data) return <p className="min-h-screen flex items-center justify-center text-ink/50">Waa la soo shubayaa...</p>;
+  if (!data) return <p className="min-h-screen flex items-center justify-center text-ink/50">{t("Waa la soo shubayaa...")}</p>;
 
   const { parent, fees, payments } = data;
   const totalFee = fees.reduce((s, f) => s + f.totalAmount, 0);
@@ -55,68 +57,69 @@ const ParentPortalDashboard = () => {
           </div>
           <div>
             <h1 className="font-serif text-lg text-white leading-tight">Taysir Foundation</h1>
-            <p className="text-white/50 text-xs mt-0.5">Xisaabta Waalidka</p>
+            <p className="text-white/50 text-xs mt-0.5">{t("Xisaabta Waalidka")}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <LanguageSwitcher light />
           <button
             onClick={() => setShowPassword(true)}
             className="text-sm text-white/80 border border-white/20 rounded-full px-4 py-1.5 hover:bg-white/10 hover:text-white transition-colors"
           >
-            Beddel Password
+            {t("Beddel Password")}
           </button>
           <button
             onClick={handleLogout}
             className="text-sm text-white/80 border border-white/20 rounded-full px-4 py-1.5 hover:bg-white/10 hover:text-white transition-colors"
           >
-            Ka Bax
+            {t("Ka Bax")}
           </button>
         </div>
       </header>
 
       <main className="max-w-4xl mx-auto p-6 space-y-6">
         <div className="card bg-gradient-to-br from-navy to-navy-light text-white border-0">
-          <p className="text-white/60 text-sm">Salaan,</p>
+          <p className="text-white/60 text-sm">{t("Salaan,")}</p>
           <h2 className="font-serif text-2xl mb-4">{parent.fullName}</h2>
           <div className="w-full bg-white/15 rounded-full h-2 overflow-hidden">
             <div className="bg-white h-full rounded-full transition-all" style={{ width: `${paidPct}%` }} />
           </div>
-          <p className="text-white/70 text-xs mt-2">{paidPct}% ee lacagta guud ayaa la bixiyey</p>
+          <p className="text-white/70 text-xs mt-2">{paidPct}{t("% ee lacagta guud ayaa la bixiyey")}</p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <StatCard label="Wadarta Lacagta" value={formatMoney(totalFee)} icon={Wallet} iconBg="bg-navy/10" iconColor="text-navy" />
-          <StatCard label="La Bixiyey" value={formatMoney(totalPaid)} accent="text-success" icon={CheckCircle2} iconBg="bg-success/10" iconColor="text-success" />
-          <StatCard label="Ku Dhiman" value={formatMoney(totalBalance)} accent="text-danger" icon={AlertCircle} iconBg="bg-danger/10" iconColor="text-danger" />
+          <StatCard label={t("Wadarta Lacagta")} value={formatMoney(totalFee)} icon={Wallet} iconBg="bg-navy/10" iconColor="text-navy" />
+          <StatCard label={t("La Bixiyey")} value={formatMoney(totalPaid)} accent="text-success" icon={CheckCircle2} iconBg="bg-success/10" iconColor="text-success" />
+          <StatCard label={t("Ku Dhiman")} value={formatMoney(totalBalance)} accent="text-danger" icon={AlertCircle} iconBg="bg-danger/10" iconColor="text-danger" />
         </div>
 
         <div className="card overflow-x-auto">
           <h3 className="font-serif text-lg mb-3 flex items-center gap-2">
             <GraduationCap size={18} className="text-navy" />
-            Sanad Dugsiyeedka
+            {t("Sanad Dugsiyeedka")}
           </h3>
           <table className="table-base">
             <thead>
               <tr>
-                <th>Sanad Dugsiyeed</th>
-                <th className="text-right">Total Fee</th>
-                <th className="text-right">La Bixiyey</th>
-                <th className="text-right">Ku Dhiman</th>
-                <th>Status</th>
+                <th>{t("Sanad Dugsiyeed")}</th>
+                <th className="text-end">{t("Total Fee")}</th>
+                <th className="text-end">{t("La Bixiyey")}</th>
+                <th className="text-end">{t("Ku Dhiman")}</th>
+                <th>{t("Status")}</th>
               </tr>
             </thead>
             <tbody>
               {fees.map((f) => (
                 <tr key={f._id}>
                   <td>{f.academicYearId?.name}</td>
-                  <td className="text-right">{formatMoney(f.totalAmount)}</td>
-                  <td className="text-right">{formatMoney(f.totalPaid)}</td>
-                  <td className="text-right">{formatMoney(f.balance)}</td>
+                  <td className="text-end">{formatMoney(f.totalAmount)}</td>
+                  <td className="text-end">{formatMoney(f.totalPaid)}</td>
+                  <td className="text-end">{formatMoney(f.balance)}</td>
                   <td><span className={statusBadgeClass(f.status)}>{statusLabel(f.status)}</span></td>
                 </tr>
               ))}
               {fees.length === 0 && (
-                <tr><td colSpan={5} className="text-center text-ink/40 py-4">Weli Fee lama dhigin.</td></tr>
+                <tr><td colSpan={5} className="text-center text-ink/40 py-4">{t("Weli Fee lama dhigin.")}</td></tr>
               )}
             </tbody>
           </table>
@@ -125,16 +128,16 @@ const ParentPortalDashboard = () => {
         <div className="card overflow-x-auto">
           <h3 className="font-serif text-lg mb-3 flex items-center gap-2">
             <Receipt size={18} className="text-navy" />
-            Taariikhda Lacag Bixinta
+            {t("Taariikhda Lacag Bixinta")}
           </h3>
           <table className="table-base">
             <thead>
               <tr>
-                <th>Receipt</th>
-                <th>Taariikh</th>
-                <th>Sanad Dugsiyeed</th>
-                <th className="text-right">Lacag</th>
-                <th>Habka Lacagta</th>
+                <th>{t("Receipt")}</th>
+                <th>{t("Taariikh")}</th>
+                <th>{t("Sanad Dugsiyeed")}</th>
+                <th className="text-end">{t("Lacag")}</th>
+                <th>{t("Habka Lacagta")}</th>
               </tr>
             </thead>
             <tbody>
@@ -143,12 +146,12 @@ const ParentPortalDashboard = () => {
                   <td>{p.receiptNumber}</td>
                   <td>{formatDate(p.paymentDate)}</td>
                   <td>{p.academicYearId?.name}</td>
-                  <td className="text-right">{formatMoney(p.amount)}</td>
-                  <td>{p.paymentMethod}</td>
+                  <td className="text-end">{formatMoney(p.amount)}</td>
+                  <td>{t(p.paymentMethod)}</td>
                 </tr>
               ))}
               {payments.length === 0 && (
-                <tr><td colSpan={5} className="text-center text-ink/40 py-4">Weli lacag lama bixin.</td></tr>
+                <tr><td colSpan={5} className="text-center text-ink/40 py-4">{t("Weli lacag lama bixin.")}</td></tr>
               )}
             </tbody>
           </table>

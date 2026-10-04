@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { AlertTriangle } from "lucide-react";
 import api from "../api/axios";
+import { t } from "../i18n";
 
 // Step-up confirmation for irreversible deletes: the admin currently
 // logged in must re-type their own password before the delete proceeds.
@@ -36,7 +37,7 @@ const ConfirmDeleteModal = ({ open, title, message, onConfirm, onClose, children
       await onConfirm();
     } catch (err) {
       setChecking(false);
-      setError(err.response?.data?.message || "Password-ku waa khalad.");
+      setError(t(err.response?.data?.message || "Password-ku waa khalad."));
     }
   };
 
@@ -58,7 +59,7 @@ const ConfirmDeleteModal = ({ open, title, message, onConfirm, onClose, children
         <form onSubmit={handleSubmit} className="space-y-3">
           {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
           <div>
-            <label className="label-field">Geli Password-kaaga si aad u xaqiijiso</label>
+            <label className="label-field">{t("Geli Password-kaaga si aad u xaqiijiso")}</label>
             <input
               type="password"
               autoFocus
@@ -70,10 +71,10 @@ const ConfirmDeleteModal = ({ open, title, message, onConfirm, onClose, children
           </div>
           <div className="flex justify-end gap-2 pt-1">
             <button type="button" className="btn-secondary text-sm" onClick={handleClose} disabled={checking}>
-              Jooji
+              {t("Jooji")}
             </button>
             <button type="submit" className="btn-danger text-sm" disabled={checking || disabled}>
-              {checking ? "Waa la xaqiijinayaa..." : "Haa, Tirtir"}
+              {checking ? t("Waa la xaqiijinayaa...") : t("Haa, Tirtir")}
             </button>
           </div>
         </form>

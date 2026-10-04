@@ -6,6 +6,7 @@ import StatCard from "../StatCard";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../../utils/format";
 import { downloadExcel } from "../../utils/excel";
 import { EMPLOYEE_TYPES, PAYMENT_METHODS, monthLabel, todayISO } from "../../utils/finance";
+import { t } from "../../i18n";
 
 // Records the month's salary payment, or (when `payment` is given) edits the one already recorded:
 // each employee gets one payment per month.
@@ -29,7 +30,7 @@ const PayModal = ({ row, payment, period, onClose, onSaved }) => {
       else await api.post("/salaries", { ...body, employeeId: row.employee._id, period });
       onSaved();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
       setSaving(false);
     }
   };
@@ -38,12 +39,12 @@ const PayModal = ({ row, payment, period, onClose, onSaved }) => {
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50" onClick={onClose}>
       <form onSubmit={submit} className="card max-w-md w-full space-y-4" onClick={(e) => e.stopPropagation()}>
         <div>
-          <h3 className="font-serif text-lg">{editing ? "Wax Ka Beddel Mushaharka" : "Bixi Mushaharka"}</h3>
+          <h3 className="font-serif text-lg">{editing ? t("Wax Ka Beddel Mushaharka") : t("Bixi Mushaharka")}</h3>
           <p className="text-sm text-ink/60 mt-0.5">
             {row.employee.fullName} · {monthLabel(period)}
           </p>
           <p className="text-xs text-ink/50 mt-1">
-            Mushahar {formatMoney(row.monthlySalary)} · La bixiyey {formatMoney(row.totalPaid)} · Ku dhiman{" "}
+            {t("Mushahar")} {formatMoney(row.monthlySalary)} {t("· La bixiyey")} {formatMoney(row.totalPaid)} {t("· Ku dhiman")}{" "}
             <span className="text-danger">{formatMoney(row.balance)}</span>
           </p>
         </div>
@@ -51,35 +52,35 @@ const PayModal = ({ row, payment, period, onClose, onSaved }) => {
         {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
 
         <div>
-          <label className="label-field">Lacagta ($) *</label>
+          <label className="label-field">{t("Lacagta ($) *")}</label>
           <input required autoFocus type="number" min="0.01" step="0.01" className="input-field" value={amount} onChange={(e) => setAmount(e.target.value)} />
         </div>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="label-field">Taariikhda</label>
+            <label className="label-field">{t("Taariikhda")}</label>
             <input type="date" className="input-field" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
           </div>
           <div>
-            <label className="label-field">Habka</label>
+            <label className="label-field">{t("Habka")}</label>
             <select className="input-field" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
               {PAYMENT_METHODS.map((m) => (
-                <option key={m}>{m}</option>
+                <option key={m} value={m}>{t(m)}</option>
               ))}
             </select>
           </div>
         </div>
         <div>
-          <label className="label-field">Faallo (ikhtiyaari)</label>
+          <label className="label-field">{t("Faallo (ikhtiyaari)")}</label>
           <input className="input-field" value={notes} onChange={(e) => setNotes(e.target.value)} />
         </div>
         <label className="flex items-center gap-2 text-sm text-ink/70">
           <input type="checkbox" checked={allowOverpayment} onChange={(e) => setAllowOverpayment(e.target.checked)} />
-          Ogolow in ka badato mushaharka (tusaale bonus)
+          {t("Ogolow in ka badato mushaharka (tusaale bonus)")}
         </label>
 
         <div className="flex justify-end gap-2 pt-1">
-          <button type="button" className="btn-secondary text-sm" onClick={onClose} disabled={saving}>Jooji</button>
-          <button className="btn-primary text-sm" disabled={saving}>{saving ? "Waa la kaydinayaa..." : editing ? "Kaydi" : "Bixi"}</button>
+          <button type="button" className="btn-secondary text-sm" onClick={onClose} disabled={saving}>{t("Jooji")}</button>
+          <button className="btn-primary text-sm" disabled={saving}>{saving ? t("Waa la kaydinayaa...") : editing ? t("Kaydi") : t("Bixi")}</button>
         </div>
       </form>
     </div>
@@ -144,7 +145,7 @@ const SalaryPanel = ({ period, refreshKey }) => {
               onClick={() => setType(value)}
               className={`px-4 py-1.5 rounded-full text-sm border ${type === value ? "bg-navy text-white border-navy" : "bg-surface text-ink border-line hover:bg-paper"}`}
             >
-              {label}
+              {t(label)}
             </button>
           ))}
         </div>
@@ -154,13 +155,13 @@ const SalaryPanel = ({ period, refreshKey }) => {
       </div>
 
       {!data ? (
-        <p className="text-ink/50">Waa la soo shubayaa...</p>
+        <p className="text-ink/50">{t("Waa la soo shubayaa...")}</p>
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <StatCard label="Wadarta Mushaharka" value={formatMoney(totals.salary)} icon={Wallet} />
-            <StatCard label="La Bixiyey" value={formatMoney(totals.paid)} accent="text-success" icon={CheckCircle2} iconBg="bg-success/10" iconColor="text-success" />
-            <StatCard label="Ku Dhiman" value={formatMoney(totals.balance)} accent="text-danger" icon={AlertCircle} iconBg="bg-danger/10" iconColor="text-danger" />
+            <StatCard label={t("Wadarta Mushaharka")} value={formatMoney(totals.salary)} icon={Wallet} />
+            <StatCard label={t("La Bixiyey")} value={formatMoney(totals.paid)} accent="text-success" icon={CheckCircle2} iconBg="bg-success/10" iconColor="text-success" />
+            <StatCard label={t("Ku Dhiman")} value={formatMoney(totals.balance)} accent="text-danger" icon={AlertCircle} iconBg="bg-danger/10" iconColor="text-danger" />
           </div>
 
           <div className="card overflow-x-auto">
@@ -168,12 +169,12 @@ const SalaryPanel = ({ period, refreshKey }) => {
               <thead>
                 <tr>
                   <th>ID</th>
-                  <th>Magaca</th>
-                  <th>Nooca</th>
-                  <th className="text-right">Mushahar</th>
-                  <th className="text-right">La Bixiyey</th>
-                  <th className="text-right">Ku Dhiman</th>
-                  <th>Xaalad</th>
+                  <th>{t("Magaca")}</th>
+                  <th>{t("Nooca")}</th>
+                  <th className="text-end">{t("Mushahar")}</th>
+                  <th className="text-end">{t("La Bixiyey")}</th>
+                  <th className="text-end">{t("Ku Dhiman")}</th>
+                  <th>{t("Xaalad")}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -186,37 +187,37 @@ const SalaryPanel = ({ period, refreshKey }) => {
                       {r.employee.position && <span className="block text-xs text-ink/50">{r.employee.position}</span>}
                     </td>
                     <td>{EMPLOYEE_TYPES[r.employee.type]}</td>
-                    <td className="text-right">{formatMoney(r.monthlySalary)}</td>
-                    <td className="text-right text-success">{formatMoney(r.totalPaid)}</td>
-                    <td className="text-right text-danger">{formatMoney(r.balance)}</td>
+                    <td className="text-end">{formatMoney(r.monthlySalary)}</td>
+                    <td className="text-end text-success">{formatMoney(r.totalPaid)}</td>
+                    <td className="text-end text-danger">{formatMoney(r.balance)}</td>
                     <td><span className={statusBadgeClass(r.status)}>{statusLabel(r.status)}</span></td>
-                    <td className="text-right">
+                    <td className="text-end">
                       {r.payments.length === 0 ? (
-                        <button className="btn-primary !px-4 !py-1.5 text-sm" onClick={() => setPayTarget({ row: r })}>Bixi</button>
+                        <button className="btn-primary !px-4 !py-1.5 text-sm" onClick={() => setPayTarget({ row: r })}>{t("Bixi")}</button>
                       ) : (
-                        <button className="btn-secondary !px-4 !py-1.5 text-sm" onClick={() => setPayTarget({ row: r, payment: r.payments[0] })}>Edit</button>
+                        <button className="btn-secondary !px-4 !py-1.5 text-sm" onClick={() => setPayTarget({ row: r, payment: r.payments[0] })}>{t("Edit")}</button>
                       )}
                     </td>
                   </tr>
                 ))}
                 {rows.length === 0 && (
-                  <tr><td colSpan={8} className="text-center text-ink/40 py-6">Shaqaale Active ah ma jiro. Ku dar tab-ka "Shaqaalaha".</td></tr>
+                  <tr><td colSpan={8} className="text-center text-ink/40 py-6">{t("Shaqaale Active ah ma jiro. Ku dar tab-ka \"Shaqaalaha\".")}</td></tr>
                 )}
               </tbody>
             </table>
           </div>
 
           <div className="card overflow-x-auto">
-            <h3 className="font-serif text-lg mb-3">Mushaharka La Bixiyey Bishan</h3>
+            <h3 className="font-serif text-lg mb-3">{t("Mushaharka La Bixiyey Bishan")}</h3>
             <table className="table-base">
               <thead>
                 <tr>
-                  <th>Voucher</th>
-                  <th>Shaqaalaha</th>
-                  <th>Taariikh</th>
-                  <th>Habka</th>
-                  <th>Faallo</th>
-                  <th className="text-right">Lacag</th>
+                  <th>{t("Voucher")}</th>
+                  <th>{t("Shaqaalaha")}</th>
+                  <th>{t("Taariikh")}</th>
+                  <th>{t("Habka")}</th>
+                  <th>{t("Faallo")}</th>
+                  <th className="text-end">{t("Lacag")}</th>
                   <th></th>
                 </tr>
               </thead>
@@ -226,22 +227,22 @@ const SalaryPanel = ({ period, refreshKey }) => {
                     <td className="text-ink/60">{p.voucherNumber}</td>
                     <td>{p.employee.fullName}</td>
                     <td>{formatDate(p.paymentDate)}</td>
-                    <td>{p.paymentMethod}</td>
+                    <td>{t(p.paymentMethod)}</td>
                     <td className="text-ink/60">{p.notes || "-"}</td>
-                    <td className="text-right font-medium">{formatMoney(p.amount)}</td>
-                    <td className="text-right whitespace-nowrap">
+                    <td className="text-end font-medium">{formatMoney(p.amount)}</td>
+                    <td className="text-end whitespace-nowrap">
                       <button
                         onClick={() => setPayTarget({ row: rows.find((r) => r.employee._id === p.employee._id), payment: p })}
-                        className="text-sm text-link hover:underline mr-3"
+                        className="text-sm text-link hover:underline me-3"
                       >
-                        Edit
+                        {t("Edit")}
                       </button>
-                      <button onClick={() => setDeleteTarget(p)} className="text-sm text-danger hover:underline">Tirtir</button>
+                      <button onClick={() => setDeleteTarget(p)} className="text-sm text-danger hover:underline">{t("Tirtir")}</button>
                     </td>
                   </tr>
                 ))}
                 {payments.length === 0 && (
-                  <tr><td colSpan={7} className="text-center text-ink/40 py-6">Bishan weli mushahar lama bixin.</td></tr>
+                  <tr><td colSpan={7} className="text-center text-ink/40 py-6">{t("Bishan weli mushahar lama bixin.")}</td></tr>
                 )}
               </tbody>
             </table>
@@ -264,8 +265,8 @@ const SalaryPanel = ({ period, refreshKey }) => {
 
       <ConfirmDeleteModal
         open={!!deleteTarget}
-        title="Tirtir Mushaharka La Bixiyey?"
-        message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.voucherNumber} (${formatMoney(deleteTarget.amount)} — ${deleteTarget.employee.fullName}). Ku dhimanka shaqaalahan ayaa dib u kordhi doona.` : ""}
+        title={t("Tirtir Mushaharka La Bixiyey?")}
+        message={deleteTarget ? t("Waxaad tirtirayaa {voucher} ({amount} — {name}). Ku dhimanka shaqaalahan ayaa dib u kordhi doona.", { voucher: deleteTarget.voucherNumber, amount: formatMoney(deleteTarget.amount), name: deleteTarget.employee.fullName }) : ""}
         verify={verifyFinancePassword}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}

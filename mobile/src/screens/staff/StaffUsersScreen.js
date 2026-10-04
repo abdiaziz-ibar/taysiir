@@ -17,6 +17,7 @@ import {
 import ConfirmPasswordModal from "../../components/ConfirmPasswordModal";
 import FinanceAccountsSection from "../../components/FinanceAccountsSection";
 import { COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const emptyForm = { fullName: "", username: "", email: "", password: "", role: "staff" };
 const SCOPE_LABEL = { parent: "Waalid", verify: "Password-ka tirtirka", staff: "System User", finance: "Maaliyadda" };
@@ -51,7 +52,7 @@ const StaffUsersScreen = ({ navigation }) => {
       close();
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -59,7 +60,7 @@ const StaffUsersScreen = ({ navigation }) => {
 
   const saveNew = () => {
     if (!addForm.fullName.trim() || !addForm.username.trim() || !addForm.password) {
-      return setError("Magaca, Username iyo Password waa waajib.");
+      return setError(t("Magaca, Username iyo Password waa waajib."));
     }
     run(() => staffApi.post("/users", addForm), () => setAddForm(null));
   };
@@ -86,11 +87,11 @@ const StaffUsersScreen = ({ navigation }) => {
   return (
     <View style={styles.flex}>
       <ScreenHeader
-        title="Isticmaalayaasha"
+        title={t("Isticmaalayaasha")}
         onBack={navigation.goBack}
         right={
           <TouchableOpacity onPress={() => { setError(""); setAddForm({ ...emptyForm }); }}>
-            <Text style={styles.add}>+ Cusub</Text>
+            <Text style={styles.add}>{t("+ Cusub")}</Text>
           </TouchableOpacity>
         }
       />
@@ -99,18 +100,18 @@ const StaffUsersScreen = ({ navigation }) => {
       ) : (
         <ScrollView contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
           <Card>
-            <Text style={styles.section}>Akoonno Xiran (password khaldan)</Text>
-            {locked.length === 0 && <Text style={styles.empty}>Ma jiro akoon xiran hadda.</Text>}
+            <Text style={styles.section}>{t("Akoonno Xiran (password khaldan)")}</Text>
+            {locked.length === 0 && <Text style={styles.empty}>{t("Ma jiro akoon xiran hadda.")}</Text>}
             {locked.map((l) => (
               <View key={`${l.scope}:${l.identifier}`} style={styles.lockRow}>
                 <View style={{ flex: 1 }}>
                   <Text style={styles.name}>{l.name || l.identifier}</Text>
                   <Text style={styles.sub}>
-                    {SCOPE_LABEL[l.scope] || l.scope} · wuu furmayaa ~{Math.ceil(l.remainingMs / 60000)} daqiiqo
+                    {t(SCOPE_LABEL[l.scope] || l.scope)} {t("· wuu furmayaa ~")}{Math.ceil(l.remainingMs / 60000)} {t("daqiiqo")}
                   </Text>
                 </View>
                 <TouchableOpacity style={styles.unlockBtn} onPress={() => unlock(l)}>
-                  <Text style={styles.unlockText}>Fur</Text>
+                  <Text style={styles.unlockText}>{t("Fur")}</Text>
                 </TouchableOpacity>
               </View>
             ))}
@@ -124,8 +125,8 @@ const StaffUsersScreen = ({ navigation }) => {
                   <Text style={styles.sub}>{u.username}</Text>
                 </View>
                 <View style={{ alignItems: "flex-end", gap: 4 }}>
-                  <Badge text={u.role === "admin" ? "Admin" : "Staff"} color={COLORS.navy} />
-                  <Badge text={u.status === "active" ? "Active" : "Inactive"} color={u.status === "active" ? COLORS.success : COLORS.danger} />
+                  <Badge text={u.role === "admin" ? t("Admin") : t("Staff")} color={COLORS.navy} />
+                  <Badge text={u.status === "active" ? t("Active") : t("Inactive")} color={u.status === "active" ? COLORS.success : COLORS.danger} />
                 </View>
               </View>
               <View style={styles.actions}>
@@ -135,11 +136,11 @@ const StaffUsersScreen = ({ navigation }) => {
                     setEditForm({ _id: u._id, fullName: u.fullName, email: u.email || "", role: u.role, status: u.status, password: "" });
                   }}
                 >
-                  <Text style={styles.link}>Edit</Text>
+                  <Text style={styles.link}>{t("Edit")}</Text>
                 </TouchableOpacity>
                 {u.username !== "admin" && (
                   <TouchableOpacity onPress={() => setDeleteTarget(u)}>
-                    <Text style={styles.linkDanger}>Tirtir</Text>
+                    <Text style={styles.linkDanger}>{t("Tirtir")}</Text>
                   </TouchableOpacity>
                 )}
               </View>
@@ -150,58 +151,58 @@ const StaffUsersScreen = ({ navigation }) => {
         </ScrollView>
       )}
 
-      <ScreenModal visible={!!addForm} title="Isticmaale Cusub" onClose={() => setAddForm(null)}>
+      <ScreenModal visible={!!addForm} title={t("Isticmaale Cusub")} onClose={() => setAddForm(null)}>
         <ErrorText text={error} />
         {addForm && (
           <>
-            <Field label="Magaca *" value={addForm.fullName} onChangeText={(v) => setAddForm({ ...addForm, fullName: v })} />
-            <Field label="Username *" value={addForm.username} onChangeText={(v) => setAddForm({ ...addForm, username: v })} autoCapitalize="none" autoCorrect={false} />
-            <Field label="Email (ikhtiyaari)" value={addForm.email} onChangeText={(v) => setAddForm({ ...addForm, email: v })} autoCapitalize="none" keyboardType="email-address" />
-            <Field label="Password *" value={addForm.password} onChangeText={(v) => setAddForm({ ...addForm, password: v })} secureTextEntry autoCapitalize="none" />
-            <Text style={styles.label}>Role</Text>
+            <Field label={t("Magaca *")} value={addForm.fullName} onChangeText={(v) => setAddForm({ ...addForm, fullName: v })} />
+            <Field label={t("Username *")} value={addForm.username} onChangeText={(v) => setAddForm({ ...addForm, username: v })} autoCapitalize="none" autoCorrect={false} />
+            <Field label={t("Email (ikhtiyaari)")} value={addForm.email} onChangeText={(v) => setAddForm({ ...addForm, email: v })} autoCapitalize="none" keyboardType="email-address" />
+            <Field label={t("Password *")} value={addForm.password} onChangeText={(v) => setAddForm({ ...addForm, password: v })} secureTextEntry autoCapitalize="none" />
+            <Text style={styles.label}>{t("Role")}</Text>
             <ChipRow>
-              <Chip label="Staff" active={addForm.role === "staff"} onPress={() => setAddForm({ ...addForm, role: "staff" })} />
-              <Chip label="Admin" active={addForm.role === "admin"} onPress={() => setAddForm({ ...addForm, role: "admin" })} />
+              <Chip label={t("Staff")} active={addForm.role === "staff"} onPress={() => setAddForm({ ...addForm, role: "staff" })} />
+              <Chip label={t("Admin")} active={addForm.role === "admin"} onPress={() => setAddForm({ ...addForm, role: "admin" })} />
             </ChipRow>
-            <PrimaryButton title="Kaydi Isticmaalaha" onPress={saveNew} loading={saving} />
+            <PrimaryButton title={t("Kaydi Isticmaalaha")} onPress={saveNew} loading={saving} />
           </>
         )}
       </ScreenModal>
 
-      <ScreenModal visible={!!editForm} title="Edit Isticmaale" onClose={() => setEditForm(null)}>
+      <ScreenModal visible={!!editForm} title={t("Edit Isticmaale")} onClose={() => setEditForm(null)}>
         <ErrorText text={error} />
         {editForm && (
           <>
-            <Field label="Magaca" value={editForm.fullName} onChangeText={(v) => setEditForm({ ...editForm, fullName: v })} />
-            <Field label="Email" value={editForm.email} onChangeText={(v) => setEditForm({ ...editForm, email: v })} autoCapitalize="none" keyboardType="email-address" />
-            <Text style={styles.label}>Role</Text>
+            <Field label={t("Magaca")} value={editForm.fullName} onChangeText={(v) => setEditForm({ ...editForm, fullName: v })} />
+            <Field label={t("Email")} value={editForm.email} onChangeText={(v) => setEditForm({ ...editForm, email: v })} autoCapitalize="none" keyboardType="email-address" />
+            <Text style={styles.label}>{t("Role")}</Text>
             <ChipRow>
-              <Chip label="Staff" active={editForm.role === "staff"} onPress={() => setEditForm({ ...editForm, role: "staff" })} />
-              <Chip label="Admin" active={editForm.role === "admin"} onPress={() => setEditForm({ ...editForm, role: "admin" })} />
+              <Chip label={t("Staff")} active={editForm.role === "staff"} onPress={() => setEditForm({ ...editForm, role: "staff" })} />
+              <Chip label={t("Admin")} active={editForm.role === "admin"} onPress={() => setEditForm({ ...editForm, role: "admin" })} />
             </ChipRow>
-            <Text style={styles.label}>Xaalad</Text>
+            <Text style={styles.label}>{t("Xaalad")}</Text>
             <ChipRow>
-              <Chip label="Active" active={editForm.status === "active"} onPress={() => setEditForm({ ...editForm, status: "active" })} />
-              <Chip label="Inactive" active={editForm.status === "inactive"} onPress={() => setEditForm({ ...editForm, status: "inactive" })} />
+              <Chip label={t("Active")} active={editForm.status === "active"} onPress={() => setEditForm({ ...editForm, status: "active" })} />
+              <Chip label={t("Inactive")} active={editForm.status === "inactive"} onPress={() => setEditForm({ ...editForm, status: "inactive" })} />
             </ChipRow>
             <Field
-              label="Password cusub (ka tag madhan haddii aadan beddelayn)"
+              label={t("Password cusub (ka tag madhan haddii aadan beddelayn)")}
               value={editForm.password}
               onChangeText={(v) => setEditForm({ ...editForm, password: v })}
               secureTextEntry
               autoCapitalize="none"
             />
-            <PrimaryButton title="Kaydi" onPress={saveEdit} loading={saving} />
+            <PrimaryButton title={t("Kaydi")} onPress={saveEdit} loading={saving} />
           </>
         )}
       </ScreenModal>
 
       <ConfirmPasswordModal
         visible={!!deleteTarget}
-        title="Tirtir Isticmaalaha?"
+        title={t("Tirtir Isticmaalaha?")}
         message={
           deleteTarget
-            ? `Waxaad tirtirayaa ${deleteTarget.fullName} (${deleteTarget.username}). Ma awoodo mar dambe inuu soo galo system-ka — lama soo celin karo.`
+            ? t("Waxaad tirtirayaa {name} ({username}). Ma awoodo mar dambe inuu soo galo system-ka — lama soo celin karo.", { name: deleteTarget.fullName, username: deleteTarget.username })
             : ""
         }
         onConfirm={handleDelete}

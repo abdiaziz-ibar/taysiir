@@ -1,8 +1,17 @@
 import { formatMoney } from "./format";
+import { t } from "../i18n";
 
 export const PAYMENT_METHODS = ["Cash", "Mobile Money", "Bank", "Other"];
 
-export const EMPLOYEE_TYPES = { teacher: "Macalin", staff: "Shaqaale" };
+// Getters, so the label is translated at the moment it is read (and follows the chosen language).
+export const EMPLOYEE_TYPES = {
+  get teacher() {
+    return t("Macalin");
+  },
+  get staff() {
+    return t("Shaqaale");
+  },
+};
 
 export const EXPENSE_CATEGORIES = [
   "Koronto",
@@ -38,7 +47,7 @@ const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "Ju
 
 export const monthLabel = (period) => {
   const [y, m] = period.split("-").map(Number);
-  return `${MONTH_NAMES[m - 1]} ${y}`;
+  return `${t(MONTH_NAMES[m - 1])} ${y}`;
 };
 
 // formatMoney() puts the sign after the "$" ("$-510"); a profit/loss figure reads better as "-$510".

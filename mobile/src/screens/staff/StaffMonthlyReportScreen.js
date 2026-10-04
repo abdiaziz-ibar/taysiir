@@ -5,6 +5,7 @@ import staffApi from "../../api/staffClient";
 import { useStaff } from "../../context/StaffContext";
 import { ScreenHeader, YearChips, Loading, Card, MonthBars } from "../../components/StaffUI";
 import { formatMoney, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const StaffMonthlyReportScreen = ({ navigation }) => {
   const { selectedYearId } = useStaff();
@@ -19,21 +20,21 @@ const StaffMonthlyReportScreen = ({ navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <ScreenHeader title="Warbixinta Bilaha" onBack={navigation.goBack} />
+      <ScreenHeader title={t("Warbixinta Bilaha")} onBack={navigation.goBack} />
       <YearChips />
       {data === null ? (
         <Loading />
       ) : (
         <ScrollView contentContainerStyle={{ padding: 12, paddingBottom: 40 }}>
           <Card>
-            <Text style={styles.title}>Lacagta La Bixiyey Bishii Kasta</Text>
+            <Text style={styles.title}>{t("Lacagta La Bixiyey Bishii Kasta")}</Text>
             <MonthBars data={data} valueKey="totalPaid" />
           </Card>
           <Card>
             {data.map((m) => (
               <View key={m.month} style={styles.row}>
-                <Text style={styles.month}>{m.month}</Text>
-                <Text style={styles.count}>{m.paymentsCount} lacag-bixin</Text>
+                <Text style={styles.month}>{t(m.month)}</Text>
+                <Text style={styles.count}>{m.paymentsCount} {t("lacag-bixin")}</Text>
                 <Text style={styles.amount}>{formatMoney(m.totalPaid)}</Text>
               </View>
             ))}

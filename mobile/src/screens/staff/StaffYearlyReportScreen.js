@@ -5,6 +5,7 @@ import staffApi from "../../api/staffClient";
 import { useStaff } from "../../context/StaffContext";
 import { ScreenHeader, YearChips, Loading, Card, MonthBars } from "../../components/StaffUI";
 import { formatMoney, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const Stat = ({ label, value, color }) => (
   <View style={styles.stat}>
@@ -26,7 +27,7 @@ const StaffYearlyReportScreen = ({ navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <ScreenHeader title="Warbixin Sanad Dugsiyeed" onBack={navigation.goBack} />
+      <ScreenHeader title={t("Warbixin Sanad Dugsiyeed")} onBack={navigation.goBack} />
       <YearChips />
       {data === null ? (
         <Loading />
@@ -34,18 +35,18 @@ const StaffYearlyReportScreen = ({ navigation }) => {
         <ScrollView contentContainerStyle={{ padding: 12, paddingBottom: 40 }}>
           <Text style={styles.year}>{data.academicYear}</Text>
           <View style={styles.grid}>
-            <Stat label="Waalidiinta" value={data.totalParents} />
-            <Stat label="Wadarta Fees" value={formatMoney(data.totalFees)} />
-            <Stat label="La Bixiyey" value={formatMoney(data.totalPaid)} color={COLORS.success} />
-            <Stat label="Deynta" value={formatMoney(data.totalDebt)} color={COLORS.danger} />
-            <Stat label="Collection Rate" value={`${data.collectionRate}%`} color={COLORS.amber} />
+            <Stat label={t("Waalidiinta")} value={data.totalParents} />
+            <Stat label={t("Wadarta Fees")} value={formatMoney(data.totalFees)} />
+            <Stat label={t("La Bixiyey")} value={formatMoney(data.totalPaid)} color={COLORS.success} />
+            <Stat label={t("Deynta")} value={formatMoney(data.totalDebt)} color={COLORS.danger} />
+            <Stat label={t("Collection Rate")} value={`${data.collectionRate}%`} color={COLORS.amber} />
           </View>
           <Card>
-            <Text style={styles.title}>La Bixiyey (bil kasta)</Text>
+            <Text style={styles.title}>{t("La Bixiyey (bil kasta)")}</Text>
             <MonthBars data={data.monthly} valueKey="paid" color={COLORS.navy} />
           </Card>
           <Card>
-            <Text style={styles.title}>Ku Dhiman (bil kasta)</Text>
+            <Text style={styles.title}>{t("Ku Dhiman (bil kasta)")}</Text>
             <MonthBars data={data.monthly} valueKey="balance" color={COLORS.amber} />
           </Card>
         </ScrollView>

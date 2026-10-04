@@ -34,7 +34,7 @@
     @apply w-full text-sm border-collapse;
   }
   .table-base th {
-    @apply text-left py-2 px-3 border-b-2 border-line text-ink/60 font-medium;
+    @apply text-start py-2 px-3 border-b-2 border-line text-ink/60 font-medium;
   }
   .table-base td {
     @apply py-2 px-3 border-b border-line;

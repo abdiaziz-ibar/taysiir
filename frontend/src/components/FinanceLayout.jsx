@@ -3,6 +3,8 @@ import { NavLink, Outlet, useNavigate } from "react-router-dom";
 import { Menu, X, ReceiptText, PiggyBank, KeyRound } from "lucide-react";
 import financeApi from "../api/financeAxios";
 import ChangePasswordModal from "../pages/portal/ChangePasswordModal";
+import LanguageSwitcher from "../i18n/LanguageSwitcher";
+import { t } from "../i18n";
 
 const linkBase = "flex items-center gap-3 px-4 py-2.5 rounded-md text-sm transition-colors";
 
@@ -42,8 +44,8 @@ const FinanceLayout = () => {
       {open && <div className="fixed inset-0 bg-black/40 z-40 md:hidden" onClick={() => setOpen(false)} />}
 
       <aside
-        className={`w-64 bg-gradient-to-b from-navy via-navy-light to-navy-dark flex flex-col shrink-0 fixed inset-y-0 left-0 z-50 transform transition-transform duration-200 md:relative md:translate-x-0 md:z-auto overflow-hidden ${
-          open ? "translate-x-0" : "-translate-x-full"
+        className={`w-64 bg-gradient-to-b from-navy via-navy-light to-navy-dark flex flex-col shrink-0 fixed inset-y-0 start-0 z-50 transform transition-transform duration-200 md:relative md:translate-x-0 md:rtl:translate-x-0 md:z-auto overflow-hidden ${
+          open ? "translate-x-0" : "-translate-x-full rtl:translate-x-full"
         }`}
       >
         <div className="relative px-5 py-6 border-b border-white/10 flex items-center gap-3">
@@ -52,15 +54,15 @@ const FinanceLayout = () => {
           </div>
           <div className="min-w-0 flex-1">
             <h1 className="text-white font-serif text-lg leading-tight truncate">Taysir Foundation</h1>
-            <p className="text-white/50 text-xs mt-0.5 truncate">Maaliyadda</p>
+            <p className="text-white/50 text-xs mt-0.5 truncate">{t("Maaliyadda")}</p>
           </div>
           <button onClick={() => setOpen(false)} className="md:hidden text-white/60 hover:text-white shrink-0">
             <X size={20} />
           </button>
         </div>
         <nav className="relative flex-1 px-3 py-4 space-y-1">
-          <NavItem to="/finance/expenses" icon={ReceiptText} onClick={() => setOpen(false)}>Qarashaadka &amp; Mushaharka</NavItem>
-          <NavItem to="/finance/report" icon={PiggyBank} onClick={() => setOpen(false)}>Warbixinta Maaliyadda</NavItem>
+          <NavItem to="/finance/expenses" icon={ReceiptText} onClick={() => setOpen(false)}>{t("Qarashaadka & Mushaharka")}</NavItem>
+          <NavItem to="/finance/report" icon={PiggyBank} onClick={() => setOpen(false)}>{t("Warbixinta Maaliyadda")}</NavItem>
         </nav>
       </aside>
 
@@ -69,17 +71,18 @@ const FinanceLayout = () => {
           <button onClick={() => setOpen(true)} className="md:hidden text-ink/70 hover:text-ink shrink-0 p-1">
             <Menu size={20} />
           </button>
-          <span className="text-sm text-ink/60 hidden md:inline">Qaybta Maaliyadda</span>
-          <div className="flex items-center gap-2 md:gap-3 ml-auto shrink-0">
+          <span className="text-sm text-ink/60 hidden md:inline">{t("Qaybta Maaliyadda")}</span>
+          <div className="flex items-center gap-2 md:gap-3 ms-auto shrink-0">
+            <LanguageSwitcher />
             <span className="text-sm text-ink/70 hidden sm:inline truncate max-w-[140px]">{finance?.fullName}</span>
             <button
               onClick={() => setShowPassword(true)}
               className="text-sm text-ink/70 border border-line rounded-full px-3 py-1.5 hover:bg-paper transition-colors inline-flex items-center gap-1.5"
             >
-              <KeyRound size={14} /> Password
+              <KeyRound size={14} /> {t("Password")}
             </button>
             <button onClick={logout} className="text-sm text-danger border border-line rounded-full px-3 py-1.5 hover:bg-paper transition-colors">
-              Ka Bax
+              {t("Ka Bax")}
             </button>
           </div>
         </header>

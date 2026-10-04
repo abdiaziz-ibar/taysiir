@@ -3,6 +3,7 @@ import { Wallet, CheckCircle2, AlertCircle } from "lucide-react";
 import api from "../../api/axios";
 import { formatMoney } from "../../utils/format";
 import { downloadExcel } from "../../utils/excel";
+import { t } from "../../i18n";
 
 const StatCard = ({ label, value, icon: Icon, iconBg, iconColor, accent }) => (
   <div className="card">
@@ -41,26 +42,26 @@ const AllYearsReport = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-serif">Dhammaan Sannadaha — Lacagta Guud</h2>
-        <button onClick={handleExport} className="btn-secondary text-sm">⬇ Soo Deji Excel</button>
+        <h2 className="text-xl font-serif">{t("Dhammaan Sannadaha — Lacagta Guud")}</h2>
+        <button onClick={handleExport} className="btn-secondary text-sm">{t("⬇ Soo Deji Excel")}</button>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <StatCard label="Wadarta Lacagta School-ka" value={formatMoney(data.totals.totalFees)} icon={Wallet} iconBg="bg-navy/10" iconColor="text-navy" />
-        <StatCard label="Wadarta La Bixiyey" value={formatMoney(data.totals.totalPaid)} accent="text-success" icon={CheckCircle2} iconBg="bg-success/10" iconColor="text-success" />
-        <StatCard label="Wadarta Ku Dhiman" value={formatMoney(data.totals.totalDebt)} accent="text-danger" icon={AlertCircle} iconBg="bg-danger/10" iconColor="text-danger" />
+        <StatCard label={t("Wadarta Lacagta School-ka")} value={formatMoney(data.totals.totalFees)} icon={Wallet} iconBg="bg-navy/10" iconColor="text-navy" />
+        <StatCard label={t("Wadarta La Bixiyey")} value={formatMoney(data.totals.totalPaid)} accent="text-success" icon={CheckCircle2} iconBg="bg-success/10" iconColor="text-success" />
+        <StatCard label={t("Wadarta Ku Dhiman")} value={formatMoney(data.totals.totalDebt)} accent="text-danger" icon={AlertCircle} iconBg="bg-danger/10" iconColor="text-danger" />
       </div>
 
       <div className="card overflow-x-auto">
         <table className="table-base">
           <thead>
             <tr>
-              <th>Sanad Dugsiyeed</th>
-              <th className="text-right">Waalidiinta</th>
-              <th className="text-right">Wadarta Fee</th>
-              <th className="text-right">La Bixiyey</th>
-              <th className="text-right">Ku Dhiman</th>
-              <th className="text-right">Collection Rate</th>
+              <th>{t("Sanad Dugsiyeed")}</th>
+              <th className="text-end">{t("Waalidiinta")}</th>
+              <th className="text-end">{t("Wadarta Fee")}</th>
+              <th className="text-end">{t("La Bixiyey")}</th>
+              <th className="text-end">{t("Ku Dhiman")}</th>
+              <th className="text-end">{t("Collection Rate")}</th>
             </tr>
           </thead>
           <tbody>
@@ -68,26 +69,26 @@ const AllYearsReport = () => {
               <tr key={y.academicYearId}>
                 <td>
                   {y.academicYear}
-                  {y.isActive && <span className="badge badge-paid ml-2">Firfircoon</span>}
+                  {y.isActive && <span className="badge badge-paid ms-2">{t("Firfircoon")}</span>}
                 </td>
-                <td className="text-right">{y.totalParents}</td>
-                <td className="text-right">{formatMoney(y.totalFees)}</td>
-                <td className="text-right text-success">{formatMoney(y.totalPaid)}</td>
-                <td className="text-right text-danger">{formatMoney(y.totalDebt)}</td>
-                <td className="text-right">{y.collectionRate}%</td>
+                <td className="text-end">{y.totalParents}</td>
+                <td className="text-end">{formatMoney(y.totalFees)}</td>
+                <td className="text-end text-success">{formatMoney(y.totalPaid)}</td>
+                <td className="text-end text-danger">{formatMoney(y.totalDebt)}</td>
+                <td className="text-end">{y.collectionRate}%</td>
               </tr>
             ))}
             {data.years.length === 0 && (
-              <tr><td colSpan={6} className="text-center text-ink/40 py-6">Sanad Dugsiyeed lama helin.</td></tr>
+              <tr><td colSpan={6} className="text-center text-ink/40 py-6">{t("Sanad Dugsiyeed lama helin.")}</td></tr>
             )}
           </tbody>
           <tfoot>
             <tr>
-              <td className="font-medium py-3">Wadarta Guud</td>
+              <td className="font-medium py-3">{t("Wadarta Guud")}</td>
               <td></td>
-              <td className="text-right font-medium py-3">{formatMoney(data.totals.totalFees)}</td>
-              <td className="text-right font-medium py-3 text-success">{formatMoney(data.totals.totalPaid)}</td>
-              <td className="text-right font-medium py-3 text-danger">{formatMoney(data.totals.totalDebt)}</td>
+              <td className="text-end font-medium py-3">{formatMoney(data.totals.totalFees)}</td>
+              <td className="text-end font-medium py-3 text-success">{formatMoney(data.totals.totalPaid)}</td>
+              <td className="text-end font-medium py-3 text-danger">{formatMoney(data.totals.totalDebt)}</td>
               <td></td>
             </tr>
           </tfoot>

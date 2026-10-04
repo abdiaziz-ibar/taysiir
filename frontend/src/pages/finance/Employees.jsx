@@ -3,6 +3,7 @@ import api, { verifyFinancePassword } from "../../api/financeAxios";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
 import { formatMoney } from "../../utils/format";
 import { EMPLOYEE_TYPES } from "../../utils/finance";
+import { t } from "../../i18n";
 
 const emptyForm = { fullName: "", type: "teacher", position: "", phone: "", monthlySalary: "", notes: "", status: "active" };
 
@@ -68,7 +69,7 @@ const Employees = () => {
       closeForm();
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -86,26 +87,26 @@ const Employees = () => {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-serif">Shaqaalaha &amp; Macalimiinta</h2>
+          <h2 className="text-xl font-serif">{t("Shaqaalaha & Macalimiinta")}</h2>
           <p className="text-sm text-ink/50 mt-0.5">
-            {employees.length} diiwaan · Mushaharka bishii (Active): <span className="text-ink">{formatMoney(payroll)}</span>
+            {employees.length} {t("diiwaan · Mushaharka bishii (Active):")} <span className="text-ink">{formatMoney(payroll)}</span>
           </p>
         </div>
         <button className="btn-primary" onClick={showForm ? closeForm : openNew}>
-          {showForm ? "Jooji" : "+ Shaqaale Cusub"}
+          {showForm ? t("Jooji") : t("+ Shaqaale Cusub")}
         </button>
       </div>
 
       {showForm && (
         <form onSubmit={handleSubmit} className="card grid grid-cols-1 md:grid-cols-2 gap-4">
-          <h3 className="md:col-span-2 font-serif text-lg">{editingId ? "Wax Ka Beddel Shaqaalaha" : "Shaqaale Cusub"}</h3>
+          <h3 className="md:col-span-2 font-serif text-lg">{editingId ? t("Wax Ka Beddel Shaqaalaha") : t("Shaqaale Cusub")}</h3>
           {error && <div className="md:col-span-2 bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
           <div>
-            <label className="label-field">Magaca *</label>
+            <label className="label-field">{t("Magaca *")}</label>
             <input required className="input-field" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
           </div>
           <div>
-            <label className="label-field">Nooca *</label>
+            <label className="label-field">{t("Nooca *")}</label>
             <select className="input-field" value={form.type} onChange={(e) => setForm({ ...form, type: e.target.value })}>
               {Object.entries(EMPLOYEE_TYPES).map(([k, label]) => (
                 <option key={k} value={k}>{label}</option>
@@ -113,48 +114,48 @@ const Employees = () => {
             </select>
           </div>
           <div>
-            <label className="label-field">Shaqada / Maaddada (ikhtiyaari)</label>
-            <input className="input-field" placeholder="Tusaale: Macallinka Xisaabta, Waardiye" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} />
+            <label className="label-field">{t("Shaqada / Maaddada (ikhtiyaari)")}</label>
+            <input className="input-field" placeholder={t("Tusaale: Macallinka Xisaabta, Waardiye")} value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} />
           </div>
           <div>
-            <label className="label-field">Phone (ikhtiyaari)</label>
+            <label className="label-field">{t("Phone (ikhtiyaari)")}</label>
             <input className="input-field" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
           <div>
-            <label className="label-field">Mushaharka Bishii ($) *</label>
+            <label className="label-field">{t("Mushaharka Bishii ($) *")}</label>
             <input required type="number" min="0" step="0.01" className="input-field" value={form.monthlySalary} onChange={(e) => setForm({ ...form, monthlySalary: e.target.value })} />
           </div>
           {editingId && (
             <div>
-              <label className="label-field">Xaalad</label>
+              <label className="label-field">{t("Xaalad")}</label>
               <select className="input-field" value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value })}>
-                <option value="active">Active</option>
-                <option value="inactive">Inactive (shaqada ka tagay)</option>
+                <option value="active">{t("Active")}</option>
+                <option value="inactive">{t("Inactive (shaqada ka tagay)")}</option>
               </select>
             </div>
           )}
           <div className="md:col-span-2">
-            <label className="label-field">Faallo (ikhtiyaari)</label>
+            <label className="label-field">{t("Faallo (ikhtiyaari)")}</label>
             <input className="input-field" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           </div>
           <div className="md:col-span-2">
-            <button className="btn-primary" disabled={saving}>{saving ? "Waa la kaydinayaa..." : "Kaydi"}</button>
+            <button className="btn-primary" disabled={saving}>{saving ? t("Waa la kaydinayaa...") : t("Kaydi")}</button>
           </div>
         </form>
       )}
 
       <div className="card flex flex-wrap gap-3">
-        <input className="input-field md:max-w-xs" placeholder="Raadi magac, phone ama shaqo..." value={search} onChange={(e) => setSearch(e.target.value)} />
+        <input className="input-field md:max-w-xs" placeholder={t("Raadi magac, phone ama shaqo...")} value={search} onChange={(e) => setSearch(e.target.value)} />
         <select className="input-field md:max-w-[230px]" value={type} onChange={(e) => setType(e.target.value)}>
-          <option value="">Dhammaan noocyada</option>
+          <option value="">{t("Dhammaan noocyada")}</option>
           {Object.entries(EMPLOYEE_TYPES).map(([k, label]) => (
             <option key={k} value={k}>{label}</option>
           ))}
         </select>
         <select className="input-field md:max-w-[230px]" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="">Dhammaan xaaladaha</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
+          <option value="">{t("Dhammaan xaaladaha")}</option>
+          <option value="active">{t("Active")}</option>
+          <option value="inactive">{t("Inactive")}</option>
         </select>
       </div>
 
@@ -163,12 +164,12 @@ const Employees = () => {
           <thead>
             <tr>
               <th>ID</th>
-              <th>Magaca</th>
-              <th>Nooca</th>
-              <th>Shaqada</th>
-              <th>Phone</th>
-              <th className="text-right">Mushahar / Bil</th>
-              <th>Xaalad</th>
+              <th>{t("Magaca")}</th>
+              <th>{t("Nooca")}</th>
+              <th>{t("Shaqada")}</th>
+              <th>{t("Phone")}</th>
+              <th className="text-end">{t("Mushahar / Bil")}</th>
+              <th>{t("Xaalad")}</th>
               <th></th>
             </tr>
           </thead>
@@ -180,16 +181,16 @@ const Employees = () => {
                 <td><span className={e.type === "teacher" ? "badge bg-navy/10 text-navy" : "badge bg-amber/10 text-amber"}>{EMPLOYEE_TYPES[e.type]}</span></td>
                 <td>{e.position || "-"}</td>
                 <td>{e.phone || "-"}</td>
-                <td className="text-right">{formatMoney(e.monthlySalary)}</td>
-                <td><span className={e.status === "active" ? "badge badge-paid" : "badge badge-unpaid"}>{e.status === "active" ? "Active" : "Inactive"}</span></td>
-                <td className="text-right whitespace-nowrap">
-                  <button onClick={() => openEdit(e)} className="text-sm text-link hover:underline mr-3">Edit</button>
-                  <button onClick={() => setDeleteTarget(e)} className="text-sm text-danger hover:underline">Tirtir</button>
+                <td className="text-end">{formatMoney(e.monthlySalary)}</td>
+                <td><span className={e.status === "active" ? "badge badge-paid" : "badge badge-unpaid"}>{e.status === "active" ? t("Active") : t("Inactive")}</span></td>
+                <td className="text-end whitespace-nowrap">
+                  <button onClick={() => openEdit(e)} className="text-sm text-link hover:underline me-3">{t("Edit")}</button>
+                  <button onClick={() => setDeleteTarget(e)} className="text-sm text-danger hover:underline">{t("Tirtir")}</button>
                 </td>
               </tr>
             ))}
             {employees.length === 0 && (
-              <tr><td colSpan={8} className="text-center text-ink/40 py-6">Weli shaqaale lama diiwaan gelin.</td></tr>
+              <tr><td colSpan={8} className="text-center text-ink/40 py-6">{t("Weli shaqaale lama diiwaan gelin.")}</td></tr>
             )}
           </tbody>
         </table>
@@ -197,8 +198,8 @@ const Employees = () => {
 
       <ConfirmDeleteModal
         open={!!deleteTarget}
-        title="Tirtir Shaqaalaha?"
-        message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.fullName} (${deleteTarget.employeeId}). Haddii uu leeyahay mushahar hore loo bixiyey, lama tirtiri karo — ka dhig Inactive.` : ""}
+        title={t("Tirtir Shaqaalaha?")}
+        message={deleteTarget ? t("Waxaad tirtirayaa {name} ({id}). Haddii uu leeyahay mushahar hore loo bixiyey, lama tirtiri karo — ka dhig Inactive.", { name: deleteTarget.fullName, id: deleteTarget.employeeId }) : ""}
         verify={verifyFinancePassword}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}

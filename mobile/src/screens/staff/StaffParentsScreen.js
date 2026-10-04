@@ -17,6 +17,7 @@ import staffApi from "../../api/staffClient";
 import { useStaff } from "../../context/StaffContext";
 import { StaffHeader, YearChips, Chip, Badge, feeStatusColor, feeStatusText } from "../../components/StaffUI";
 import { formatMoney, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const emptyForm = { fullName: "", phone: "", address: "", email: "", totalAmount: "" };
 
@@ -69,7 +70,7 @@ const StaffParentsScreen = ({ navigation }) => {
   const handleSave = async () => {
     setError("");
     if (!form.fullName.trim() || !form.phone.trim() || !form.address.trim()) {
-      setError("Magaca, Phone iyo Address waa waajib.");
+      setError(t("Magaca, Phone iyo Address waa waajib."));
       return;
     }
     setSaving(true);
@@ -88,7 +89,7 @@ const StaffParentsScreen = ({ navigation }) => {
       setShowForm(false);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -111,7 +112,7 @@ const StaffParentsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <StaffHeader title="Waalidiinta" />
+      <StaffHeader title={t("Waalidiinta")} />
       <YearChips />
 
       <View style={styles.toolbar}>
@@ -119,25 +120,25 @@ const StaffParentsScreen = ({ navigation }) => {
           style={styles.search}
           value={search}
           onChangeText={setSearch}
-          placeholder="Raadi magaca ama phone..."
+          placeholder={t("Raadi magaca ama phone...")}
           placeholderTextColor="#9CA3AF"
         />
         <TouchableOpacity style={styles.addBtn} onPress={() => setShowForm(true)}>
-          <Text style={styles.addBtnText}>+ Cusub</Text>
+          <Text style={styles.addBtnText}>{t("+ Cusub")}</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.filters}>
-        <Chip label="Dhammaan" active={status === ""} onPress={() => setStatus("")} />
-        <Chip label="Unpaid" active={status === "unpaid"} onPress={() => setStatus("unpaid")} />
-        <Chip label="Partial" active={status === "partial"} onPress={() => setStatus("partial")} />
-        <Chip label="Paid" active={status === "paid"} onPress={() => setStatus("paid")} />
+        <Chip label={t("Dhammaan")} active={status === ""} onPress={() => setStatus("")} />
+        <Chip label={t("Unpaid")} active={status === "unpaid"} onPress={() => setStatus("unpaid")} />
+        <Chip label={t("Partial")} active={status === "partial"} onPress={() => setStatus("partial")} />
+        <Chip label={t("Paid")} active={status === "paid"} onPress={() => setStatus("paid")} />
         <Chip
           label={`ID${idSort === "asc" ? " ↑" : idSort === "desc" ? " ↓" : ""}`}
           active={!!idSort}
           onPress={() => setIdSort((d) => (d === "asc" ? "desc" : "asc"))}
         />
       </View>
-      <Text style={styles.hint}>Lacagta waa tii sanadka {yearName || "..."} kaliya.</Text>
+      <Text style={styles.hint}>{t("Lacagta waa tii sanadka")} {yearName || "..."} {t("kaliya.")}</Text>
 
       {loading ? (
         <View style={styles.center}>
@@ -150,32 +151,32 @@ const StaffParentsScreen = ({ navigation }) => {
           renderItem={renderItem}
           contentContainerStyle={{ padding: 12, paddingBottom: 30 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListEmptyComponent={<Text style={styles.empty}>Waalid lama helin.</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>{t("Waalid lama helin.")}</Text>}
         />
       )}
 
       <Modal visible={showForm} animationType="slide" onRequestClose={() => setShowForm(false)}>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Waalid Cusub</Text>
+            <Text style={styles.modalTitle}>{t("Waalid Cusub")}</Text>
             <TouchableOpacity onPress={() => setShowForm(false)}>
-              <Text style={styles.close}>Jooji</Text>
+              <Text style={styles.close}>{t("Jooji")}</Text>
             </TouchableOpacity>
           </View>
           <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
             {error ? <Text style={styles.error}>{error}</Text> : null}
-            <Text style={styles.label}>Magaca Waalidka *</Text>
+            <Text style={styles.label}>{t("Magaca Waalidka *")}</Text>
             <TextInput style={styles.input} value={form.fullName} onChangeText={(v) => setForm({ ...form, fullName: v })} />
-            <Text style={styles.label}>Phone *</Text>
+            <Text style={styles.label}>{t("Phone *")}</Text>
             <TextInput
               style={styles.input}
               value={form.phone}
               onChangeText={(v) => setForm({ ...form, phone: v })}
               keyboardType="phone-pad"
             />
-            <Text style={styles.label}>Address *</Text>
+            <Text style={styles.label}>{t("Address *")}</Text>
             <TextInput style={styles.input} value={form.address} onChangeText={(v) => setForm({ ...form, address: v })} />
-            <Text style={styles.label}>Email (ikhtiyaari)</Text>
+            <Text style={styles.label}>{t("Email (ikhtiyaari)")}</Text>
             <TextInput
               style={styles.input}
               value={form.email}
@@ -183,17 +184,17 @@ const StaffParentsScreen = ({ navigation }) => {
               autoCapitalize="none"
               keyboardType="email-address"
             />
-            <Text style={styles.label}>Wadarta Fee sanadka {yearName} (ikhtiyaari)</Text>
+            <Text style={styles.label}>{t("Wadarta Fee sanadka")} {yearName} {t("(ikhtiyaari)")}</Text>
             <TextInput
               style={styles.input}
               value={form.totalAmount}
               onChangeText={(v) => setForm({ ...form, totalAmount: v })}
               keyboardType="numeric"
-              placeholder="Tusaale: 100"
+              placeholder={t("Tusaale: 100")}
               placeholderTextColor="#9CA3AF"
             />
             <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving}>
-              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Kaydi Waalidka</Text>}
+              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>{t("Kaydi Waalidka")}</Text>}
             </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>

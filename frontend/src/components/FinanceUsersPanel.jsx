@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import ConfirmDeleteModal from "./ConfirmDeleteModal";
+import { t } from "../i18n";
 
 const emptyForm = { fullName: "", username: "", password: "" };
 
@@ -33,7 +34,7 @@ const FinanceUsersPanel = () => {
       setShowForm(false);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -53,7 +54,7 @@ const FinanceUsersPanel = () => {
       setEditingId(null);
       load();
     } catch (err) {
-      setEditError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setEditError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     }
   };
 
@@ -67,13 +68,13 @@ const FinanceUsersPanel = () => {
     <div className="card space-y-4">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h3 className="font-serif text-lg">Akoonnada Maaliyadda</h3>
+          <h3 className="font-serif text-lg">{t("Akoonnada Maaliyadda")}</h3>
           <p className="text-sm text-ink/50 mt-0.5">
-            Waxay galaan qaybta Maaliyadda (mushaharka &amp; qarashaadka) oo kaliya — lacagaha waalidiinta ma arkaan.
+            {t("Waxay galaan qaybta Maaliyadda (mushaharka & qarashaadka) oo kaliya — lacagaha waalidiinta ma arkaan.")}
           </p>
         </div>
         <button className="btn-secondary text-sm" onClick={() => setShowForm((v) => !v)}>
-          {showForm ? "Jooji" : "+ Akoon Cusub"}
+          {showForm ? t("Jooji") : t("+ Akoon Cusub")}
         </button>
       </div>
 
@@ -81,19 +82,19 @@ const FinanceUsersPanel = () => {
         <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {error && <div className="md:col-span-3 bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
           <div>
-            <label className="label-field">Magaca</label>
+            <label className="label-field">{t("Magaca")}</label>
             <input required className="input-field" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
           </div>
           <div>
-            <label className="label-field">Username</label>
+            <label className="label-field">{t("Username")}</label>
             <input required className="input-field" autoCapitalize="none" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} />
           </div>
           <div>
-            <label className="label-field">Password (ugu yaraan 6 xaraf)</label>
+            <label className="label-field">{t("Password (ugu yaraan 6 xaraf)")}</label>
             <input required type="password" minLength={6} className="input-field" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} />
           </div>
           <div className="md:col-span-3">
-            <button className="btn-primary" disabled={saving}>{saving ? "Waa la kaydinayaa..." : "Kaydi Akoonka"}</button>
+            <button className="btn-primary" disabled={saving}>{saving ? t("Waa la kaydinayaa...") : t("Kaydi Akoonka")}</button>
           </div>
         </form>
       )}
@@ -102,7 +103,7 @@ const FinanceUsersPanel = () => {
 
       <div className="overflow-x-auto">
         <table className="table-base">
-          <thead><tr><th>Magaca</th><th>Username</th><th>Xaalad</th><th></th></tr></thead>
+          <thead><tr><th>{t("Magaca")}</th><th>{t("Username")}</th><th>{t("Xaalad")}</th><th></th></tr></thead>
           <tbody>
             {users.map((u) => (
               <tr key={u._id}>
@@ -113,7 +114,7 @@ const FinanceUsersPanel = () => {
                       <input
                         type="password"
                         className="input-field mt-2"
-                        placeholder="Password cusub (ka tag madhan haddii aadan beddelayn)"
+                        placeholder={t("Password cusub (ka tag madhan haddii aadan beddelayn)")}
                         value={editForm.password}
                         onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
                       />
@@ -121,30 +122,30 @@ const FinanceUsersPanel = () => {
                     <td>{u.username}</td>
                     <td>
                       <select className="input-field" value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
+                        <option value="active">{t("Active")}</option>
+                        <option value="inactive">{t("Inactive")}</option>
                       </select>
                     </td>
-                    <td className="text-right whitespace-nowrap">
-                      <button onClick={() => handleEditSave(u._id)} className="text-sm text-success hover:underline mr-3">Kaydi</button>
-                      <button onClick={() => setEditingId(null)} className="text-sm text-ink/60 hover:underline">Jooji</button>
+                    <td className="text-end whitespace-nowrap">
+                      <button onClick={() => handleEditSave(u._id)} className="text-sm text-success hover:underline me-3">{t("Kaydi")}</button>
+                      <button onClick={() => setEditingId(null)} className="text-sm text-ink/60 hover:underline">{t("Jooji")}</button>
                     </td>
                   </>
                 ) : (
                   <>
                     <td>{u.fullName}</td>
                     <td>{u.username}</td>
-                    <td><span className={u.status === "active" ? "badge badge-paid" : "badge badge-unpaid"}>{u.status === "active" ? "Active" : "Inactive"}</span></td>
-                    <td className="text-right whitespace-nowrap">
-                      <button onClick={() => startEdit(u)} className="text-sm text-link hover:underline mr-3">Edit</button>
-                      <button onClick={() => setDeleteTarget(u)} className="text-sm text-danger hover:underline">Tirtir</button>
+                    <td><span className={u.status === "active" ? "badge badge-paid" : "badge badge-unpaid"}>{u.status === "active" ? t("Active") : t("Inactive")}</span></td>
+                    <td className="text-end whitespace-nowrap">
+                      <button onClick={() => startEdit(u)} className="text-sm text-link hover:underline me-3">{t("Edit")}</button>
+                      <button onClick={() => setDeleteTarget(u)} className="text-sm text-danger hover:underline">{t("Tirtir")}</button>
                     </td>
                   </>
                 )}
               </tr>
             ))}
             {users.length === 0 && (
-              <tr><td colSpan={4} className="text-center text-ink/40 py-6">Weli akoon Maaliyadda ah lama abuurin.</td></tr>
+              <tr><td colSpan={4} className="text-center text-ink/40 py-6">{t("Weli akoon Maaliyadda ah lama abuurin.")}</td></tr>
             )}
           </tbody>
         </table>
@@ -152,8 +153,8 @@ const FinanceUsersPanel = () => {
 
       <ConfirmDeleteModal
         open={!!deleteTarget}
-        title="Tirtir Akoonka Maaliyadda?"
-        message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.fullName} (${deleteTarget.username}). Ma awoodo mar dambe inuu soo galo qaybta Maaliyadda. Diiwaannadiisii hore way hadhayaan.` : ""}
+        title={t("Tirtir Akoonka Maaliyadda?")}
+        message={deleteTarget ? t("Waxaad tirtirayaa {name} ({username}). Ma awoodo mar dambe inuu soo galo qaybta Maaliyadda. Diiwaannadiisii hore way hadhayaan.", { name: deleteTarget.fullName, username: deleteTarget.username }) : ""}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
       />

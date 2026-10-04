@@ -6,6 +6,7 @@ import { FinanceHeader } from "../../components/FinanceUI";
 import { Card, InfoRow } from "../../components/StaffUI";
 import ParentChangePasswordModal from "../../components/ParentChangePasswordModal";
 import { COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const FinanceAccountScreen = () => {
   const { finance, financeLogout } = useAuth();
@@ -13,18 +14,18 @@ const FinanceAccountScreen = () => {
 
   return (
     <View style={styles.flex}>
-      <FinanceHeader title="Xisaabta" />
+      <FinanceHeader title={t("Xisaabta")} />
       <View style={{ padding: 14 }}>
         <Card>
-          <InfoRow label="Magaca" value={finance?.fullName} />
-          <InfoRow label="Username" value={finance?.username} />
-          <InfoRow label="Qaybta" value="Maaliyadda" />
+          <InfoRow label={t("Magaca")} value={finance?.fullName} />
+          <InfoRow label={t("Username")} value={finance?.username} />
+          <InfoRow label={t("Qaybta")} value={t("Maaliyadda")} />
         </Card>
         <TouchableOpacity style={styles.btn} onPress={() => setShowPassword(true)}>
-          <Text style={styles.btnText}>Beddel Password</Text>
+          <Text style={styles.btnText}>{t("Beddel Password")}</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.btn, styles.logout]} onPress={financeLogout}>
-          <Text style={[styles.btnText, { color: COLORS.danger }]}>Ka Bax</Text>
+          <Text style={[styles.btnText, { color: COLORS.danger }]}>{t("Ka Bax")}</Text>
         </TouchableOpacity>
       </View>
       <ParentChangePasswordModal

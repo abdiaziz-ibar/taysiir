@@ -5,6 +5,7 @@ import { Loading, Card, Badge, ScreenModal, Field, Chip, ChipRow, PrimaryButton,
 import ConfirmPasswordModal from "./ConfirmPasswordModal";
 import { COLORS, formatMoney } from "../utils/format";
 import { EMPLOYEE_TYPES } from "../utils/finance";
+import { t } from "../i18n";
 
 const emptyForm = { fullName: "", type: "teacher", position: "", phone: "", monthlySalary: "", notes: "", status: "active" };
 
@@ -48,9 +49,9 @@ const EmployeesPanel = () => {
   };
 
   const save = async () => {
-    if (!form.fullName.trim()) return setError("Magaca waa waajib.");
+    if (!form.fullName.trim()) return setError(t("Magaca waa waajib."));
     if (form.monthlySalary === "" || Number(form.monthlySalary) < 0 || Number.isNaN(Number(form.monthlySalary))) {
-      return setError("Mushaharka bishii waa inuu noqdaa tiro sax ah.");
+      return setError(t("Mushaharka bishii waa inuu noqdaa tiro sax ah."));
     }
     setError("");
     setSaving(true);
@@ -62,7 +63,7 @@ const EmployeesPanel = () => {
       setForm(null);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -78,20 +79,20 @@ const EmployeesPanel = () => {
 
   return (
     <View>
-      <Field value={search} onChangeText={setSearch} placeholder="Raadi magac, phone ama shaqo..." />
+      <Field value={search} onChangeText={setSearch} placeholder={t("Raadi magac, phone ama shaqo...")} />
       <View style={{ marginTop: 8 }}>
         <ChipRow>
-          <Chip label="Dhammaan" active={type === ""} onPress={() => setType("")} />
-          <Chip label="Macalimiin" active={type === "teacher"} onPress={() => setType("teacher")} />
-          <Chip label="Shaqaale" active={type === "staff"} onPress={() => setType("staff")} />
+          <Chip label={t("Dhammaan")} active={type === ""} onPress={() => setType("")} />
+          <Chip label={t("Macalimiin")} active={type === "teacher"} onPress={() => setType("teacher")} />
+          <Chip label={t("Shaqaale")} active={type === "staff"} onPress={() => setType("staff")} />
         </ChipRow>
       </View>
       <View style={styles.summaryRow}>
         <Text style={styles.hint}>
-          {employees ? employees.length : 0} diiwaan · Mushaharka bishii (Active): {formatMoney(payroll)}
+          {employees ? employees.length : 0} {t("diiwaan · Mushaharka bishii (Active):")} {formatMoney(payroll)}
         </Text>
         <TouchableOpacity onPress={openNew}>
-          <Text style={styles.addLink}>+ Shaqaale Cusub</Text>
+          <Text style={styles.addLink}>{t("+ Shaqaale Cusub")}</Text>
         </TouchableOpacity>
       </View>
 
@@ -101,7 +102,7 @@ const EmployeesPanel = () => {
         </View>
       ) : (
         <View style={{ marginTop: 8 }}>
-          {employees.length === 0 && <Text style={styles.empty}>Weli shaqaale lama diiwaan gelin.</Text>}
+          {employees.length === 0 && <Text style={styles.empty}>{t("Weli shaqaale lama diiwaan gelin.")}</Text>}
           {employees.map((e) => (
             <Card key={e._id}>
               <View style={styles.head}>
@@ -115,15 +116,15 @@ const EmployeesPanel = () => {
                 </View>
                 <View style={{ alignItems: "flex-end", gap: 4 }}>
                   <Text style={styles.salary}>{formatMoney(e.monthlySalary)}</Text>
-                  <Badge text={e.status === "active" ? "Active" : "Inactive"} color={e.status === "active" ? COLORS.success : COLORS.danger} />
+                  <Badge text={e.status === "active" ? t("Active") : t("Inactive")} color={e.status === "active" ? COLORS.success : COLORS.danger} />
                 </View>
               </View>
               <View style={styles.actions}>
                 <TouchableOpacity onPress={() => openEdit(e)}>
-                  <Text style={styles.link}>Edit</Text>
+                  <Text style={styles.link}>{t("Edit")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setDeleteTarget(e)}>
-                  <Text style={styles.linkDanger}>Tirtir</Text>
+                  <Text style={styles.linkDanger}>{t("Tirtir")}</Text>
                 </TouchableOpacity>
               </View>
             </Card>
@@ -131,40 +132,40 @@ const EmployeesPanel = () => {
         </View>
       )}
 
-      <ScreenModal visible={!!form} title={form?._id ? "Wax Ka Beddel Shaqaalaha" : "Shaqaale Cusub"} onClose={() => setForm(null)}>
+      <ScreenModal visible={!!form} title={form?._id ? t("Wax Ka Beddel Shaqaalaha") : t("Shaqaale Cusub")} onClose={() => setForm(null)}>
         <ErrorText text={error} />
         {form && (
           <>
-            <Field label="Magaca *" value={form.fullName} onChangeText={(v) => setForm({ ...form, fullName: v })} />
-            <Text style={styles.label}>Nooca *</Text>
+            <Field label={t("Magaca *")} value={form.fullName} onChangeText={(v) => setForm({ ...form, fullName: v })} />
+            <Text style={styles.label}>{t("Nooca *")}</Text>
             <ChipRow>
-              <Chip label="Macalin" active={form.type === "teacher"} onPress={() => setForm({ ...form, type: "teacher" })} />
-              <Chip label="Shaqaale" active={form.type === "staff"} onPress={() => setForm({ ...form, type: "staff" })} />
+              <Chip label={t("Macalin")} active={form.type === "teacher"} onPress={() => setForm({ ...form, type: "teacher" })} />
+              <Chip label={t("Shaqaale")} active={form.type === "staff"} onPress={() => setForm({ ...form, type: "staff" })} />
             </ChipRow>
-            <Field label="Shaqada / Maaddada (ikhtiyaari)" value={form.position} onChangeText={(v) => setForm({ ...form, position: v })} />
-            <Field label="Phone (ikhtiyaari)" value={form.phone} onChangeText={(v) => setForm({ ...form, phone: v })} keyboardType="phone-pad" />
-            <Field label="Mushaharka Bishii ($) *" value={form.monthlySalary} onChangeText={(v) => setForm({ ...form, monthlySalary: v })} keyboardType="decimal-pad" />
+            <Field label={t("Shaqada / Maaddada (ikhtiyaari)")} value={form.position} onChangeText={(v) => setForm({ ...form, position: v })} />
+            <Field label={t("Phone (ikhtiyaari)")} value={form.phone} onChangeText={(v) => setForm({ ...form, phone: v })} keyboardType="phone-pad" />
+            <Field label={t("Mushaharka Bishii ($) *")} value={form.monthlySalary} onChangeText={(v) => setForm({ ...form, monthlySalary: v })} keyboardType="decimal-pad" />
             {form._id && (
               <>
-                <Text style={styles.label}>Xaalad</Text>
+                <Text style={styles.label}>{t("Xaalad")}</Text>
                 <ChipRow>
-                  <Chip label="Active" active={form.status === "active"} onPress={() => setForm({ ...form, status: "active" })} />
-                  <Chip label="Inactive" active={form.status === "inactive"} onPress={() => setForm({ ...form, status: "inactive" })} />
+                  <Chip label={t("Active")} active={form.status === "active"} onPress={() => setForm({ ...form, status: "active" })} />
+                  <Chip label={t("Inactive")} active={form.status === "inactive"} onPress={() => setForm({ ...form, status: "inactive" })} />
                 </ChipRow>
               </>
             )}
-            <Field label="Faallo (ikhtiyaari)" value={form.notes} onChangeText={(v) => setForm({ ...form, notes: v })} />
-            <PrimaryButton title="Kaydi" onPress={save} loading={saving} />
+            <Field label={t("Faallo (ikhtiyaari)")} value={form.notes} onChangeText={(v) => setForm({ ...form, notes: v })} />
+            <PrimaryButton title={t("Kaydi")} onPress={save} loading={saving} />
           </>
         )}
       </ScreenModal>
 
       <ConfirmPasswordModal
         visible={!!deleteTarget}
-        title="Tirtir Shaqaalaha?"
+        title={t("Tirtir Shaqaalaha?")}
         message={
           deleteTarget
-            ? `Waxaad tirtirayaa ${deleteTarget.fullName} (${deleteTarget.employeeId}). Haddii uu leeyahay mushahar hore loo bixiyey, lama tirtiri karo — ka dhig Inactive.`
+            ? t("Waxaad tirtirayaa {name} ({id}). Haddii uu leeyahay mushahar hore loo bixiyey, lama tirtiri karo — ka dhig Inactive.", { name: deleteTarget.fullName, id: deleteTarget.employeeId })
             : ""
         }
         verify={verifyFinancePassword}

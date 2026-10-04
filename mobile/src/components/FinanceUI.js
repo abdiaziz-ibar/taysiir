@@ -1,6 +1,8 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useAuth } from "../context/AuthContext";
+import LanguageButton from "../i18n/LanguageButton";
 import { COLORS } from "../utils/format";
+import { t } from "../i18n";
 
 // Header for the finance section's screens (no back button — they're tabs).
 export const FinanceHeader = ({ title, action }) => {
@@ -10,8 +12,11 @@ export const FinanceHeader = ({ title, action }) => {
       <View style={{ flex: 1 }}>
         <Text style={styles.title}>{title}</Text>
         <Text style={styles.sub} numberOfLines={1}>
-          Maaliyadda · {finance?.fullName}
+          {t("Maaliyadda ·")} {finance?.fullName}
         </Text>
+      </View>
+      <View style={{ marginEnd: action ? 12 : 0 }}>
+        <LanguageButton light />
       </View>
       {action ? (
         <TouchableOpacity onPress={action.onPress}>

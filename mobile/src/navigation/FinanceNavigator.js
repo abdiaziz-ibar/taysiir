@@ -4,6 +4,7 @@ import FinanceExpensesScreen from "../screens/finance/FinanceExpensesScreen";
 import FinanceReportScreen from "../screens/finance/FinanceReportScreen";
 import FinanceAccountScreen from "../screens/finance/FinanceAccountScreen";
 import { COLORS } from "../utils/format";
+import { t } from "../i18n";
 
 const Tab = createBottomTabNavigator();
 
@@ -19,9 +20,9 @@ const FinanceNavigator = () => (
       tabBarLabelStyle: { fontSize: 11 },
     }}
   >
-    <Tab.Screen name="Expenses" component={FinanceExpensesScreen} options={{ title: "Qarashaadka", tabBarIcon: tabIcon("🧾") }} />
-    <Tab.Screen name="Report" component={FinanceReportScreen} options={{ title: "Warbixin", tabBarIcon: tabIcon("📈") }} />
-    <Tab.Screen name="Account" component={FinanceAccountScreen} options={{ title: "Xisaabta", tabBarIcon: tabIcon("👤") }} />
+    <Tab.Screen name="Expenses" component={FinanceExpensesScreen} options={{ title: t("Qarashaadka"), tabBarIcon: tabIcon("🧾") }} />
+    <Tab.Screen name="Report" component={FinanceReportScreen} options={{ title: t("Warbixin"), tabBarIcon: tabIcon("📈") }} />
+    <Tab.Screen name="Account" component={FinanceAccountScreen} options={{ title: t("Xisaabta"), tabBarIcon: tabIcon("👤") }} />
   </Tab.Navigator>
 );
 

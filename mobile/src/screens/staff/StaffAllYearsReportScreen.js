@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import staffApi from "../../api/staffClient";
 import { ScreenHeader, Loading, Card, Badge } from "../../components/StaffUI";
 import { formatMoney, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const Line = ({ label, value, color }) => (
   <View style={styles.line}>
@@ -23,29 +24,29 @@ const StaffAllYearsReportScreen = ({ navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <ScreenHeader title="Dhammaan Sannadaha" onBack={navigation.goBack} />
+      <ScreenHeader title={t("Dhammaan Sannadaha")} onBack={navigation.goBack} />
       {data === null ? (
         <Loading />
       ) : (
         <ScrollView contentContainerStyle={{ padding: 12, paddingBottom: 40 }}>
           <View style={styles.total}>
-            <Text style={styles.totalLabel}>Wadarta Guud</Text>
+            <Text style={styles.totalLabel}>{t("Wadarta Guud")}</Text>
             <Text style={styles.totalValue}>{formatMoney(data.totals.totalFees)}</Text>
             <Text style={styles.totalSub}>
-              La bixiyey {formatMoney(data.totals.totalPaid)} · Ku dhiman {formatMoney(data.totals.totalDebt)}
+              {t("La bixiyey")} {formatMoney(data.totals.totalPaid)} {t("· Ku dhiman")} {formatMoney(data.totals.totalDebt)}
             </Text>
           </View>
           {data.years.map((y) => (
             <Card key={y.academicYearId}>
               <View style={styles.head}>
                 <Text style={styles.yearName}>{y.academicYear}</Text>
-                {y.isActive && <Badge text="Firfircoon" color={COLORS.success} />}
+                {y.isActive && <Badge text={t("Firfircoon")} color={COLORS.success} />}
               </View>
-              <Line label="Waalidiinta" value={y.totalParents} />
-              <Line label="Wadarta Fee" value={formatMoney(y.totalFees)} />
-              <Line label="La Bixiyey" value={formatMoney(y.totalPaid)} color={COLORS.success} />
-              <Line label="Ku Dhiman" value={formatMoney(y.totalDebt)} color={COLORS.danger} />
-              <Line label="Collection Rate" value={`${y.collectionRate}%`} />
+              <Line label={t("Waalidiinta")} value={y.totalParents} />
+              <Line label={t("Wadarta Fee")} value={formatMoney(y.totalFees)} />
+              <Line label={t("La Bixiyey")} value={formatMoney(y.totalPaid)} color={COLORS.success} />
+              <Line label={t("Ku Dhiman")} value={formatMoney(y.totalDebt)} color={COLORS.danger} />
+              <Line label={t("Collection Rate")} value={`${y.collectionRate}%`} />
             </Card>
           ))}
         </ScrollView>

@@ -12,6 +12,8 @@ import {
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
 import { COLORS } from "../utils/format";
+import LanguageButton from "../i18n/LanguageButton";
+import { t } from "../i18n";
 
 const LoginScreen = () => {
   const { login, register, staffLogin, financeLogin } = useAuth();
@@ -28,25 +30,25 @@ const LoginScreen = () => {
     setError("");
     if (role === "staff" || role === "finance") {
       if (!username.trim() || !password) {
-        setError("Username iyo Password waa waajib.");
+        setError(t("Username iyo Password waa waajib."));
         return;
       }
       setLoading(true);
       try {
         await (role === "finance" ? financeLogin : staffLogin)(username.trim().toLowerCase(), password);
       } catch (err) {
-        setError(err.response?.data?.message || "Login-ku wuu fashilmay.");
+        setError(t(err.response?.data?.message || "Login-ku wuu fashilmay."));
       } finally {
         setLoading(false);
       }
       return;
     }
     if (!phone.trim() || !password) {
-      setError("Phone iyo Password waa waajib.");
+      setError(t("Phone iyo Password waa waajib."));
       return;
     }
     if (mode === "register" && password !== confirmPassword) {
-      setError("Labada password iskuma eka.");
+      setError(t("Labada password iskuma eka."));
       return;
     }
     setLoading(true);
@@ -54,7 +56,7 @@ const LoginScreen = () => {
       if (mode === "register") await register(phone.trim(), password);
       else await login(phone.trim(), password);
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setLoading(false);
     }
@@ -66,11 +68,14 @@ const LoginScreen = () => {
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
       <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+        <View style={{ position: "absolute", top: 48, end: 20 }}>
+          <LanguageButton light />
+        </View>
         <View style={styles.logoBadge}>
           <Text style={styles.logoText}>TF</Text>
         </View>
         <Text style={styles.title}>Taysir Foundation</Text>
-        <Text style={styles.subtitle}>Parent Fee &amp; Debt Management</Text>
+        <Text style={styles.subtitle}>{t("Parent Fee & Debt Management")}</Text>
 
         <View style={styles.card}>
           <View style={styles.roleRow}>
@@ -82,7 +87,7 @@ const LoginScreen = () => {
                 setPassword("");
               }}
             >
-              <Text style={[styles.roleText, role === "staff" && styles.roleTextActive]}>System Users</Text>
+              <Text style={[styles.roleText, role === "staff" && styles.roleTextActive]}>{t("System Users")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.roleTab, role === "parent" && styles.roleTabActive]}
@@ -92,7 +97,7 @@ const LoginScreen = () => {
                 setPassword("");
               }}
             >
-              <Text style={[styles.roleText, role === "parent" && styles.roleTextActive]}>Parents</Text>
+              <Text style={[styles.roleText, role === "parent" && styles.roleTextActive]}>{t("Parents")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.roleTab, role === "finance" && styles.roleTabActive]}
@@ -102,34 +107,34 @@ const LoginScreen = () => {
                 setPassword("");
               }}
             >
-              <Text style={[styles.roleText, role === "finance" && styles.roleTextActive]}>Maaliyadda</Text>
+              <Text style={[styles.roleText, role === "finance" && styles.roleTextActive]}>{t("Maaliyadda")}</Text>
             </TouchableOpacity>
           </View>
 
           {role === "staff" || role === "finance" ? (
             <>
               {error ? <Text style={styles.error}>{error}</Text> : null}
-              <Text style={styles.label}>Username</Text>
+              <Text style={styles.label}>{t("Username")}</Text>
               <TextInput
                 style={styles.input}
                 value={username}
                 onChangeText={setUsername}
-                placeholder="Geli username-kaaga"
+                placeholder={t("Geli username-kaaga")}
                 placeholderTextColor="#9CA3AF"
                 autoCapitalize="none"
                 autoCorrect={false}
               />
-              <Text style={styles.label}>Password</Text>
+              <Text style={styles.label}>{t("Password")}</Text>
               <TextInput
                 style={styles.input}
                 value={password}
                 onChangeText={setPassword}
-                placeholder="Geli password-kaaga"
+                placeholder={t("Geli password-kaaga")}
                 placeholderTextColor="#9CA3AF"
                 secureTextEntry
               />
               <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={loading}>
-                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Soo Gal (Log In)</Text>}
+                {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>{t("Soo Gal (Log In)")}</Text>}
               </TouchableOpacity>
             </>
           ) : (
@@ -142,7 +147,7 @@ const LoginScreen = () => {
                 setError("");
               }}
             >
-              <Text style={[styles.tabText, mode === "login" && styles.tabTextActive]}>Soo Gal</Text>
+              <Text style={[styles.tabText, mode === "login" && styles.tabTextActive]}>{t("Soo Gal")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.tab, mode === "register" && styles.tabActive]}
@@ -151,47 +156,46 @@ const LoginScreen = () => {
                 setError("");
               }}
             >
-              <Text style={[styles.tabText, mode === "register" && styles.tabTextActive]}>Marka Koowaad</Text>
+              <Text style={[styles.tabText, mode === "register" && styles.tabTextActive]}>{t("Marka Koowaad")}</Text>
             </TouchableOpacity>
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
           {mode === "register" && (
             <Text style={styles.note}>
-              Waxaad dhigaysaa password aad isticmaali doonto marar dambe. Lambarkaagu waa inuu horey ugu jiraa
-              nidaamka.
+              {t("Waxaad dhigaysaa password aad isticmaali doonto marar dambe. Lambarkaagu waa inuu horey ugu jiraa nidaamka.")}
             </Text>
           )}
 
-          <Text style={styles.label}>Lambarka Telefoonka</Text>
+          <Text style={styles.label}>{t("Lambarka Telefoonka")}</Text>
           <TextInput
             style={styles.input}
             value={phone}
             onChangeText={setPhone}
-            placeholder="Lambarka aad dugsiga ku siisay"
+            placeholder={t("Lambarka aad dugsiga ku siisay")}
             placeholderTextColor="#9CA3AF"
             keyboardType="phone-pad"
             autoCapitalize="none"
           />
 
-          <Text style={styles.label}>{mode === "register" ? "Samee Password" : "Password"}</Text>
+          <Text style={styles.label}>{mode === "register" ? t("Samee Password") : t("Password")}</Text>
           <TextInput
             style={styles.input}
             value={password}
             onChangeText={setPassword}
-            placeholder="Geli password-kaaga"
+            placeholder={t("Geli password-kaaga")}
             placeholderTextColor="#9CA3AF"
             secureTextEntry
           />
 
           {mode === "register" && (
             <>
-              <Text style={styles.label}>Xaqiiji Password</Text>
+              <Text style={styles.label}>{t("Xaqiiji Password")}</Text>
               <TextInput
                 style={styles.input}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
-                placeholder="Mar labaad geli password-ka"
+                placeholder={t("Mar labaad geli password-ka")}
                 placeholderTextColor="#9CA3AF"
                 secureTextEntry
               />
@@ -202,7 +206,7 @@ const LoginScreen = () => {
             {loading ? (
               <ActivityIndicator color="#fff" />
             ) : (
-              <Text style={styles.buttonText}>{mode === "register" ? "Samee Xisaab" : "Soo Gal"}</Text>
+              <Text style={styles.buttonText}>{mode === "register" ? t("Samee Xisaab") : t("Soo Gal")}</Text>
             )}
           </TouchableOpacity>
           </>

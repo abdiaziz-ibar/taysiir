@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView } from "react-native";
 import api from "../api/client";
 import { COLORS } from "../utils/format";
+import { t } from "../i18n";
 
 const empty = { current: "", next: "", confirm: "" };
 
@@ -21,13 +22,13 @@ const ParentChangePasswordModal = ({ visible, onClose, client = api, path = "/pa
 
   const submit = async () => {
     setError("");
-    if (form.next !== form.confirm) return setError("Labada password ee cusub iskuma eka.");
+    if (form.next !== form.confirm) return setError(t("Labada password ee cusub iskuma eka."));
     setSaving(true);
     try {
       await client.post(path, { currentPassword: form.current, newPassword: form.next });
       setDone(true);
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -40,33 +41,33 @@ const ParentChangePasswordModal = ({ visible, onClose, client = api, path = "/pa
       <KeyboardAvoidingView style={styles.overlay} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.center} keyboardShouldPersistTaps="handled">
           <View style={styles.card}>
-            <Text style={styles.title}>Beddel Password</Text>
+            <Text style={styles.title}>{t("Beddel Password")}</Text>
             {done ? (
               <>
-                <Text style={styles.success}>Password-ka waa la beddelay.</Text>
+                <Text style={styles.success}>{t("Password-ka waa la beddelay.")}</Text>
                 <TouchableOpacity style={styles.primary} onPress={close}>
-                  <Text style={styles.primaryText}>Xir</Text>
+                  <Text style={styles.primaryText}>{t("Xir")}</Text>
                 </TouchableOpacity>
               </>
             ) : (
               <>
                 {error ? <Text style={styles.error}>{error}</Text> : null}
-                <Text style={styles.label}>Password-ka hadda jira</Text>
+                <Text style={styles.label}>{t("Password-ka hadda jira")}</Text>
                 <TextInput style={styles.input} value={form.current} onChangeText={set("current")} secureTextEntry autoCapitalize="none" />
-                <Text style={styles.label}>Password cusub (ugu yaraan 6 xaraf)</Text>
+                <Text style={styles.label}>{t("Password cusub (ugu yaraan 6 xaraf)")}</Text>
                 <TextInput style={styles.input} value={form.next} onChangeText={set("next")} secureTextEntry autoCapitalize="none" />
-                <Text style={styles.label}>Xaqiiji password cusub</Text>
+                <Text style={styles.label}>{t("Xaqiiji password cusub")}</Text>
                 <TextInput style={styles.input} value={form.confirm} onChangeText={set("confirm")} secureTextEntry autoCapitalize="none" />
                 <View style={styles.actions}>
                   <TouchableOpacity style={styles.cancel} onPress={close} disabled={saving}>
-                    <Text style={styles.cancelText}>Jooji</Text>
+                    <Text style={styles.cancelText}>{t("Jooji")}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={[styles.save, (saving || !form.current || !form.next || !form.confirm) && { opacity: 0.5 }]}
                     onPress={submit}
                     disabled={saving || !form.current || !form.next || !form.confirm}
                   >
-                    {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.saveText}>Kaydi</Text>}
+                    {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.saveText}>{t("Kaydi")}</Text>}
                   </TouchableOpacity>
                 </View>
               </>

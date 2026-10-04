@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, ActivityIndicator } from "react-native";
 import staffApi from "../api/staffClient";
 import { COLORS } from "../utils/format";
+import { t } from "../i18n";
 
 // Step-up confirmation for irreversible actions: the logged-in admin
 // re-types their own password before onConfirm runs (same as the web).
@@ -29,7 +30,7 @@ const ConfirmPasswordModal = ({ visible, title, message, onConfirm, onClose, chi
       setPassword("");
       await onConfirm();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setBusy(false);
     }
@@ -43,7 +44,7 @@ const ConfirmPasswordModal = ({ visible, title, message, onConfirm, onClose, chi
           <Text style={styles.message}>{message}</Text>
           {children}
           {error ? <Text style={styles.error}>{error}</Text> : null}
-          <Text style={styles.label}>Geli Password-kaaga si aad u xaqiijiso</Text>
+          <Text style={styles.label}>{t("Geli Password-kaaga si aad u xaqiijiso")}</Text>
           <TextInput
             style={styles.input}
             value={password}
@@ -53,14 +54,14 @@ const ConfirmPasswordModal = ({ visible, title, message, onConfirm, onClose, chi
           />
           <View style={styles.actions}>
             <TouchableOpacity style={styles.cancel} onPress={close} disabled={busy}>
-              <Text style={styles.cancelText}>Jooji</Text>
+              <Text style={styles.cancelText}>{t("Jooji")}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.confirm, (busy || disabled || !password) && { opacity: 0.5 }]}
               onPress={submit}
               disabled={busy || disabled || !password}
             >
-              {busy ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.confirmText}>Haa, Tirtir</Text>}
+              {busy ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.confirmText}>{t("Haa, Tirtir")}</Text>}
             </TouchableOpacity>
           </View>
         </View>

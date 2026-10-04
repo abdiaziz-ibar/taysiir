@@ -6,6 +6,7 @@ import { useStaff } from "../../context/StaffContext";
 import { ScreenHeader, Card, Badge, ScreenModal, Field, PrimaryButton, ErrorText } from "../../components/StaffUI";
 import ConfirmPasswordModal from "../../components/ConfirmPasswordModal";
 import { COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const StaffAcademicYearsScreen = ({ navigation }) => {
   const { staff } = useAuth();
@@ -29,7 +30,7 @@ const StaffAcademicYearsScreen = ({ navigation }) => {
       setStartYear("");
       refreshYears();
     } catch (err) {
-      setCreateError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setCreateError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setCreating(false);
     }
@@ -41,7 +42,7 @@ const StaffAcademicYearsScreen = ({ navigation }) => {
       await staffApi.put(`/academic-years/${y._id}/${y.isActive ? "deactivate" : "activate"}`);
       refreshYears();
     } catch (err) {
-      setActionError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setActionError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     }
   };
 
@@ -57,7 +58,7 @@ const StaffAcademicYearsScreen = ({ navigation }) => {
       setEdit(null);
       refreshYears();
     } catch (err) {
-      setEditError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setEditError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -71,19 +72,19 @@ const StaffAcademicYearsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <ScreenHeader title="Sanad Dugsiyeedka" onBack={navigation.goBack} />
+      <ScreenHeader title={t("Sanad Dugsiyeedka")} onBack={navigation.goBack} />
       <ScrollView contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
         {isAdmin && (
           <Card>
             <ErrorText text={createError} />
             <Field
-              label="Sanadka Bilowga (tusaale 2026)"
+              label={t("Sanadka Bilowga (tusaale 2026)")}
               value={startYear}
               onChangeText={setStartYear}
               keyboardType="numeric"
               maxLength={4}
             />
-            <PrimaryButton title="+ Samee Sanad Dugsiyeed" onPress={handleCreate} loading={creating} disabled={!startYear} />
+            <PrimaryButton title={t("+ Samee Sanad Dugsiyeed")} onPress={handleCreate} loading={creating} disabled={!startYear} />
           </Card>
         )}
         <ErrorText text={actionError} />
@@ -97,18 +98,18 @@ const StaffAcademicYearsScreen = ({ navigation }) => {
                   {y.startMonth} → {y.endMonth}
                 </Text>
               </View>
-              {y.isActive ? <Badge text="Firfircoon" color={COLORS.success} /> : <Text style={styles.inactive}>Aan firfircoon</Text>}
+              {y.isActive ? <Badge text={t("Firfircoon")} color={COLORS.success} /> : <Text style={styles.inactive}>{t("Aan firfircoon")}</Text>}
             </View>
             {isAdmin && (
               <View style={styles.actions}>
                 <TouchableOpacity onPress={() => { setEditError(""); setEdit({ ...y }); }}>
-                  <Text style={styles.link}>Edit</Text>
+                  <Text style={styles.link}>{t("Edit")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => toggleActive(y)}>
-                  <Text style={y.isActive ? styles.linkDanger : styles.link}>{y.isActive ? "Deactivate" : "Activate"}</Text>
+                  <Text style={y.isActive ? styles.linkDanger : styles.link}>{y.isActive ? t("Deactivate") : t("Activate")}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => setDeleteTarget(y)}>
-                  <Text style={styles.linkDanger}>Tirtir</Text>
+                  <Text style={styles.linkDanger}>{t("Tirtir")}</Text>
                 </TouchableOpacity>
               </View>
             )}
@@ -116,24 +117,24 @@ const StaffAcademicYearsScreen = ({ navigation }) => {
         ))}
       </ScrollView>
 
-      <ScreenModal visible={!!edit} title="Edit Sanad Dugsiyeed" onClose={() => setEdit(null)}>
+      <ScreenModal visible={!!edit} title={t("Edit Sanad Dugsiyeed")} onClose={() => setEdit(null)}>
         <ErrorText text={editError} />
         {edit && (
           <>
-            <Field label="Sanad" value={edit.name} onChangeText={(v) => setEdit({ ...edit, name: v })} />
-            <Field label="Bilowga" value={edit.startMonth} onChangeText={(v) => setEdit({ ...edit, startMonth: v })} />
-            <Field label="Dhammaadka" value={edit.endMonth} onChangeText={(v) => setEdit({ ...edit, endMonth: v })} />
-            <PrimaryButton title="Kaydi" onPress={saveEdit} loading={saving} />
+            <Field label={t("Sanad")} value={edit.name} onChangeText={(v) => setEdit({ ...edit, name: v })} />
+            <Field label={t("Bilowga")} value={edit.startMonth} onChangeText={(v) => setEdit({ ...edit, startMonth: v })} />
+            <Field label={t("Dhammaadka")} value={edit.endMonth} onChangeText={(v) => setEdit({ ...edit, endMonth: v })} />
+            <PrimaryButton title={t("Kaydi")} onPress={saveEdit} loading={saving} />
           </>
         )}
       </ScreenModal>
 
       <ConfirmPasswordModal
         visible={!!deleteTarget}
-        title="Tirtir Sanad Dugsiyeedka?"
+        title={t("Tirtir Sanad Dugsiyeedka?")}
         message={
           deleteTarget
-            ? `Waxaad tirtirayaa ${deleteTarget.name}. Tan waxay sidoo kale tirtiraysaa dhammaan Fee-yada iyo Lacag-bixinnada sanadkan la xidhiidha oo dhan — lama soo celin karo.`
+            ? t("Waxaad tirtirayaa {name}. Tan waxay sidoo kale tirtiraysaa dhammaan Fee-yada iyo Lacag-bixinnada sanadkan la xidhiidha oo dhan — lama soo celin karo.", { name: deleteTarget.name })
             : ""
         }
         onConfirm={handleDelete}

@@ -17,6 +17,7 @@ import {
 } from "../../components/StaffUI";
 import ConfirmPasswordModal from "../../components/ConfirmPasswordModal";
 import { formatMoney, formatDate, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const METHODS = ["Cash", "Mobile Money", "Bank", "Other"];
 
@@ -51,7 +52,7 @@ const StaffPaymentDetailScreen = ({ route, navigation }) => {
   if (!payment) {
     return (
       <View style={styles.flex}>
-        <ScreenHeader title="Receipt" onBack={navigation.goBack} />
+        <ScreenHeader title={t("Receipt")} onBack={navigation.goBack} />
         <Loading />
       </View>
     );
@@ -73,8 +74,8 @@ const StaffPaymentDetailScreen = ({ route, navigation }) => {
 
   const handleSave = async () => {
     setError("");
-    if (!(Number(amount) > 0)) return setError("Geli lacagta.");
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return setError("Taariikhda u qor sida YYYY-MM-DD.");
+    if (!(Number(amount) > 0)) return setError(t("Geli lacagta."));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return setError(t("Taariikhda u qor sida YYYY-MM-DD."));
     setSaving(true);
     try {
       await staffApi.put(`/payments/${id}`, {
@@ -88,7 +89,7 @@ const StaffPaymentDetailScreen = ({ route, navigation }) => {
       setEditing(false);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -105,53 +106,53 @@ const StaffPaymentDetailScreen = ({ route, navigation }) => {
       <ScreenHeader title={payment.receiptNumber} onBack={navigation.goBack} />
       <ScrollView contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
         <Card>
-          <Text style={styles.heading}>SCHOOL FEE RECEIPT</Text>
-          <InfoRow label="Taariikh" value={formatDate(payment.paymentDate)} />
-          <InfoRow label="Magaca Waalidka" value={payment.parentId?.fullName} />
-          <InfoRow label="Sanad Dugsiyeed" value={payment.academicYearId?.name} />
-          {fee && <InfoRow label="Wadarta Lacagta" value={formatMoney(fee.totalAmount)} />}
-          {fee && <InfoRow label="Hore Loo Bixiyey" value={formatMoney(beforePaid)} />}
-          <InfoRow label="Lacagta Hadda La Bixiyey" value={formatMoney(payment.amount)} />
-          {fee && <InfoRow label="Lacagta Ku Dhiman" value={formatMoney(fee.balance)} />}
-          <InfoRow label="Habka Lacagta" value={payment.paymentMethod} />
-          <InfoRow label="Reference" value={payment.referenceNumber} />
-          <InfoRow label="Notes" value={payment.notes} />
-          <InfoRow label="Waxaa Qaabilay" value={payment.createdBy?.fullName || "Admin"} />
+          <Text style={styles.heading}>{t("SCHOOL FEE RECEIPT")}</Text>
+          <InfoRow label={t("Taariikh")} value={formatDate(payment.paymentDate)} />
+          <InfoRow label={t("Magaca Waalidka")} value={payment.parentId?.fullName} />
+          <InfoRow label={t("Sanad Dugsiyeed")} value={payment.academicYearId?.name} />
+          {fee && <InfoRow label={t("Wadarta Lacagta")} value={formatMoney(fee.totalAmount)} />}
+          {fee && <InfoRow label={t("Hore Loo Bixiyey")} value={formatMoney(beforePaid)} />}
+          <InfoRow label={t("Lacagta Hadda La Bixiyey")} value={formatMoney(payment.amount)} />
+          {fee && <InfoRow label={t("Lacagta Ku Dhiman")} value={formatMoney(fee.balance)} />}
+          <InfoRow label={t("Habka Lacagta")} value={t(payment.paymentMethod)} />
+          <InfoRow label={t("Reference")} value={payment.referenceNumber} />
+          <InfoRow label={t("Notes")} value={payment.notes} />
+          <InfoRow label={t("Waxaa Qaabilay")} value={payment.createdBy?.fullName || t("Admin")} />
         </Card>
 
         <TouchableOpacity style={styles.editBtn} onPress={startEdit}>
-          <Text style={styles.editBtnText}>Wax Ka Beddel (Edit)</Text>
+          <Text style={styles.editBtnText}>{t("Wax Ka Beddel (Edit)")}</Text>
         </TouchableOpacity>
         {isAdmin && (
           <TouchableOpacity style={styles.deleteBtn} onPress={() => setDeleting(true)}>
-            <Text style={styles.deleteBtnText}>Tirtir</Text>
+            <Text style={styles.deleteBtnText}>{t("Tirtir")}</Text>
           </TouchableOpacity>
         )}
       </ScrollView>
 
-      <ScreenModal visible={editing} title="Wax Ka Beddel Lacag Bixinta" onClose={() => setEditing(false)}>
+      <ScreenModal visible={editing} title={t("Wax Ka Beddel Lacag Bixinta")} onClose={() => setEditing(false)}>
         <ErrorText text={error} />
-        <Field label="Lacagta" value={amount} onChangeText={setAmount} keyboardType="numeric" />
-        <Field label="Taariikhda (YYYY-MM-DD)" value={date} onChangeText={setDate} autoCapitalize="none" />
-        <Text style={styles.label}>Habka Lacagta</Text>
+        <Field label={t("Lacagta")} value={amount} onChangeText={setAmount} keyboardType="numeric" />
+        <Field label={t("Taariikhda (YYYY-MM-DD)")} value={date} onChangeText={setDate} autoCapitalize="none" />
+        <Text style={styles.label}>{t("Habka Lacagta")}</Text>
         <ChipRow>
           {METHODS.map((m) => (
-            <Chip key={m} label={m} active={method === m} onPress={() => setMethod(m)} />
+            <Chip key={m} label={t(m)} active={method === m} onPress={() => setMethod(m)} />
           ))}
         </ChipRow>
-        <Field label="Reference" value={reference} onChangeText={setReference} />
-        <Field label="Notes" value={notes} onChangeText={setNotes} multiline />
+        <Field label={t("Reference")} value={reference} onChangeText={setReference} />
+        <Field label={t("Notes")} value={notes} onChangeText={setNotes} multiline />
         <View style={styles.switchRow}>
-          <Text style={styles.switchText}>Ogolow overpayment</Text>
+          <Text style={styles.switchText}>{t("Ogolow overpayment")}</Text>
           <Switch value={allowOver} onValueChange={setAllowOver} />
         </View>
-        <PrimaryButton title="Kaydi" onPress={handleSave} loading={saving} />
+        <PrimaryButton title={t("Kaydi")} onPress={handleSave} loading={saving} />
       </ScreenModal>
 
       <ConfirmPasswordModal
         visible={deleting}
-        title="Tirtir Lacag Bixinta?"
-        message={`Waxaad tirtirayaa lacag-bixintan (${formatMoney(payment.amount)}). Balance-ka waalidku si toos ah ayuu u kordhi doonaa — lama soo celin karo.`}
+        title={t("Tirtir Lacag Bixinta?")}
+        message={t("Waxaad tirtirayaa lacag-bixintan ({amount}). Balance-ka waalidku si toos ah ayuu u kordhi doonaa — lama soo celin karo.", { amount: formatMoney(payment.amount) })}
         onConfirm={handleDelete}
         onClose={() => setDeleting(false)}
       />

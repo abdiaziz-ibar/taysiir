@@ -6,6 +6,7 @@ import { useStaff } from "../../context/StaffContext";
 import { ScreenHeader, YearChips, Loading } from "../../components/StaffUI";
 import FeeRow from "../../components/FeeRow";
 import { COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const StaffFeesScreen = ({ navigation }) => {
   const { selectedYearId } = useStaff();
@@ -34,13 +35,13 @@ const StaffFeesScreen = ({ navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <ScreenHeader title="Lacagaha School-ka" onBack={navigation.goBack} />
+      <ScreenHeader title={t("Lacagaha School-ka")} onBack={navigation.goBack} />
       <YearChips />
       <TextInput
         style={styles.search}
         value={search}
         onChangeText={setSearch}
-        placeholder="Raadi magaca ama phone..."
+        placeholder={t("Raadi magaca ama phone...")}
         placeholderTextColor="#9CA3AF"
       />
       {fees === null ? (
@@ -60,7 +61,7 @@ const StaffFeesScreen = ({ navigation }) => {
               }}
             />
           }
-          ListEmptyComponent={<Text style={styles.empty}>Fee lama helin sanad dugsiyeedkan.</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>{t("Fee lama helin sanad dugsiyeedkan.")}</Text>}
           renderItem={({ item }) => (
             <FeeRow fee={item} onPress={() => navigation.navigate("ParentDetail", { id: item.parentId?._id })} />
           )}

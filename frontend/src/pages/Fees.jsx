@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import api from "../api/axios";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, statusLabel, statusBadgeClass } from "../utils/format";
+import { t } from "../i18n";
 
 const Fees = () => {
   const { selectedYearId } = useAcademicYear();
@@ -15,30 +16,30 @@ const Fees = () => {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-serif">Lacagaha School-ka (Fees)</h2>
+      <h2 className="text-xl font-serif">{t("Lacagaha School-ka (Fees)")}</h2>
       <div className="card overflow-x-auto">
         <table className="table-base">
           <thead>
             <tr>
-              <th>Waalid</th>
-              <th className="text-right">Total Fee</th>
-              <th className="text-right">La Bixiyey</th>
-              <th className="text-right">Ku Dhiman</th>
-              <th>Status</th>
+              <th>{t("Waalid")}</th>
+              <th className="text-end">{t("Total Fee")}</th>
+              <th className="text-end">{t("La Bixiyey")}</th>
+              <th className="text-end">{t("Ku Dhiman")}</th>
+              <th>{t("Status")}</th>
             </tr>
           </thead>
           <tbody>
             {fees.map((f) => (
               <tr key={f._id}>
                 <td><Link to={`/parents/${f.parentId?._id}`} className="text-link hover:underline">{f.parentId?.fullName}</Link></td>
-                <td className="text-right">{formatMoney(f.totalAmount)}</td>
-                <td className="text-right">{formatMoney(f.totalPaid)}</td>
-                <td className="text-right">{formatMoney(f.balance)}</td>
+                <td className="text-end">{formatMoney(f.totalAmount)}</td>
+                <td className="text-end">{formatMoney(f.totalPaid)}</td>
+                <td className="text-end">{formatMoney(f.balance)}</td>
                 <td><span className={statusBadgeClass(f.status)}>{statusLabel(f.status)}</span></td>
               </tr>
             ))}
             {fees.length === 0 && (
-              <tr><td colSpan={5} className="text-center text-ink/40 py-6">Fee lama helin sanad dugsiyeedkan.</td></tr>
+              <tr><td colSpan={5} className="text-center text-ink/40 py-6">{t("Fee lama helin sanad dugsiyeedkan.")}</td></tr>
             )}
           </tbody>
         </table>

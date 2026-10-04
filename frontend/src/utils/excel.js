@@ -1,10 +1,12 @@
 import * as XLSX from "xlsx";
+import { t } from "../i18n";
 
 // Builds a real .xlsx file (not CSV) and triggers a browser download.
 // A genuine spreadsheet sidesteps Excel's locale-dependent CSV delimiter
 // (some regions expect ";" instead of "," and mangle a plain CSV on open).
-export const downloadExcel = (filename, headers, rows) => {
-  const sheet = XLSX.utils.aoa_to_sheet([headers, ...rows]);
+export const downloadExcel = (filename, headers, rows, { translate = true } = {}) => {
+  const head = translate ? headers.map((h) => t(h)) : headers;
+  const sheet = XLSX.utils.aoa_to_sheet([head, ...rows]);
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, sheet, "Sheet1");
   XLSX.writeFile(workbook, filename);

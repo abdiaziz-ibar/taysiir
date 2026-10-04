@@ -1,3 +1,5 @@
+import { t } from "../i18n";
+
 export const formatMoney = (n) =>
   `$${Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 })}`;
 
@@ -7,10 +9,10 @@ export const formatDate = (d) => {
 };
 
 export const statusLabel = (status) => {
-  if (status === "paid" || status === "confirmed") return status === "confirmed" ? "La Xaqiijiyay" : "La Bixiyey (Paid)";
-  if (status === "partial") return "Qeyb (Partial)";
-  if (status === "pending") return "La Sugayo";
-  return "Lama Bixin (Unpaid)";
+  if (status === "paid" || status === "confirmed") return status === "confirmed" ? t("La Xaqiijiyay") : t("La Bixiyey (Paid)");
+  if (status === "partial") return t("Qeyb (Partial)");
+  if (status === "pending") return t("La Sugayo");
+  return t("Lama Bixin (Unpaid)");
 };
 
 export const COLORS = {

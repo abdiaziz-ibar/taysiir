@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import api from "../api/axios";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
 import FinanceUsersPanel from "../components/FinanceUsersPanel";
+import { t } from "../i18n";
 
 const emptyForm = { fullName: "", username: "", email: "", password: "", role: "staff" };
 
@@ -44,7 +45,7 @@ const Users = () => {
       setShowForm(false);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     }
   };
 
@@ -69,34 +70,34 @@ const Users = () => {
       setEditingId(null);
       load();
     } catch (err) {
-      setEditError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setEditError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     }
   };
 
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-serif">Isticmaalayaasha</h2>
+        <h2 className="text-xl font-serif">{t("Isticmaalayaasha")}</h2>
         <button className="btn-primary" onClick={() => setShowForm((v) => !v)}>
-          {showForm ? "Jooji" : "+ Isticmaale Cusub"}
+          {showForm ? t("Jooji") : t("+ Isticmaale Cusub")}
         </button>
       </div>
 
       {showForm && (
         <form onSubmit={handleSubmit} className="card grid grid-cols-1 md:grid-cols-2 gap-4">
           {error && <div className="md:col-span-2 bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
-          <div><label className="label-field">Magaca</label><input required className="input-field" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} /></div>
-          <div><label className="label-field">Username</label><input required className="input-field" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} /></div>
-          <div><label className="label-field">Email (ikhtiyaari)</label><input className="input-field" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
-          <div><label className="label-field">Password</label><input type="password" required className="input-field" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div>
+          <div><label className="label-field">{t("Magaca")}</label><input required className="input-field" value={form.fullName} onChange={(e) => setForm({ ...form, fullName: e.target.value })} /></div>
+          <div><label className="label-field">{t("Username")}</label><input required className="input-field" value={form.username} onChange={(e) => setForm({ ...form, username: e.target.value })} /></div>
+          <div><label className="label-field">{t("Email (ikhtiyaari)")}</label><input className="input-field" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></div>
+          <div><label className="label-field">{t("Password")}</label><input type="password" required className="input-field" value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} /></div>
           <div>
-            <label className="label-field">Role</label>
+            <label className="label-field">{t("Role")}</label>
             <select className="input-field" value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })}>
-              <option value="staff">Staff</option>
-              <option value="admin">Admin</option>
+              <option value="staff">{t("Staff")}</option>
+              <option value="admin">{t("Admin")}</option>
             </select>
           </div>
-          <div className="md:col-span-2"><button className="btn-primary">Kaydi Isticmaalaha</button></div>
+          <div className="md:col-span-2"><button className="btn-primary">{t("Kaydi Isticmaalaha")}</button></div>
         </form>
       )}
 
@@ -104,11 +105,11 @@ const Users = () => {
 
       <div className="card">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="font-serif text-lg">Akoonno Xiran (password khaldan)</h3>
-          <button onClick={loadLocked} className="text-sm text-link hover:underline">Cusboonaysii</button>
+          <h3 className="font-serif text-lg">{t("Akoonno Xiran (password khaldan)")}</h3>
+          <button onClick={loadLocked} className="text-sm text-link hover:underline">{t("Cusboonaysii")}</button>
         </div>
         {locked.length === 0 ? (
-          <p className="text-sm text-ink/40">Ma jiro akoon xiran hadda.</p>
+          <p className="text-sm text-ink/40">{t("Ma jiro akoon xiran hadda.")}</p>
         ) : (
           <div className="divide-y divide-line">
             {locked.map((l) => (
@@ -117,14 +118,14 @@ const Users = () => {
                   <p className="text-sm font-medium truncate">
                     {l.name || l.identifier}
                     <span className="text-ink/40 font-normal">
-                      {" "}· {l.scope === "parent" ? "Waalid" : l.scope === "finance" ? "Maaliyadda" : l.scope === "verify" ? "Password-ka tirtirka" : "System User"}
+                      {" "}· {l.scope === "parent" ? t("Waalid") : l.scope === "finance" ? t("Maaliyadda") : l.scope === "verify" ? t("Password-ka tirtirka") : t("System User")}
                     </span>
                   </p>
                   <p className="text-xs text-ink/50">
-                    {l.name ? `${l.identifier} · ` : ""}wuu furmayaa ~{Math.ceil(l.remainingMs / 60000)} daqiiqo
+                    {l.name ? `${l.identifier} · ` : ""}{t("wuu furmayaa ~")}{Math.ceil(l.remainingMs / 60000)} {t("daqiiqo")}
                   </p>
                 </div>
-                <button onClick={() => handleUnlock(l)} className="btn-secondary text-sm shrink-0">Fur</button>
+                <button onClick={() => handleUnlock(l)} className="btn-secondary text-sm shrink-0">{t("Fur")}</button>
               </div>
             ))}
           </div>
@@ -133,7 +134,7 @@ const Users = () => {
 
       <div className="card overflow-x-auto">
         <table className="table-base">
-          <thead><tr><th>Magaca</th><th>Username</th><th>Role</th><th>Xaalad</th><th></th></tr></thead>
+          <thead><tr><th>{t("Magaca")}</th><th>{t("Username")}</th><th>{t("Role")}</th><th>{t("Xaalad")}</th><th></th></tr></thead>
           <tbody>
             {users.map((u) => (
               <tr key={u._id}>
@@ -143,31 +144,31 @@ const Users = () => {
                     <td>{u.username}</td>
                     <td>
                       <select className="input-field" value={editForm.role} onChange={(e) => setEditForm({ ...editForm, role: e.target.value })}>
-                        <option value="staff">Staff</option>
-                        <option value="admin">Admin</option>
+                        <option value="staff">{t("Staff")}</option>
+                        <option value="admin">{t("Admin")}</option>
                       </select>
                     </td>
                     <td>
                       <select className="input-field" value={editForm.status} onChange={(e) => setEditForm({ ...editForm, status: e.target.value })}>
-                        <option value="active">Active</option>
-                        <option value="inactive">Inactive</option>
+                        <option value="active">{t("Active")}</option>
+                        <option value="inactive">{t("Inactive")}</option>
                       </select>
                     </td>
-                    <td className="text-right whitespace-nowrap">
-                      <button onClick={() => handleEditSave(u._id)} className="text-sm text-success hover:underline mr-3">Kaydi</button>
-                      <button onClick={() => setEditingId(null)} className="text-sm text-ink/60 hover:underline">Jooji</button>
+                    <td className="text-end whitespace-nowrap">
+                      <button onClick={() => handleEditSave(u._id)} className="text-sm text-success hover:underline me-3">{t("Kaydi")}</button>
+                      <button onClick={() => setEditingId(null)} className="text-sm text-ink/60 hover:underline">{t("Jooji")}</button>
                     </td>
                   </>
                 ) : (
                   <>
                     <td>{u.fullName}</td>
                     <td>{u.username}</td>
-                    <td className="capitalize">{u.role}</td>
-                    <td className="capitalize">{u.status}</td>
-                    <td className="text-right whitespace-nowrap">
-                      <button onClick={() => startEdit(u)} className="text-sm text-link hover:underline mr-3">Edit</button>
+                    <td>{t(u.role === "admin" ? "Admin" : "Staff")}</td>
+                    <td>{t(u.status === "active" ? "Active" : "Inactive")}</td>
+                    <td className="text-end whitespace-nowrap">
+                      <button onClick={() => startEdit(u)} className="text-sm text-link hover:underline me-3">{t("Edit")}</button>
                       {u.username !== "admin" && (
-                        <button onClick={() => setDeleteTarget(u)} className="text-sm text-danger hover:underline">Tirtir</button>
+                        <button onClick={() => setDeleteTarget(u)} className="text-sm text-danger hover:underline">{t("Tirtir")}</button>
                       )}
                     </td>
                   </>
@@ -182,8 +183,8 @@ const Users = () => {
 
       <ConfirmDeleteModal
         open={!!deleteTarget}
-        title="Tirtir Isticmaalaha?"
-        message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.fullName} (${deleteTarget.username}). Ma awoodo mar dambe inuu soo galo system-ka — lama soo celin karo.` : ""}
+        title={t("Tirtir Isticmaalaha?")}
+        message={deleteTarget ? t("Waxaad tirtirayaa {name} ({username}). Ma awoodo mar dambe inuu soo galo system-ka — lama soo celin karo.", { name: deleteTarget.fullName, username: deleteTarget.username }) : ""}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
       />

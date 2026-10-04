@@ -15,11 +15,12 @@ import staffApi from "../../api/staffClient";
 import ProofImage from "../../components/ProofImage";
 import { StaffHeader, Chip, Badge } from "../../components/StaffUI";
 import { formatMoney, formatDate, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const statusColor = (s) => (s === "confirmed" ? COLORS.success : COLORS.amber);
-const statusText = (s) => (s === "confirmed" ? "La Xaqiijiyay" : "La Sugayo");
-const typeColor = (t) => (t === "complaint" ? COLORS.danger : COLORS.navy);
-const typeText = (t) => (t === "complaint" ? "Cabasho" : "Invoice");
+const statusText = (s) => (s === "confirmed" ? t("La Xaqiijiyay") : t("La Sugayo"));
+const typeColor = (type) => (type === "complaint" ? COLORS.danger : COLORS.navy);
+const typeText = (type) => (type === "complaint" ? t("Cabasho") : t("Invoice"));
 
 const StaffProofsScreen = ({ navigation }) => {
   const [proofs, setProofs] = useState([]);
@@ -127,7 +128,7 @@ const StaffProofsScreen = ({ navigation }) => {
               <>
                 <TouchableOpacity style={styles.statusBtn} onPress={toggleStatus} disabled={busy}>
                   <Text style={styles.statusBtnText}>
-                    {thread.status === "confirmed" ? "Dib u Fur (Sugaya)" : "Calaamadi La Xaqiijiyay"}
+                    {thread.status === "confirmed" ? t("Dib u Fur (Sugaya)") : t("Calaamadi La Xaqiijiyay")}
                   </Text>
                 </TouchableOpacity>
 
@@ -150,11 +151,11 @@ const StaffProofsScreen = ({ navigation }) => {
                     style={styles.replyInput}
                     value={reply}
                     onChangeText={setReply}
-                    placeholder="Qor jawaab..."
+                    placeholder={t("Qor jawaab...")}
                     placeholderTextColor="#9CA3AF"
                   />
                   <TouchableOpacity style={styles.replyBtn} onPress={sendReply} disabled={busy}>
-                    <Text style={styles.replyBtnText}>Dir</Text>
+                    <Text style={styles.replyBtnText}>{t("Dir")}</Text>
                   </TouchableOpacity>
                 </View>
               </>
@@ -167,16 +168,16 @@ const StaffProofsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <StaffHeader title="Caddaynta & Cabashooyinka" />
+      <StaffHeader title={t("Caddaynta & Cabashooyinka")} />
       <View style={styles.filters}>
-        <Chip label="Dhammaan" active={type === ""} onPress={() => setType("")} />
-        <Chip label="Invoice" active={type === "invoice"} onPress={() => setType("invoice")} />
-        <Chip label="Cabasho" active={type === "complaint"} onPress={() => setType("complaint")} />
+        <Chip label={t("Dhammaan")} active={type === ""} onPress={() => setType("")} />
+        <Chip label={t("Invoice")} active={type === "invoice"} onPress={() => setType("invoice")} />
+        <Chip label={t("Cabasho")} active={type === "complaint"} onPress={() => setType("complaint")} />
       </View>
       <View style={styles.filters}>
-        <Chip label="Dhammaan" active={status === ""} onPress={() => setStatus("")} />
-        <Chip label="La Sugayo" active={status === "pending"} onPress={() => setStatus("pending")} />
-        <Chip label="La Xaqiijiyay" active={status === "confirmed"} onPress={() => setStatus("confirmed")} />
+        <Chip label={t("Dhammaan")} active={status === ""} onPress={() => setStatus("")} />
+        <Chip label={t("La Sugayo")} active={status === "pending"} onPress={() => setStatus("pending")} />
+        <Chip label={t("La Xaqiijiyay")} active={status === "confirmed"} onPress={() => setStatus("confirmed")} />
       </View>
 
       {loading ? (
@@ -190,7 +191,7 @@ const StaffProofsScreen = ({ navigation }) => {
           renderItem={renderItem}
           contentContainerStyle={{ padding: 12, paddingBottom: 30 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListEmptyComponent={<Text style={styles.empty}>Weli wax lama soo gudbin.</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>{t("Weli wax lama soo gudbin.")}</Text>}
         />
       )}
 

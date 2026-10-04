@@ -1,8 +1,17 @@
 import { formatMoney } from "./format";
+import { t } from "../i18n";
 
 export const PAYMENT_METHODS = ["Cash", "Mobile Money", "Bank", "Other"];
 
-export const EMPLOYEE_TYPES = { teacher: "Macalin", staff: "Shaqaale" };
+// Getters, so the label is translated at the moment it is read (and follows the chosen language).
+export const EMPLOYEE_TYPES = {
+  get teacher() {
+    return t("Macalin");
+  },
+  get staff() {
+    return t("Shaqaale");
+  },
+};
 
 export const EXPENSE_CATEGORIES = [
   "Koronto",
@@ -38,7 +47,9 @@ export const shiftMonth = (period, delta) => {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}`;
 };
 
+const MONTH_NAMES = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+
 export const monthLabel = (period) => {
   const [y, m] = period.split("-").map(Number);
-  return new Date(y, m - 1, 1).toLocaleDateString("en-GB", { month: "long", year: "numeric" });
+  return `${t(MONTH_NAMES[m - 1])} ${y}`;
 };

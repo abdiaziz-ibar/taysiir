@@ -11,8 +11,10 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useAuth } from "../context/AuthContext";
+import LanguageButton from "../i18n/LanguageButton";
 import { useStaff } from "../context/StaffContext";
 import { COLORS, formatMoney } from "../utils/format";
+import { t } from "../i18n";
 
 export const StaffHeader = ({ title }) => {
   const { staff, staffLogout } = useAuth();
@@ -24,8 +26,11 @@ export const StaffHeader = ({ title }) => {
           {staff?.fullName}
         </Text>
       </View>
+      <View style={{ marginEnd: 8 }}>
+        <LanguageButton light />
+      </View>
       <TouchableOpacity style={styles.logoutBtn} onPress={staffLogout}>
-        <Text style={styles.logoutText}>Ka Bax</Text>
+        <Text style={styles.logoutText}>{t("Ka Bax")}</Text>
       </TouchableOpacity>
     </View>
   );
@@ -70,7 +75,7 @@ export const ChipRow = ({ children }) => <View style={styles.chipRow}>{children}
 export const ScreenHeader = ({ title, onBack, right }) => (
   <View style={styles.header}>
     <TouchableOpacity onPress={onBack} style={{ width: 60 }}>
-      <Text style={styles.back}>‹ Dib</Text>
+      <Text style={styles.back}>{t("‹ Dib")}</Text>
     </TouchableOpacity>
     <Text style={styles.screenTitle} numberOfLines={1}>
       {title}
@@ -85,7 +90,7 @@ export const ScreenModal = ({ visible, title, onClose, children }) => (
       <View style={styles.modalHeader}>
         <Text style={styles.headerTitle}>{title}</Text>
         <TouchableOpacity onPress={onClose}>
-          <Text style={styles.modalClose}>Jooji</Text>
+          <Text style={styles.modalClose}>{t("Jooji")}</Text>
         </TouchableOpacity>
       </View>
       <ScrollView contentContainerStyle={{ padding: 18, paddingBottom: 60 }} keyboardShouldPersistTaps="handled">
@@ -140,7 +145,7 @@ export const MonthBars = ({ data, valueKey, color }) => {
     <View>
       {data.map((d) => (
         <View key={d.month} style={styles.barRow}>
-          <Text style={styles.barMonth}>{d.month}</Text>
+          <Text style={styles.barMonth}>{t(d.month)}</Text>
           <View style={styles.barTrack}>
             <View style={[styles.barFill, { width: `${((d[valueKey] || 0) / max) * 100}%`, backgroundColor: color || COLORS.navy }]} />
           </View>
@@ -152,7 +157,7 @@ export const MonthBars = ({ data, valueKey, color }) => {
 };
 
 export const feeStatusColor = (s) => (s === "paid" ? COLORS.success : s === "partial" ? COLORS.amber : COLORS.danger);
-export const feeStatusText = (s) => (s === "paid" ? "Paid" : s === "partial" ? "Partial" : "Unpaid");
+export const feeStatusText = (s) => (s === "paid" ? t("Paid") : s === "partial" ? t("Partial") : t("Unpaid"));
 
 const styles = StyleSheet.create({
   header: {

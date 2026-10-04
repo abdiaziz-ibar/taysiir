@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import staffApi from "../../api/staffClient";
 import { ScreenHeader, Loading, Chip, Badge, feeStatusColor, feeStatusText } from "../../components/StaffUI";
 import { formatMoney, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const idNum = (code) => parseInt((code || "").replace(/\D/g, ""), 10) || 0;
 const GETTERS = {
@@ -53,7 +54,7 @@ const StaffParentsSummaryScreen = ({ navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <ScreenHeader title="Wadarta Waalidiinta" onBack={navigation.goBack} />
+      <ScreenHeader title={t("Wadarta Waalidiinta")} onBack={navigation.goBack} />
       {data === null ? (
         <Loading />
       ) : (
@@ -64,24 +65,24 @@ const StaffParentsSummaryScreen = ({ navigation }) => {
           ListHeaderComponent={
             <View>
               <View style={styles.total}>
-                <Text style={styles.totalLabel}>Wadarta Guud (dhammaan sannadaha)</Text>
+                <Text style={styles.totalLabel}>{t("Wadarta Guud (dhammaan sannadaha)")}</Text>
                 <Text style={styles.totalValue}>{formatMoney(data.totals.totalFees)}</Text>
                 <Text style={styles.totalSub}>
-                  La bixiyey {formatMoney(data.totals.totalPaid)} · Ku dhiman {formatMoney(data.totals.totalDebt)}
+                  {t("La bixiyey")} {formatMoney(data.totals.totalPaid)} {t("· Ku dhiman")} {formatMoney(data.totals.totalDebt)}
                 </Text>
               </View>
               <TextInput
                 style={styles.search}
                 value={search}
                 onChangeText={setSearch}
-                placeholder="Raadi magaca, phone ama ID..."
+                placeholder={t("Raadi magaca, phone ama ID...")}
                 placeholderTextColor="#9CA3AF"
               />
               <View style={styles.sorts}>
                 {SORTS.map(([key, label]) => (
                   <Chip
                     key={key}
-                    label={`${label}${sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : ""}`}
+                    label={`${t(label)}${sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : ""}`}
                     active={sortKey === key}
                     onPress={() => toggleSort(key)}
                   />
@@ -89,7 +90,7 @@ const StaffParentsSummaryScreen = ({ navigation }) => {
               </View>
             </View>
           }
-          ListEmptyComponent={<Text style={styles.empty}>Waalid lama helin.</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>{t("Waalid lama helin.")}</Text>}
           renderItem={({ item: p }) => {
             const open = openId === p.parentId;
             return (
@@ -98,23 +99,23 @@ const StaffParentsSummaryScreen = ({ navigation }) => {
                   <View style={{ flex: 1 }}>
                     <Text style={styles.name}>{p.fullName}</Text>
                     <Text style={styles.sub}>
-                      {p.parentCode} · {p.phone} · {p.yearsCount} sanad
+                      {p.parentCode} · {p.phone} · {p.yearsCount} {t("sanad")}
                     </Text>
                     <Text style={styles.sub}>
-                      Fee {formatMoney(p.totalFees)} · La bixiyey {formatMoney(p.totalPaid)}
+                      {t("Fee")} {formatMoney(p.totalFees)} {t("· La bixiyey")} {formatMoney(p.totalPaid)}
                     </Text>
                   </View>
                   <Text style={styles.debt}>{formatMoney(p.totalDebt)}</Text>
                 </TouchableOpacity>
                 {open && (
                   <View style={styles.years}>
-                    {p.years.length === 0 && <Text style={styles.sub}>Fee lama dhigin.</Text>}
+                    {p.years.length === 0 && <Text style={styles.sub}>{t("Fee lama dhigin.")}</Text>}
                     {p.years.map((y) => (
                       <View key={y.academicYearId} style={styles.yearRow}>
                         <View style={{ flex: 1 }}>
                           <Text style={styles.yearName}>{y.academicYear}</Text>
                           <Text style={styles.sub}>
-                            Fee {formatMoney(y.totalAmount)} · La bixiyey {formatMoney(y.totalPaid)}
+                            {t("Fee")} {formatMoney(y.totalAmount)} {t("· La bixiyey")} {formatMoney(y.totalPaid)}
                           </Text>
                         </View>
                         <View style={{ alignItems: "flex-end", gap: 4 }}>
@@ -124,7 +125,7 @@ const StaffParentsSummaryScreen = ({ navigation }) => {
                       </View>
                     ))}
                     <TouchableOpacity onPress={() => navigation.navigate("ParentDetail", { id: p.parentId })}>
-                      <Text style={styles.link}>Fur faahfaahinta waalidka ›</Text>
+                      <Text style={styles.link}>{t("Fur faahfaahinta waalidka ›")}</Text>
                     </TouchableOpacity>
                   </View>
                 )}

@@ -6,6 +6,7 @@ import { useStaff } from "../../context/StaffContext";
 import { ScreenHeader, YearChips, Loading } from "../../components/StaffUI";
 import FeeRow from "../../components/FeeRow";
 import { formatMoney, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const StaffDebtsScreen = ({ navigation }) => {
   const { selectedYearId } = useStaff();
@@ -26,7 +27,7 @@ const StaffDebtsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <ScreenHeader title="Deymaha" onBack={navigation.goBack} />
+      <ScreenHeader title={t("Deymaha")} onBack={navigation.goBack} />
       <YearChips />
       {data === null ? (
         <Loading />
@@ -47,11 +48,11 @@ const StaffDebtsScreen = ({ navigation }) => {
           }
           ListHeaderComponent={
             <View style={styles.total}>
-              <Text style={styles.totalLabel}>Wadarta Deynta</Text>
+              <Text style={styles.totalLabel}>{t("Wadarta Deynta")}</Text>
               <Text style={styles.totalValue}>{formatMoney(data.totalDebt)}</Text>
             </View>
           }
-          ListEmptyComponent={<Text style={styles.empty}>Mid deyn qaba lama helin. 🎉</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>{t("Mid deyn qaba lama helin. 🎉")}</Text>}
           renderItem={({ item }) => (
             <FeeRow fee={item} onPress={() => navigation.navigate("ParentDetail", { id: item.parentId?._id })} />
           )}

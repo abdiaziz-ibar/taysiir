@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../utils/format";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+import { t } from "../i18n";
 
 const ParentDetail = () => {
   const { id } = useParams();
@@ -52,7 +53,7 @@ const ParentDetail = () => {
       setFeeAmount("");
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     }
   };
 
@@ -70,7 +71,7 @@ const ParentDetail = () => {
       setFeeEditingId(null);
       load();
     } catch (err) {
-      setFeeEditError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setFeeEditError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     }
   };
 
@@ -96,7 +97,7 @@ const ParentDetail = () => {
       setEditing(false);
       load();
     } catch (err) {
-      setEditError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setEditError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -120,24 +121,24 @@ const ParentDetail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [parent]);
 
-  if (!parent) return <p className="text-ink/50">Waa la soo shubayaa...</p>;
+  if (!parent) return <p className="text-ink/50">{t("Waa la soo shubayaa...")}</p>;
 
   const feesForYear = selectedYear ? parent.fees.filter((f) => f.academicYearId?._id === selectedYear) : parent.fees;
   const currentFee = feesForYear[0];
 
   return (
     <div className="space-y-6">
-      <Link to="/parents" className="text-sm text-link hover:underline">&larr; Ku Noqo Waalidiinta</Link>
+      <Link to="/parents" className="text-sm text-link hover:underline">{t("← Ku Noqo Waalidiinta")}</Link>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="card md:col-span-1">
           <div className="flex items-center justify-between mb-3 gap-2">
-            <h3 className="font-serif text-lg">Xogta Waalidka</h3>
+            <h3 className="font-serif text-lg">{t("Xogta Waalidka")}</h3>
             {!editing && (
               <div className="flex gap-2 shrink-0">
-                <button className="btn-secondary text-sm" onClick={startEdit}>Wax Ka Beddel (Edit)</button>
+                <button className="btn-secondary text-sm" onClick={startEdit}>{t("Wax Ka Beddel (Edit)")}</button>
                 {user?.role === "admin" && (
-                  <button className="btn-danger text-sm" onClick={() => setDeleteTarget({ type: "all" })}>Tirtir</button>
+                  <button className="btn-danger text-sm" onClick={() => setDeleteTarget({ type: "all" })}>{t("Tirtir")}</button>
                 )}
               </div>
             )}
@@ -145,47 +146,47 @@ const ParentDetail = () => {
 
           {!editing ? (
             <>
-              <p className="text-sm text-ink/50">Parent ID</p>
+              <p className="text-sm text-ink/50">{t("Parent ID")}</p>
               <p className="mb-2">{parent.parentId}</p>
-              <p className="text-sm text-ink/50">Magaca</p>
+              <p className="text-sm text-ink/50">{t("Magaca")}</p>
               <p className="mb-2">{parent.fullName}</p>
-              <p className="text-sm text-ink/50">Phone</p>
+              <p className="text-sm text-ink/50">{t("Phone")}</p>
               <p className="mb-2">{parent.phone}</p>
-              {parent.alternativePhone && (<><p className="text-sm text-ink/50">Alternative Phone</p><p className="mb-2">{parent.alternativePhone}</p></>)}
-              <p className="text-sm text-ink/50">Address</p>
+              {parent.alternativePhone && (<><p className="text-sm text-ink/50">{t("Alternative Phone")}</p><p className="mb-2">{parent.alternativePhone}</p></>)}
+              <p className="text-sm text-ink/50">{t("Address")}</p>
               <p className="mb-2">{parent.address || "-"}</p>
-              {parent.notes && (<><p className="text-sm text-ink/50">Notes</p><p>{parent.notes}</p></>)}
+              {parent.notes && (<><p className="text-sm text-ink/50">{t("Notes")}</p><p>{parent.notes}</p></>)}
             </>
           ) : (
             <form onSubmit={handleEditSave} className="space-y-3">
               {editError && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{editError}</div>}
               <div>
-                <label className="label-field">Magaca Waalidka</label>
+                <label className="label-field">{t("Magaca Waalidka")}</label>
                 <input className="input-field" required value={editForm.fullName} onChange={(e) => setEditForm({ ...editForm, fullName: e.target.value })} />
               </div>
               <div>
-                <label className="label-field">Phone Number</label>
+                <label className="label-field">{t("Phone Number")}</label>
                 <input className="input-field" required value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} />
               </div>
               <div>
-                <label className="label-field">Alternative Phone</label>
+                <label className="label-field">{t("Alternative Phone")}</label>
                 <input className="input-field" value={editForm.alternativePhone} onChange={(e) => setEditForm({ ...editForm, alternativePhone: e.target.value })} />
               </div>
               <div>
-                <label className="label-field">Address</label>
+                <label className="label-field">{t("Address")}</label>
                 <input className="input-field" required value={editForm.address} onChange={(e) => setEditForm({ ...editForm, address: e.target.value })} />
               </div>
               <div>
-                <label className="label-field">Email (ikhtiyaari)</label>
+                <label className="label-field">{t("Email (ikhtiyaari)")}</label>
                 <input className="input-field" value={editForm.email} onChange={(e) => setEditForm({ ...editForm, email: e.target.value })} />
               </div>
               <div>
-                <label className="label-field">Notes</label>
+                <label className="label-field">{t("Notes")}</label>
                 <textarea className="input-field" rows={2} value={editForm.notes} onChange={(e) => setEditForm({ ...editForm, notes: e.target.value })} />
               </div>
               <div className="flex gap-3">
-                <button className="btn-primary" disabled={saving}>{saving ? "Waa la kaydinayaa..." : "Kaydi"}</button>
-                <button type="button" className="btn-secondary" onClick={() => setEditing(false)}>Jooji (Cancel)</button>
+                <button className="btn-primary" disabled={saving}>{saving ? t("Waa la kaydinayaa...") : t("Kaydi")}</button>
+                <button type="button" className="btn-secondary" onClick={() => setEditing(false)}>{t("Jooji (Cancel)")}</button>
               </div>
             </form>
           )}
@@ -193,9 +194,9 @@ const ParentDetail = () => {
 
         <div className="card md:col-span-2">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-serif text-lg">Sanad Dugsiyeedka</h3>
+            <h3 className="font-serif text-lg">{t("Sanad Dugsiyeedka")}</h3>
             <button className="btn-secondary text-sm" onClick={() => setShowFeeForm((v) => !v)}>
-              {showFeeForm ? "Jooji" : "+ U Samee Fee Sanad Cusub"}
+              {showFeeForm ? t("Jooji") : t("+ U Samee Fee Sanad Cusub")}
             </button>
           </div>
 
@@ -203,17 +204,17 @@ const ParentDetail = () => {
             <form onSubmit={handleAddFee} className="flex flex-wrap gap-3 items-end mb-4 bg-paper p-3 rounded-md">
               {error && <div className="w-full bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
               <div>
-                <label className="label-field">Sanad Dugsiyeed</label>
+                <label className="label-field">{t("Sanad Dugsiyeed")}</label>
                 <select className="input-field" required value={feeYear} onChange={(e) => setFeeYear(e.target.value)}>
-                  <option value="">Dooro...</option>
+                  <option value="">{t("Dooro...")}</option>
                   {years.map((y) => <option key={y._id} value={y._id}>{y.name}</option>)}
                 </select>
               </div>
               <div>
-                <label className="label-field">Total Fee ($)</label>
+                <label className="label-field">{t("Total Fee ($)")}</label>
                 <input type="number" min="0" step="0.01" required className="input-field" value={feeAmount} onChange={(e) => setFeeAmount(e.target.value)} />
               </div>
-              <button className="btn-primary">Kaydi</button>
+              <button className="btn-primary">{t("Kaydi")}</button>
             </form>
           )}
 
@@ -222,11 +223,11 @@ const ParentDetail = () => {
           <table className="table-base">
             <thead>
               <tr>
-                <th>Academic Year</th>
-                <th className="text-right">Total Fee</th>
-                <th className="text-right">Paid</th>
-                <th className="text-right">Balance</th>
-                <th>Status</th>
+                <th>{t("Academic Year")}</th>
+                <th className="text-end">{t("Total Fee")}</th>
+                <th className="text-end">{t("Paid")}</th>
+                <th className="text-end">{t("Balance")}</th>
+                <th>{t("Status")}</th>
                 <th></th>
               </tr>
             </thead>
@@ -234,13 +235,13 @@ const ParentDetail = () => {
               {parent.fees.map((f) => (
                 <tr key={f._id}>
                   <td>{f.academicYearId?.name}</td>
-                  <td className="text-right">
+                  <td className="text-end">
                     {feeEditingId === f._id ? (
                       <input
                         type="number"
                         min="0"
                         step="0.01"
-                        className="input-field !w-28 ml-auto text-right"
+                        className="input-field !w-28 ms-auto text-end"
                         value={feeEditAmount}
                         onChange={(e) => setFeeEditAmount(e.target.value)}
                       />
@@ -248,13 +249,13 @@ const ParentDetail = () => {
                       formatMoney(f.totalAmount)
                     )}
                   </td>
-                  <td className="text-right">
+                  <td className="text-end">
                     {feeEditingId === f._id ? (
                       <input
                         type="number"
                         min="0"
                         step="0.01"
-                        className="input-field !w-28 ml-auto text-right"
+                        className="input-field !w-28 ms-auto text-end"
                         value={feeEditPaid}
                         onChange={(e) => setFeeEditPaid(e.target.value)}
                       />
@@ -262,19 +263,19 @@ const ParentDetail = () => {
                       formatMoney(f.totalPaid)
                     )}
                   </td>
-                  <td className="text-right">{formatMoney(f.balance)}</td>
+                  <td className="text-end">{formatMoney(f.balance)}</td>
                   <td><span className={statusBadgeClass(f.status)}>{statusLabel(f.status)}</span></td>
-                  <td className="text-right whitespace-nowrap">
+                  <td className="text-end whitespace-nowrap">
                     {feeEditingId === f._id ? (
                       <>
-                        <button onClick={() => handleFeeEditSave(f._id)} className="text-sm text-success hover:underline mr-3">Kaydi</button>
-                        <button onClick={() => setFeeEditingId(null)} className="text-sm text-ink/60 hover:underline">Jooji</button>
+                        <button onClick={() => handleFeeEditSave(f._id)} className="text-sm text-success hover:underline me-3">{t("Kaydi")}</button>
+                        <button onClick={() => setFeeEditingId(null)} className="text-sm text-ink/60 hover:underline">{t("Jooji")}</button>
                       </>
                     ) : (
                       <>
-                        <button onClick={() => startFeeEdit(f)} className="text-sm text-link hover:underline">Edit</button>
+                        <button onClick={() => startFeeEdit(f)} className="text-sm text-link hover:underline">{t("Edit")}</button>
                         {user?.role === "admin" && (
-                          <button onClick={() => setDeleteTarget({ type: "year", fee: f })} className="text-sm text-danger hover:underline ml-3">Tirtir</button>
+                          <button onClick={() => setDeleteTarget({ type: "year", fee: f })} className="text-sm text-danger hover:underline ms-3">{t("Tirtir")}</button>
                         )}
                       </>
                     )}
@@ -282,7 +283,7 @@ const ParentDetail = () => {
                 </tr>
               ))}
               {parent.fees.length === 0 && (
-                <tr><td colSpan={6} className="text-center text-ink/40 py-4">Weli Fee lama dhigin.</td></tr>
+                <tr><td colSpan={6} className="text-center text-ink/40 py-4">{t("Weli Fee lama dhigin.")}</td></tr>
               )}
             </tbody>
           </table>
@@ -290,15 +291,15 @@ const ParentDetail = () => {
       </div>
 
       <div className="card">
-        <h3 className="font-serif text-lg mb-3">Payment History</h3>
+        <h3 className="font-serif text-lg mb-3">{t("Payment History")}</h3>
         <table className="table-base">
           <thead>
             <tr>
-              <th>Receipt</th>
-              <th>Taariikh</th>
-              <th>Sanad Dugsiyeed</th>
-              <th className="text-right">Lacag</th>
-              <th>Habka Lacagta</th>
+              <th>{t("Receipt")}</th>
+              <th>{t("Taariikh")}</th>
+              <th>{t("Sanad Dugsiyeed")}</th>
+              <th className="text-end">{t("Lacag")}</th>
+              <th>{t("Habka Lacagta")}</th>
             </tr>
           </thead>
           <tbody>
@@ -307,12 +308,12 @@ const ParentDetail = () => {
                 <td><Link to={`/payments/${p._id}`} className="text-link hover:underline">{p.receiptNumber}</Link></td>
                 <td>{formatDate(p.paymentDate)}</td>
                 <td>{p.academicYearId?.name}</td>
-                <td className="text-right">{formatMoney(p.amount)}</td>
-                <td>{p.paymentMethod}</td>
+                <td className="text-end">{formatMoney(p.amount)}</td>
+                <td>{t(p.paymentMethod)}</td>
               </tr>
             ))}
             {payments.length === 0 && (
-              <tr><td colSpan={5} className="text-center text-ink/40 py-4">Weli lacag lama bixin.</td></tr>
+              <tr><td colSpan={5} className="text-center text-ink/40 py-4">{t("Weli lacag lama bixin.")}</td></tr>
             )}
           </tbody>
         </table>
@@ -320,11 +321,11 @@ const ParentDetail = () => {
 
       <ConfirmDeleteModal
         open={!!deleteTarget}
-        title={deleteTarget?.type === "year" ? "Tirtir Sanad Dugsiyeedka?" : "Tirtir Waalidka?"}
+        title={deleteTarget?.type === "year" ? t("Tirtir Sanad Dugsiyeedka?") : t("Tirtir Waalidka?")}
         message={
           deleteTarget?.type === "year"
-            ? `Waxaad ka tirtirayaa sanadka ${deleteTarget.fee.academicYearId?.name} Fee-giisa iyo lacag-bixinnadiisa kaliya. ${parent.fullName} iyo sannadaha kale way hadhayaan.`
-            : `Waxaad tirtirayaa ${parent.fullName} oo dhan, iyo dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa sannad kasta — lama soo celin karo.`
+            ? t("Waxaad ka tirtirayaa sanadka {year} Fee-giisa iyo lacag-bixinnadiisa kaliya. {name} iyo sannadaha kale way hadhayaan.", { year: deleteTarget.fee.academicYearId?.name, name: parent.fullName })
+            : t("Waxaad tirtirayaa {name} oo dhan, iyo dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa sannad kasta — lama soo celin karo.", { name: parent.fullName })
         }
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}

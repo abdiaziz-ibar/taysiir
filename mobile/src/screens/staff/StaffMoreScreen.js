@@ -2,6 +2,7 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-nati
 import { useAuth } from "../../context/AuthContext";
 import { StaffHeader } from "../../components/StaffUI";
 import { COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const GROUPS = [
   {
@@ -36,11 +37,11 @@ const StaffMoreScreen = ({ navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <StaffHeader title="Dheeri" />
+      <StaffHeader title={t("Dheeri")} />
       <ScrollView contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
         {GROUPS.map((g) => (
           <View key={g.title} style={{ marginBottom: 14 }}>
-            <Text style={styles.group}>{g.title}</Text>
+            <Text style={styles.group}>{t(g.title)}</Text>
             <View style={styles.card}>
               {g.items
                 .filter((i) => !i.adminOnly || isAdmin)
@@ -51,7 +52,7 @@ const StaffMoreScreen = ({ navigation }) => {
                     onPress={() => navigation.navigate(i.route)}
                   >
                     <Text style={styles.icon}>{i.icon}</Text>
-                    <Text style={styles.label}>{i.label}</Text>
+                    <Text style={styles.label}>{t(i.label)}</Text>
                     <Text style={styles.chev}>›</Text>
                   </TouchableOpacity>
                 ))}

@@ -26,8 +26,8 @@ export default {
         line: "#E7E5E0",
       },
       fontFamily: {
-        serif: ["Lora", "Georgia", "serif"],
-        sans: ["IBM Plex Sans", "system-ui", "sans-serif"],
+        serif: ["Lora", "Georgia", "Noto Naskh Arabic", "serif"],
+        sans: ["IBM Plex Sans", "Noto Sans Arabic", "system-ui", "sans-serif"],
       },
     },
   },

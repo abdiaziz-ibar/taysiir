@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from "react";
 import { Receipt, Paperclip, Send, ChevronDown, ChevronRight, Trash2 } from "lucide-react";
 import parentApi from "../../api/parentAxios";
 import { formatMoney, formatDate } from "../../utils/format";
+import { t } from "../../i18n";
 
 const API_ORIGIN = (import.meta.env.VITE_API_URL || "http://localhost:5000/api").replace(/\/api\/?$/, "");
 
 const statusBadge = (status) => (status === "confirmed" ? "badge badge-paid" : "badge badge-partial");
-const statusLabel = (status) => (status === "confirmed" ? "La Xaqiijiyay" : "La Sugayo");
+const statusLabel = (status) => (status === "confirmed" ? t("La Xaqiijiyay") : t("La Sugayo"));
 const typeBadge = (type) => (type === "complaint" ? "badge badge-unpaid" : "badge bg-navy/10 text-navy");
-const typeLabel = (type) => (type === "complaint" ? "Cabasho" : "Invoice");
+const typeLabel = (type) => (type === "complaint" ? t("Cabasho") : t("Invoice"));
 
 const ParentPaymentProofs = ({ payments }) => {
   const [proofs, setProofs] = useState([]);
@@ -45,7 +46,7 @@ const ParentPaymentProofs = ({ payments }) => {
     e.preventDefault();
     setError("");
     if (!message.trim()) {
-      setError(type === "complaint" ? "Fadlan sharax cabashadaada." : "Fadlan sharax lacag-bixinta aad sameysay.");
+      setError(type === "complaint" ? t("Fadlan sharax cabashadaada.") : t("Fadlan sharax lacag-bixinta aad sameysay."));
       return;
     }
     setSubmitting(true);
@@ -65,7 +66,7 @@ const ParentPaymentProofs = ({ payments }) => {
       setShowForm(false);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSubmitting(false);
     }
@@ -99,13 +100,13 @@ const ParentPaymentProofs = ({ payments }) => {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("Ma hubtaa inaad tirtirto caddayntan/cabashadan?")) return;
+    if (!window.confirm(t("Ma hubtaa inaad tirtirto caddayntan/cabashadan?"))) return;
     try {
       await parentApi.delete(`/parent-portal/payment-proofs/${id}`);
       setOpenId(null);
       load();
     } catch (err) {
-      window.alert(err.response?.data?.message || "Khalad ayaa dhacay.");
+      window.alert(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     }
   };
 
@@ -114,10 +115,10 @@ const ParentPaymentProofs = ({ payments }) => {
       <div className="flex items-center justify-between mb-3">
         <h3 className="font-serif text-lg flex items-center gap-2">
           <Receipt size={18} className="text-navy" />
-          Lacag Bixinta &amp; Cabashooyinka
+          {t("Lacag Bixinta & Cabashooyinka")}
         </h3>
         <button className="btn-secondary text-sm" onClick={() => setShowForm((v) => !v)}>
-          {showForm ? "Jooji" : "+ Soo Gudbi"}
+          {showForm ? t("Jooji") : t("+ Soo Gudbi")}
         </button>
       </div>
 
@@ -129,14 +130,14 @@ const ParentPaymentProofs = ({ payments }) => {
               onClick={() => { setType("invoice"); setError(""); }}
               className={`flex-1 py-1.5 rounded-full transition-colors ${type === "invoice" ? "bg-navy text-white" : "bg-surface text-ink/60 hover:bg-surface/70"}`}
             >
-              Soo Gudbi Invoice
+              {t("Soo Gudbi Invoice")}
             </button>
             <button
               type="button"
               onClick={() => { setType("complaint"); setError(""); }}
               className={`flex-1 py-1.5 rounded-full transition-colors ${type === "complaint" ? "bg-navy text-white" : "bg-surface text-ink/60 hover:bg-surface/70"}`}
             >
-              Qor Cabasho
+              {t("Qor Cabasho")}
             </button>
           </div>
 
@@ -145,33 +146,33 @@ const ParentPaymentProofs = ({ payments }) => {
 
             {type === "invoice" ? (
               <p className="text-xs text-ink/50">
-                Haddii aad lacag bixisay (tusaale EVC Plus/Zaad), halkan ku soo gudbi caddayntiisa (invoice/screenshot) si maamulku u ogaado in lacagta la dhiibay.
+                {t("Haddii aad lacag bixisay (tusaale EVC Plus/Zaad), halkan ku soo gudbi caddayntiisa (invoice/screenshot) si maamulku u ogaado in lacagta la dhiibay.")}
               </p>
             ) : (
               <p className="text-xs text-ink/50">
-                Haddii dhibaato ka qabto lacag-bixin (tusaale lama xisaabin, qalad ayaa ka dhacay), halkan ku sharax cabashadaada.
+                {t("Haddii dhibaato ka qabto lacag-bixin (tusaale lama xisaabin, qalad ayaa ka dhacay), halkan ku sharax cabashadaada.")}
               </p>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {type === "invoice" && (
                 <div>
-                  <label className="label-field">Lacagta La Bixiyay ($)</label>
+                  <label className="label-field">{t("Lacagta La Bixiyay ($)")}</label>
                   <input
                     type="number"
                     min="0"
                     step="0.01"
                     className="input-field"
                     value={amount}
-                    placeholder="Tusaale: 50"
+                    placeholder={t("Tusaale: 50")}
                     onChange={(e) => setAmount(e.target.value)}
                   />
                 </div>
               )}
               <div className={type === "complaint" ? "sm:col-span-2" : ""}>
-                <label className="label-field">Lacag Bixin (ikhtiyaari)</label>
+                <label className="label-field">{t("Lacag Bixin (ikhtiyaari)")}</label>
                 <select className="input-field" value={paymentId} onChange={(e) => setPaymentId(e.target.value)}>
-                  <option value="">-- Ha dooran --</option>
+                  <option value="">{t("-- Ha dooran --")}</option>
                   {payments.map((p) => (
                     <option key={p._id} value={p._id}>
                       {p.receiptNumber} — {formatDate(p.paymentDate)}
@@ -179,32 +180,32 @@ const ParentPaymentProofs = ({ payments }) => {
                   ))}
                 </select>
                 {payments.length === 0 && (
-                  <p className="text-xs text-ink/40 mt-1">Weli lacag lama bixin, marka liiskani madhan yahay.</p>
+                  <p className="text-xs text-ink/40 mt-1">{t("Weli lacag lama bixin, marka liiskani madhan yahay.")}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label className="label-field">{type === "complaint" ? "Sharax Cabashadaada" : "Faahfaahin"}</label>
+              <label className="label-field">{type === "complaint" ? t("Sharax Cabashadaada") : t("Faahfaahin")}</label>
               <textarea
                 className="input-field"
                 rows={3}
                 required
                 value={message}
-                placeholder={type === "complaint" ? "Tusaale: Lacagtii aan bixiyey lama xisaabin." : "Tusaale: Waxaan ku bixiyey EVC Plus 19/09/2026."}
+                placeholder={type === "complaint" ? t("Tusaale: Lacagtii aan bixiyey lama xisaabin.") : t("Tusaale: Waxaan ku bixiyey EVC Plus 19/09/2026.")}
                 onChange={(e) => setMessage(e.target.value)}
               />
             </div>
 
             <div>
               <label className="label-field flex items-center gap-1.5">
-                <Paperclip size={14} /> {type === "complaint" ? "Caddayn (ikhtiyaari)" : "Invoice/Screenshot (PNG/JPG)"}
+                <Paperclip size={14} /> {type === "complaint" ? t("Caddayn (ikhtiyaari)") : t("Invoice/Screenshot (PNG/JPG)")}
               </label>
               <input ref={fileInputRef} type="file" accept="image/png,image/jpeg" className="input-field" />
             </div>
 
             <button className="btn-primary" disabled={submitting}>
-              {submitting ? "Waa la diraayaa..." : "Soo Gudbi"}
+              {submitting ? t("Waa la diraayaa...") : t("Soo Gudbi")}
             </button>
           </form>
         </div>
@@ -218,10 +219,10 @@ const ParentPaymentProofs = ({ payments }) => {
             <div key={p._id} className="border border-line rounded-md overflow-hidden">
               <button
                 onClick={() => toggleThread(p._id)}
-                className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-paper"
+                className="w-full flex items-center justify-between gap-3 px-4 py-3 text-start hover:bg-paper"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  {isOpen ? <ChevronDown size={15} className="text-ink/40 shrink-0" /> : <ChevronRight size={15} className="text-ink/40 shrink-0" />}
+                  {isOpen ? <ChevronDown size={15} className="text-ink/40 shrink-0" /> : <ChevronRight size={15} className="text-ink/40 shrink-0 rtl:rotate-180" />}
                   <span className={typeBadge(p.type)}>{typeLabel(p.type)}</span>
                   <span className="truncate text-sm">
                     {p.amount ? `${formatMoney(p.amount)} — ` : ""}
@@ -240,7 +241,7 @@ const ParentPaymentProofs = ({ payments }) => {
                     <a href={`${API_ORIGIN}${p.screenshotUrl}`} target="_blank" rel="noreferrer">
                       <img
                         src={`${API_ORIGIN}${p.screenshotUrl}`}
-                        alt="Caddaynta lacag bixinta"
+                        alt={t("Caddaynta lacag bixinta")}
                         className="max-h-48 rounded-md border border-line"
                       />
                     </a>
@@ -251,15 +252,15 @@ const ParentPaymentProofs = ({ payments }) => {
                       <div
                         key={m._id}
                         className={`max-w-[80%] rounded-md px-3 py-2 text-sm ${
-                          m.senderType === "parent" ? "bg-navy text-white ml-auto" : "bg-surface border border-line"
+                          m.senderType === "parent" ? "bg-navy text-white ms-auto" : "bg-surface border border-line"
                         }`}
                       >
-                        <p className="text-xs opacity-60 mb-0.5">{m.senderType === "parent" ? "Adiga" : m.senderName}</p>
+                        <p className="text-xs opacity-60 mb-0.5">{m.senderType === "parent" ? t("Adiga") : m.senderName}</p>
                         <p>{m.message}</p>
                       </div>
                     ))}
                     {thread && thread.messages.length === 0 && (
-                      <p className="text-sm text-ink/40">Weli jawaab lama bixin.</p>
+                      <p className="text-sm text-ink/40">{t("Weli jawaab lama bixin.")}</p>
                     )}
                   </div>
 
@@ -272,7 +273,7 @@ const ParentPaymentProofs = ({ payments }) => {
                   >
                     <input
                       className="input-field"
-                      placeholder="Qor fariin..."
+                      placeholder={t("Qor fariin...")}
                       value={replyText}
                       onChange={(e) => setReplyText(e.target.value)}
                     />
@@ -287,7 +288,7 @@ const ParentPaymentProofs = ({ payments }) => {
                       onClick={() => handleDelete(p._id)}
                       className="inline-flex items-center gap-1.5 text-sm text-danger hover:underline"
                     >
-                      <Trash2 size={14} /> Tirtir
+                      <Trash2 size={14} /> {t("Tirtir")}
                     </button>
                   )}
                 </div>
@@ -296,7 +297,7 @@ const ParentPaymentProofs = ({ payments }) => {
           );
         })}
         {proofs.length === 0 && !showForm && (
-          <p className="text-sm text-ink/40 text-center py-4">Weli lacag-bixin ama cabasho lama soo gudbin.</p>
+          <p className="text-sm text-ink/40 text-center py-4">{t("Weli lacag-bixin ama cabasho lama soo gudbin.")}</p>
         )}
       </div>
     </div>

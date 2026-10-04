@@ -1,6 +1,8 @@
 import { Menu } from "lucide-react";
+import LanguageSwitcher from "../i18n/LanguageSwitcher";
 import { useAuth } from "../context/AuthContext";
 import { useAcademicYear } from "../context/AcademicYearContext";
+import { t } from "../i18n";
 
 const Topbar = ({ onMenuClick }) => {
   const { user, logout } = useAuth();
@@ -12,7 +14,7 @@ const Topbar = ({ onMenuClick }) => {
         <button onClick={onMenuClick} className="md:hidden text-ink/70 hover:text-ink shrink-0 p-1">
           <Menu size={20} />
         </button>
-        <label className="text-sm text-ink/60 hidden sm:inline shrink-0">Sanad Dugsiyeed:</label>
+        <label className="text-sm text-ink/60 hidden sm:inline shrink-0">{t("Sanad Dugsiyeed:")}</label>
         <select
           className="input-field !w-auto !rounded-full py-1.5 text-sm min-w-0"
           value={selectedYearId || ""}
@@ -20,18 +22,19 @@ const Topbar = ({ onMenuClick }) => {
         >
           {years.map((y) => (
             <option key={y._id} value={y._id}>
-              {y.name} {y.isActive ? "(Firfircoon)" : ""}
+              {y.name} {y.isActive ? t("(Firfircoon)") : ""}
             </option>
           ))}
         </select>
       </div>
       <div className="flex items-center gap-2 md:gap-4 shrink-0">
+        <LanguageSwitcher className="hidden sm:inline-flex" />
         <span className="text-sm text-ink/70 hidden sm:inline truncate max-w-[120px]">{user?.fullName}</span>
         <button
           onClick={logout}
           className="text-sm text-danger border border-line rounded-full px-3 py-1.5 hover:bg-paper transition-colors"
         >
-          Ka Bax
+          {t("Ka Bax")}
         </button>
       </div>
     </header>

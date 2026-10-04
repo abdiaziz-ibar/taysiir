@@ -5,6 +5,7 @@ import financeApi from "../../api/financeClient";
 import { Loading, Card, Chip } from "../../components/StaffUI";
 import { FinanceHeader } from "../../components/FinanceUI";
 import { formatMoney, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 // School years run September → August, so a date before September belongs to the year that began last calendar year.
 const currentStartYear = () => {
@@ -35,7 +36,7 @@ const FinanceReportScreen = () => {
 
   return (
     <View style={styles.flex}>
-      <FinanceHeader title="Warbixinta" />
+      <FinanceHeader title={t("Warbixinta")} />
       <View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 10 }}>
           {years.map((y) => (
@@ -49,21 +50,21 @@ const FinanceReportScreen = () => {
       ) : (
         <ScrollView contentContainerStyle={{ padding: 12, paddingBottom: 40 }}>
           <Text style={styles.year}>{data.schoolYear}</Text>
-          <Text style={styles.note}>Mushaharka iyo qarashaadka marka la bixiyey (Sebtembar → Ogosto).</Text>
+          <Text style={styles.note}>{t("Mushaharka iyo qarashaadka marka la bixiyey (Sebtembar → Ogosto).")}</Text>
 
           <View style={styles.grid}>
-            <Stat label="Mushaharka" value={formatMoney(data.totals.salaries)} />
-            <Stat label="Qarashaadka" value={formatMoney(data.totals.expenses)} color={COLORS.danger} />
-            <Stat label="Wadarta Baxday" value={formatMoney(data.totals.total)} color={COLORS.danger} />
+            <Stat label={t("Mushaharka")} value={formatMoney(data.totals.salaries)} />
+            <Stat label={t("Qarashaadka")} value={formatMoney(data.totals.expenses)} color={COLORS.danger} />
+            <Stat label={t("Wadarta Baxday")} value={formatMoney(data.totals.total)} color={COLORS.danger} />
           </View>
 
           <Card>
-            <Text style={styles.title}>Bil Kasta</Text>
+            <Text style={styles.title}>{t("Bil Kasta")}</Text>
             {data.months.map((m) => (
               <View key={m.month} style={styles.monthRow}>
-                <Text style={styles.monthName}>{m.month}</Text>
+                <Text style={styles.monthName}>{t(m.month)}</Text>
                 <Text style={styles.monthLine}>
-                  Mushahar {formatMoney(m.salaries)} · Kharash {formatMoney(m.expenses)}
+                  {t("Mushahar")} {formatMoney(m.salaries)} {t("· Kharash")} {formatMoney(m.expenses)}
                 </Text>
                 <Text style={styles.monthTotal}>{formatMoney(m.total)}</Text>
               </View>
@@ -72,10 +73,10 @@ const FinanceReportScreen = () => {
 
           {data.expensesByCategory.length > 0 && (
             <Card>
-              <Text style={styles.title}>Qarashaadka Noocyadooda</Text>
+              <Text style={styles.title}>{t("Qarashaadka Noocyadooda")}</Text>
               {data.expensesByCategory.map((c) => (
                 <View key={c.category} style={styles.catRow}>
-                  <Text style={styles.catName}>{c.category}</Text>
+                  <Text style={styles.catName}>{t(c.category)}</Text>
                   <Text style={styles.catValue}>{formatMoney(c.total)}</Text>
                 </View>
               ))}

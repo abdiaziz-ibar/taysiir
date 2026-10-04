@@ -5,6 +5,7 @@ import { Loading, Card, Badge, ScreenModal, Field, Chip, ChipRow, PrimaryButton,
 import ConfirmPasswordModal from "./ConfirmPasswordModal";
 import { COLORS, formatMoney, formatDate } from "../utils/format";
 import { EMPLOYEE_TYPES, PAYMENT_METHODS, monthLabel, todayISO, isValidDate } from "../utils/finance";
+import { t } from "../i18n";
 
 const Stat = ({ label, value, color }) => (
   <View style={styles.stat}>
@@ -53,8 +54,8 @@ const SalaryPanel = ({ period, refreshKey }) => {
 
   const submitPay = async () => {
     const amount = Number(pay.amount);
-    if (!(amount > 0)) return setError("Lacagta waa inay ka weyn tahay 0.");
-    if (!isValidDate(pay.date)) return setError("Taariikhda u qor sida YYYY-MM-DD.");
+    if (!(amount > 0)) return setError(t("Lacagta waa inay ka weyn tahay 0."));
+    if (!isValidDate(pay.date)) return setError(t("Taariikhda u qor sida YYYY-MM-DD."));
     setError("");
     setSaving(true);
     try {
@@ -64,7 +65,7 @@ const SalaryPanel = ({ period, refreshKey }) => {
       setPay(null);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -79,9 +80,9 @@ const SalaryPanel = ({ period, refreshKey }) => {
   return (
     <View>
       <ChipRow>
-        <Chip label="Dhammaan" active={type === ""} onPress={() => setType("")} />
-        <Chip label="Macalimiin" active={type === "teacher"} onPress={() => setType("teacher")} />
-        <Chip label="Shaqaale" active={type === "staff"} onPress={() => setType("staff")} />
+        <Chip label={t("Dhammaan")} active={type === ""} onPress={() => setType("")} />
+        <Chip label={t("Macalimiin")} active={type === "teacher"} onPress={() => setType("teacher")} />
+        <Chip label={t("Shaqaale")} active={type === "staff"} onPress={() => setType("staff")} />
       </ChipRow>
 
       {data === null ? (
@@ -91,12 +92,12 @@ const SalaryPanel = ({ period, refreshKey }) => {
       ) : (
         <View style={{ marginTop: 12 }}>
           <View style={styles.statsRow}>
-            <Stat label="Mushahar" value={formatMoney(totals.salary)} />
-            <Stat label="La Bixiyey" value={formatMoney(totals.paid)} color={COLORS.success} />
-            <Stat label="Ku Dhiman" value={formatMoney(totals.balance)} color={COLORS.danger} />
+            <Stat label={t("Mushahar")} value={formatMoney(totals.salary)} />
+            <Stat label={t("La Bixiyey")} value={formatMoney(totals.paid)} color={COLORS.success} />
+            <Stat label={t("Ku Dhiman")} value={formatMoney(totals.balance)} color={COLORS.danger} />
           </View>
 
-          {rows.length === 0 && <Text style={styles.empty}>Shaqaale Active ah ma jiro. Ku dar tab-ka "Shaqaalaha".</Text>}
+          {rows.length === 0 && <Text style={styles.empty}>{t("Shaqaale Active ah ma jiro. Ku dar tab-ka \"Shaqaalaha\".")}</Text>}
 
           {rows.map((r) => (
             <Card key={r.employee._id}>
@@ -113,15 +114,15 @@ const SalaryPanel = ({ period, refreshKey }) => {
 
               <View style={styles.amounts}>
                 <View style={styles.amountCol}>
-                  <Text style={styles.amountLabel}>Mushahar</Text>
+                  <Text style={styles.amountLabel}>{t("Mushahar")}</Text>
                   <Text style={styles.amountValue}>{formatMoney(r.monthlySalary)}</Text>
                 </View>
                 <View style={styles.amountCol}>
-                  <Text style={styles.amountLabel}>La Bixiyey</Text>
+                  <Text style={styles.amountLabel}>{t("La Bixiyey")}</Text>
                   <Text style={[styles.amountValue, { color: COLORS.success }]}>{formatMoney(r.totalPaid)}</Text>
                 </View>
                 <View style={styles.amountCol}>
-                  <Text style={styles.amountLabel}>Ku Dhiman</Text>
+                  <Text style={styles.amountLabel}>{t("Ku Dhiman")}</Text>
                   <Text style={[styles.amountValue, { color: COLORS.danger }]}>{formatMoney(r.balance)}</Text>
                 </View>
               </View>
@@ -130,23 +131,23 @@ const SalaryPanel = ({ period, refreshKey }) => {
                 <View key={p._id} style={styles.payRow}>
                   <View style={{ flex: 1 }}>
                     <Text style={styles.payText}>
-                      {p.voucherNumber} · {formatDate(p.paymentDate)} · {p.paymentMethod}
+                      {p.voucherNumber} · {formatDate(p.paymentDate)} · {t(p.paymentMethod)}
                     </Text>
                     {p.notes ? <Text style={styles.sub}>{p.notes}</Text> : null}
                   </View>
                   <Text style={styles.payAmount}>{formatMoney(p.amount)}</Text>
                   <TouchableOpacity onPress={() => openPay(r, p)} style={{ marginLeft: 12 }}>
-                    <Text style={styles.link}>Edit</Text>
+                    <Text style={styles.link}>{t("Edit")}</Text>
                   </TouchableOpacity>
                   <TouchableOpacity onPress={() => setDeleteTarget({ ...p, employee: r.employee })} style={{ marginLeft: 12 }}>
-                    <Text style={styles.linkDanger}>Tirtir</Text>
+                    <Text style={styles.linkDanger}>{t("Tirtir")}</Text>
                   </TouchableOpacity>
                 </View>
               ))}
 
               {r.payments.length === 0 && (
                 <TouchableOpacity style={styles.payBtn} onPress={() => openPay(r)}>
-                  <Text style={styles.payBtnText}>Bixi Mushahar</Text>
+                  <Text style={styles.payBtnText}>{t("Bixi Mushahar")}</Text>
                 </TouchableOpacity>
               )}
             </Card>
@@ -154,39 +155,39 @@ const SalaryPanel = ({ period, refreshKey }) => {
         </View>
       )}
 
-      <ScreenModal visible={!!pay} title={pay?.payment ? "Wax Ka Beddel Mushaharka" : "Bixi Mushaharka"} onClose={() => setPay(null)}>
+      <ScreenModal visible={!!pay} title={pay?.payment ? t("Wax Ka Beddel Mushaharka") : t("Bixi Mushaharka")} onClose={() => setPay(null)}>
         <ErrorText text={error} />
         {pay && (
           <>
             <Text style={styles.modalName}>{pay.row.employee.fullName}</Text>
             <Text style={styles.sub}>
-              {monthLabel(period)} · Mushahar {formatMoney(pay.row.monthlySalary)} · Ku dhiman {formatMoney(pay.row.balance)}
+              {monthLabel(period)} {t("· Mushahar")} {formatMoney(pay.row.monthlySalary)} {t("· Ku dhiman")} {formatMoney(pay.row.balance)}
             </Text>
-            <Field label="Lacagta ($) *" value={pay.amount} onChangeText={(v) => setPay({ ...pay, amount: v })} keyboardType="decimal-pad" />
-            <Field label="Taariikhda (YYYY-MM-DD)" value={pay.date} onChangeText={(v) => setPay({ ...pay, date: v })} autoCapitalize="none" />
-            <Text style={styles.label}>Habka</Text>
+            <Field label={t("Lacagta ($) *")} value={pay.amount} onChangeText={(v) => setPay({ ...pay, amount: v })} keyboardType="decimal-pad" />
+            <Field label={t("Taariikhda (YYYY-MM-DD)")} value={pay.date} onChangeText={(v) => setPay({ ...pay, date: v })} autoCapitalize="none" />
+            <Text style={styles.label}>{t("Habka")}</Text>
             <ChipRow>
               {PAYMENT_METHODS.map((m) => (
-                <Chip key={m} label={m} active={pay.method === m} onPress={() => setPay({ ...pay, method: m })} />
+                <Chip key={m} label={t(m)} active={pay.method === m} onPress={() => setPay({ ...pay, method: m })} />
               ))}
             </ChipRow>
-            <Field label="Faallo (ikhtiyaari)" value={pay.notes} onChangeText={(v) => setPay({ ...pay, notes: v })} />
+            <Field label={t("Faallo (ikhtiyaari)")} value={pay.notes} onChangeText={(v) => setPay({ ...pay, notes: v })} />
             <View style={{ marginTop: 12 }}>
               <ChipRow>
-                <Chip label="Ogolow in ka badato mushaharka (bonus)" active={pay.allow} onPress={() => setPay({ ...pay, allow: !pay.allow })} />
+                <Chip label={t("Ogolow in ka badato mushaharka (bonus)")} active={pay.allow} onPress={() => setPay({ ...pay, allow: !pay.allow })} />
               </ChipRow>
             </View>
-            <PrimaryButton title={pay.payment ? "Kaydi" : "Bixi"} onPress={submitPay} loading={saving} />
+            <PrimaryButton title={pay.payment ? t("Kaydi") : t("Bixi")} onPress={submitPay} loading={saving} />
           </>
         )}
       </ScreenModal>
 
       <ConfirmPasswordModal
         visible={!!deleteTarget}
-        title="Tirtir Mushaharka La Bixiyey?"
+        title={t("Tirtir Mushaharka La Bixiyey?")}
         message={
           deleteTarget
-            ? `Waxaad tirtirayaa ${deleteTarget.voucherNumber} (${formatMoney(deleteTarget.amount)} — ${deleteTarget.employee.fullName}). Ku dhimanka shaqaalahan ayaa dib u kordhi doona.`
+            ? t("Waxaad tirtirayaa {voucher} ({amount} — {name}). Ku dhimanka shaqaalahan ayaa dib u kordhi doona.", { voucher: deleteTarget.voucherNumber, amount: formatMoney(deleteTarget.amount), name: deleteTarget.employee.fullName })
             : ""
         }
         verify={verifyFinancePassword}

@@ -1,6 +1,7 @@
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Badge, feeStatusColor, feeStatusText } from "./StaffUI";
 import { formatMoney, COLORS } from "../utils/format";
+import { t } from "../i18n";
 
 const FeeRow = ({ fee, onPress }) => (
   <TouchableOpacity style={styles.row} onPress={onPress}>
@@ -8,7 +9,7 @@ const FeeRow = ({ fee, onPress }) => (
       <Text style={styles.name}>{fee.parentId?.fullName}</Text>
       <Text style={styles.sub}>{fee.parentId?.phone}</Text>
       <Text style={styles.sub}>
-        Fee {formatMoney(fee.totalAmount)} · La bixiyey {formatMoney(fee.totalPaid)}
+        {t("Fee")} {formatMoney(fee.totalAmount)} {t("· La bixiyey")} {formatMoney(fee.totalPaid)}
       </Text>
     </View>
     <View style={styles.right}>

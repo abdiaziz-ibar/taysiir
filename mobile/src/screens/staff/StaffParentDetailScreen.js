@@ -21,6 +21,7 @@ import {
 } from "../../components/StaffUI";
 import ConfirmPasswordModal from "../../components/ConfirmPasswordModal";
 import { formatMoney, formatDate, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const StaffParentDetailScreen = ({ route, navigation }) => {
   const { id } = route.params;
@@ -56,7 +57,7 @@ const StaffParentDetailScreen = ({ route, navigation }) => {
   if (!parent) {
     return (
       <View style={styles.flex}>
-        <ScreenHeader title="Waalid" onBack={navigation.goBack} />
+        <ScreenHeader title={t("Waalid")} onBack={navigation.goBack} />
         <Loading />
       </View>
     );
@@ -72,7 +73,7 @@ const StaffParentDetailScreen = ({ route, navigation }) => {
       close();
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -80,7 +81,7 @@ const StaffParentDetailScreen = ({ route, navigation }) => {
 
   const saveParent = () => {
     if (!editForm.fullName.trim() || !editForm.phone.trim() || !editForm.address.trim()) {
-      return setError("Magaca, Phone iyo Address waa waajib.");
+      return setError(t("Magaca, Phone iyo Address waa waajib."));
     }
     run(
       () =>
@@ -98,7 +99,7 @@ const StaffParentDetailScreen = ({ route, navigation }) => {
 
   const saveNewFee = () => {
     if (!feeForm.yearId || !(Number(feeForm.amount) >= 0) || feeForm.amount === "") {
-      return setError("Dooro sanad oo geli Total Fee.");
+      return setError(t("Dooro sanad oo geli Total Fee."));
     }
     run(
       () => staffApi.post("/fees", { parentId: id, academicYearId: feeForm.yearId, totalAmount: Number(feeForm.amount) }),
@@ -131,12 +132,12 @@ const StaffParentDetailScreen = ({ route, navigation }) => {
 
       <ScrollView contentContainerStyle={styles.content}>
         <Card>
-          <InfoRow label="Parent ID" value={parent.parentId} />
-          <InfoRow label="Phone" value={parent.phone} />
-          <InfoRow label="Phone kale" value={parent.alternativePhone} />
-          <InfoRow label="Address" value={parent.address} />
-          <InfoRow label="Email" value={parent.email} />
-          <InfoRow label="Notes" value={parent.notes} />
+          <InfoRow label={t("Parent ID")} value={parent.parentId} />
+          <InfoRow label={t("Phone")} value={parent.phone} />
+          <InfoRow label={t("Phone kale")} value={parent.alternativePhone} />
+          <InfoRow label={t("Address")} value={parent.address} />
+          <InfoRow label={t("Email")} value={parent.email} />
+          <InfoRow label={t("Notes")} value={parent.notes} />
           <View style={styles.actions}>
             <TouchableOpacity
               style={styles.outlineBtn}
@@ -152,18 +153,18 @@ const StaffParentDetailScreen = ({ route, navigation }) => {
                 });
               }}
             >
-              <Text style={styles.outlineText}>Wax Ka Beddel (Edit)</Text>
+              <Text style={styles.outlineText}>{t("Wax Ka Beddel (Edit)")}</Text>
             </TouchableOpacity>
             {isAdmin && (
               <TouchableOpacity style={styles.dangerBtn} onPress={() => setDeleteTarget({ type: "all" })}>
-                <Text style={styles.dangerText}>Tirtir</Text>
+                <Text style={styles.dangerText}>{t("Tirtir")}</Text>
               </TouchableOpacity>
             )}
           </View>
         </Card>
 
         <View style={styles.debtCard}>
-          <Text style={styles.debtLabel}>Wadarta Ku Dhiman (dhammaan sannadaha)</Text>
+          <Text style={styles.debtLabel}>{t("Wadarta Ku Dhiman (dhammaan sannadaha)")}</Text>
           <Text style={styles.debtValue}>{formatMoney(totalDebt)}</Text>
         </View>
 
@@ -176,28 +177,28 @@ const StaffParentDetailScreen = ({ route, navigation }) => {
             })
           }
         >
-          <Text style={styles.payBtnText}>+ Ku Dar Lacag Bixin</Text>
+          <Text style={styles.payBtnText}>{t("+ Ku Dar Lacag Bixin")}</Text>
         </TouchableOpacity>
 
         <Card>
           <View style={styles.sectionHead}>
-            <Text style={styles.sectionTitle}>Sanad Dugsiyeedka</Text>
+            <Text style={styles.sectionTitle}>{t("Sanad Dugsiyeedka")}</Text>
             <TouchableOpacity
               onPress={() => {
                 setError("");
                 setFeeForm({ yearId: selectedYearId, amount: "" });
               }}
             >
-              <Text style={styles.link}>+ Fee Sanad Cusub</Text>
+              <Text style={styles.link}>{t("+ Fee Sanad Cusub")}</Text>
             </TouchableOpacity>
           </View>
-          {parent.fees.length === 0 && <Text style={styles.empty}>Weli Fee lama dhigin.</Text>}
+          {parent.fees.length === 0 && <Text style={styles.empty}>{t("Weli Fee lama dhigin.")}</Text>}
           {parent.fees.map((f) => (
             <View key={f._id} style={styles.feeRow}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.feeYear}>{f.academicYearId?.name}</Text>
                 <Text style={styles.feeSub}>
-                  Fee {formatMoney(f.totalAmount)} · La bixiyey {formatMoney(f.totalPaid)}
+                  {t("Fee")} {formatMoney(f.totalAmount)} {t("· La bixiyey")} {formatMoney(f.totalPaid)}
                 </Text>
                 <View style={styles.feeActions}>
                   <TouchableOpacity
@@ -206,11 +207,11 @@ const StaffParentDetailScreen = ({ route, navigation }) => {
                       setFeeEdit({ fee: f, total: String(f.totalAmount), paid: String(f.totalPaid) });
                     }}
                   >
-                    <Text style={styles.link}>Edit</Text>
+                    <Text style={styles.link}>{t("Edit")}</Text>
                   </TouchableOpacity>
                   {isAdmin && (
                     <TouchableOpacity onPress={() => setDeleteTarget({ type: "year", fee: f })}>
-                      <Text style={styles.linkDanger}>Tirtir</Text>
+                      <Text style={styles.linkDanger}>{t("Tirtir")}</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -224,14 +225,14 @@ const StaffParentDetailScreen = ({ route, navigation }) => {
         </Card>
 
         <Card>
-          <Text style={styles.sectionTitle}>Taariikhda Lacag Bixinta</Text>
-          {payments.length === 0 && <Text style={styles.empty}>Weli lacag lama bixin.</Text>}
+          <Text style={styles.sectionTitle}>{t("Taariikhda Lacag Bixinta")}</Text>
+          {payments.length === 0 && <Text style={styles.empty}>{t("Weli lacag lama bixin.")}</Text>}
           {payments.map((p) => (
             <TouchableOpacity key={p._id} style={styles.feeRow} onPress={() => navigation.navigate("PaymentDetail", { id: p._id })}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.feeYear}>{p.receiptNumber}</Text>
                 <Text style={styles.feeSub}>
-                  {formatDate(p.paymentDate)} · {p.academicYearId?.name} · {p.paymentMethod}
+                  {formatDate(p.paymentDate)} · {p.academicYearId?.name} · {t(p.paymentMethod)}
                 </Text>
               </View>
               <Text style={styles.paid}>{formatMoney(p.amount)}</Text>
@@ -240,55 +241,55 @@ const StaffParentDetailScreen = ({ route, navigation }) => {
         </Card>
       </ScrollView>
 
-      <ScreenModal visible={!!editForm} title="Wax Ka Beddel Waalidka" onClose={() => setEditForm(null)}>
+      <ScreenModal visible={!!editForm} title={t("Wax Ka Beddel Waalidka")} onClose={() => setEditForm(null)}>
         <ErrorText text={error} />
         {editForm && (
           <>
-            <Field label="Magaca Waalidka *" value={editForm.fullName} onChangeText={(v) => setEditForm({ ...editForm, fullName: v })} />
-            <Field label="Phone *" value={editForm.phone} onChangeText={(v) => setEditForm({ ...editForm, phone: v })} keyboardType="phone-pad" />
-            <Field label="Alternative Phone" value={editForm.alternativePhone} onChangeText={(v) => setEditForm({ ...editForm, alternativePhone: v })} keyboardType="phone-pad" />
-            <Field label="Address *" value={editForm.address} onChangeText={(v) => setEditForm({ ...editForm, address: v })} />
-            <Field label="Email (ikhtiyaari)" value={editForm.email} onChangeText={(v) => setEditForm({ ...editForm, email: v })} autoCapitalize="none" keyboardType="email-address" />
-            <Field label="Notes" value={editForm.notes} onChangeText={(v) => setEditForm({ ...editForm, notes: v })} multiline />
-            <PrimaryButton title="Kaydi" onPress={saveParent} loading={saving} />
+            <Field label={t("Magaca Waalidka *")} value={editForm.fullName} onChangeText={(v) => setEditForm({ ...editForm, fullName: v })} />
+            <Field label={t("Phone *")} value={editForm.phone} onChangeText={(v) => setEditForm({ ...editForm, phone: v })} keyboardType="phone-pad" />
+            <Field label={t("Alternative Phone")} value={editForm.alternativePhone} onChangeText={(v) => setEditForm({ ...editForm, alternativePhone: v })} keyboardType="phone-pad" />
+            <Field label={t("Address *")} value={editForm.address} onChangeText={(v) => setEditForm({ ...editForm, address: v })} />
+            <Field label={t("Email (ikhtiyaari)")} value={editForm.email} onChangeText={(v) => setEditForm({ ...editForm, email: v })} autoCapitalize="none" keyboardType="email-address" />
+            <Field label={t("Notes")} value={editForm.notes} onChangeText={(v) => setEditForm({ ...editForm, notes: v })} multiline />
+            <PrimaryButton title={t("Kaydi")} onPress={saveParent} loading={saving} />
           </>
         )}
       </ScreenModal>
 
-      <ScreenModal visible={!!feeForm} title="Fee Sanad Cusub" onClose={() => setFeeForm(null)}>
+      <ScreenModal visible={!!feeForm} title={t("Fee Sanad Cusub")} onClose={() => setFeeForm(null)}>
         <ErrorText text={error} />
         {feeForm && (
           <>
-            <Text style={styles.label}>Sanad Dugsiyeed</Text>
+            <Text style={styles.label}>{t("Sanad Dugsiyeed")}</Text>
             <ChipRow>
               {years.map((y) => (
                 <Chip key={y._id} label={y.name} active={feeForm.yearId === y._id} onPress={() => setFeeForm({ ...feeForm, yearId: y._id })} />
               ))}
             </ChipRow>
-            <Field label="Total Fee ($)" value={feeForm.amount} onChangeText={(v) => setFeeForm({ ...feeForm, amount: v })} keyboardType="numeric" />
-            <PrimaryButton title="Kaydi" onPress={saveNewFee} loading={saving} />
+            <Field label={t("Total Fee ($)")} value={feeForm.amount} onChangeText={(v) => setFeeForm({ ...feeForm, amount: v })} keyboardType="numeric" />
+            <PrimaryButton title={t("Kaydi")} onPress={saveNewFee} loading={saving} />
           </>
         )}
       </ScreenModal>
 
-      <ScreenModal visible={!!feeEdit} title={`Edit Fee ${feeEdit?.fee.academicYearId?.name || ""}`} onClose={() => setFeeEdit(null)}>
+      <ScreenModal visible={!!feeEdit} title={t("Edit Fee {year}", { year: feeEdit?.fee.academicYearId?.name || "" })} onClose={() => setFeeEdit(null)}>
         <ErrorText text={error} />
         {feeEdit && (
           <>
-            <Field label="Total Fee ($)" value={feeEdit.total} onChangeText={(v) => setFeeEdit({ ...feeEdit, total: v })} keyboardType="numeric" />
-            <Field label="La Bixiyey ($)" value={feeEdit.paid} onChangeText={(v) => setFeeEdit({ ...feeEdit, paid: v })} keyboardType="numeric" />
-            <PrimaryButton title="Kaydi" onPress={saveFeeEdit} loading={saving} />
+            <Field label={t("Total Fee ($)")} value={feeEdit.total} onChangeText={(v) => setFeeEdit({ ...feeEdit, total: v })} keyboardType="numeric" />
+            <Field label={t("La Bixiyey ($)")} value={feeEdit.paid} onChangeText={(v) => setFeeEdit({ ...feeEdit, paid: v })} keyboardType="numeric" />
+            <PrimaryButton title={t("Kaydi")} onPress={saveFeeEdit} loading={saving} />
           </>
         )}
       </ScreenModal>
 
       <ConfirmPasswordModal
         visible={!!deleteTarget}
-        title={deleteTarget?.type === "year" ? "Tirtir Sanad Dugsiyeedka?" : "Tirtir Waalidka?"}
+        title={deleteTarget?.type === "year" ? t("Tirtir Sanad Dugsiyeedka?") : t("Tirtir Waalidka?")}
         message={
           deleteTarget?.type === "year"
-            ? `Waxaad ka tirtirayaa sanadka ${deleteTarget.fee.academicYearId?.name} Fee-giisa iyo lacag-bixinnadiisa kaliya. ${parent.fullName} iyo sannadaha kale way hadhayaan.`
-            : `Waxaad tirtirayaa ${parent.fullName} oo dhan, iyo dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa sannad kasta — lama soo celin karo.`
+            ? t("Waxaad ka tirtirayaa sanadka {year} Fee-giisa iyo lacag-bixinnadiisa kaliya. {name} iyo sannadaha kale way hadhayaan.", { year: deleteTarget.fee.academicYearId?.name, name: parent.fullName })
+            : t("Waxaad tirtirayaa {name} oo dhan, iyo dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa sannad kasta — lama soo celin karo.", { name: parent.fullName })
         }
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}

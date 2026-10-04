@@ -19,6 +19,7 @@ import StaffAcademicYearsScreen from "../screens/staff/StaffAcademicYearsScreen"
 import StaffUsersScreen from "../screens/staff/StaffUsersScreen";
 import StaffSettingsScreen from "../screens/staff/StaffSettingsScreen";
 import { COLORS } from "../utils/format";
+import { t } from "../i18n";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
@@ -34,11 +35,11 @@ const Tabs = () => (
       tabBarLabelStyle: { fontSize: 11 },
     }}
   >
-    <Tab.Screen name="Home" component={StaffDashboardScreen} options={{ title: "Dashboard", tabBarIcon: tabIcon("📊") }} />
-    <Tab.Screen name="Parents" component={StaffParentsScreen} options={{ title: "Waalidiinta", tabBarIcon: tabIcon("👥") }} />
-    <Tab.Screen name="Payments" component={StaffPaymentsScreen} options={{ title: "Lacag Bixin", tabBarIcon: tabIcon("💵") }} />
-    <Tab.Screen name="Proofs" component={StaffProofsScreen} options={{ title: "Caddayn", tabBarIcon: tabIcon("🧾") }} />
-    <Tab.Screen name="More" component={StaffMoreScreen} options={{ title: "Dheeri", tabBarIcon: tabIcon("☰") }} />
+    <Tab.Screen name="Home" component={StaffDashboardScreen} options={{ title: t("Dashboard"), tabBarIcon: tabIcon("📊") }} />
+    <Tab.Screen name="Parents" component={StaffParentsScreen} options={{ title: t("Waalidiinta"), tabBarIcon: tabIcon("👥") }} />
+    <Tab.Screen name="Payments" component={StaffPaymentsScreen} options={{ title: t("Lacag Bixin"), tabBarIcon: tabIcon("💵") }} />
+    <Tab.Screen name="Proofs" component={StaffProofsScreen} options={{ title: t("Caddayn"), tabBarIcon: tabIcon("🧾") }} />
+    <Tab.Screen name="More" component={StaffMoreScreen} options={{ title: t("Dheeri"), tabBarIcon: tabIcon("☰") }} />
   </Tab.Navigator>
 );
 

@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { AuthProvider, useAuth } from "./src/context/AuthContext";
+import LanguageProvider from "./src/i18n/LanguageProvider";
 import LoginScreen from "./src/screens/LoginScreen";
 import DashboardScreen from "./src/screens/DashboardScreen";
 import StaffNavigator from "./src/navigation/StaffNavigator";
@@ -41,12 +42,14 @@ const RootNavigator = () => {
 export default function App() {
   return (
     <SafeAreaProvider>
-      <AuthProvider>
-        <NavigationContainer>
-          <StatusBar style="light" />
-          <RootNavigator />
-        </NavigationContainer>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <NavigationContainer>
+            <StatusBar style="light" />
+            <RootNavigator />
+          </NavigationContainer>
+        </AuthProvider>
+      </LanguageProvider>
     </SafeAreaProvider>
   );
 }

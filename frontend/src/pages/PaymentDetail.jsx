@@ -4,6 +4,7 @@ import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { formatMoney, formatDate } from "../utils/format";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+import { t } from "../i18n";
 
 const PaymentDetail = () => {
   const { id } = useParams();
@@ -57,7 +58,7 @@ const PaymentDetail = () => {
       setEditing(false);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -71,7 +72,7 @@ const PaymentDetail = () => {
     } catch (err) {
       setDeleting(false);
       setShowDeleteModal(false);
-      alert(err.response?.data?.message || "Khalad ayaa dhacay.");
+      alert(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     }
   };
 
@@ -86,45 +87,45 @@ const PaymentDetail = () => {
     win.print();
   };
 
-  if (!payment) return <p className="text-ink/50">Waa la soo shubayaa...</p>;
+  if (!payment) return <p className="text-ink/50">{t("Waa la soo shubayaa...")}</p>;
 
   const fee = payment.feeId;
   const beforePaid = fee ? Math.max(fee.totalPaid - payment.amount, 0) : null;
 
   return (
     <div className="max-w-2xl space-y-5">
-      <Link to="/payments" className="text-sm text-link hover:underline">&larr; Ku Noqo Lacag Bixinta</Link>
+      <Link to="/payments" className="text-sm text-link hover:underline">{t("← Ku Noqo Lacag Bixinta")}</Link>
 
       <div className="card" ref={receiptRef}>
-        <h1 className="font-serif text-lg mb-1">SCHOOL FEE RECEIPT</h1>
-        <p className="text-ink/50 text-sm mb-4">Receipt Number: {payment.receiptNumber}</p>
+        <h1 className="font-serif text-lg mb-1">{t("SCHOOL FEE RECEIPT")}</h1>
+        <p className="text-ink/50 text-sm mb-4">{t("Receipt Number:")} {payment.receiptNumber}</p>
         <table className="w-full text-sm">
           <tbody>
-            <tr><td className="label text-ink/50 py-1">Taariikh</td><td className="text-right">{formatDate(payment.paymentDate)}</td></tr>
-            <tr><td className="label text-ink/50 py-1">Magaca Waalidka</td><td className="text-right">{payment.parentId?.fullName}</td></tr>
-            <tr><td className="label text-ink/50 py-1">Sanad Dugsiyeed</td><td className="text-right">{payment.academicYearId?.name}</td></tr>
+            <tr><td className="label text-ink/50 py-1">{t("Taariikh")}</td><td className="text-end">{formatDate(payment.paymentDate)}</td></tr>
+            <tr><td className="label text-ink/50 py-1">{t("Magaca Waalidka")}</td><td className="text-end">{payment.parentId?.fullName}</td></tr>
+            <tr><td className="label text-ink/50 py-1">{t("Sanad Dugsiyeed")}</td><td className="text-end">{payment.academicYearId?.name}</td></tr>
             {fee && (
               <>
-                <tr><td className="label text-ink/50 py-1">Wadarta Lacagta</td><td className="text-right">{formatMoney(fee.totalAmount)}</td></tr>
-                <tr><td className="label text-ink/50 py-1">Hore Loo Bixiyey</td><td className="text-right">{formatMoney(beforePaid)}</td></tr>
+                <tr><td className="label text-ink/50 py-1">{t("Wadarta Lacagta")}</td><td className="text-end">{formatMoney(fee.totalAmount)}</td></tr>
+                <tr><td className="label text-ink/50 py-1">{t("Hore Loo Bixiyey")}</td><td className="text-end">{formatMoney(beforePaid)}</td></tr>
               </>
             )}
-            <tr><td className="label text-ink/50 py-1 font-medium">Lacagta Hadda La Bixiyey</td><td className="text-right font-medium">{formatMoney(payment.amount)}</td></tr>
-            {fee && <tr><td className="label text-ink/50 py-1">Lacagta Ku Dhiman</td><td className="text-right">{formatMoney(fee.balance)}</td></tr>}
-            <tr><td className="label text-ink/50 py-1">Habka Lacagta</td><td className="text-right">{payment.paymentMethod}</td></tr>
-            {payment.referenceNumber && <tr><td className="label text-ink/50 py-1">Reference</td><td className="text-right">{payment.referenceNumber}</td></tr>}
-            <tr><td className="label text-ink/50 py-1">Waxaa Qaabilay</td><td className="text-right">{payment.createdBy?.fullName || "Admin"}</td></tr>
+            <tr><td className="label text-ink/50 py-1 font-medium">{t("Lacagta Hadda La Bixiyey")}</td><td className="text-end font-medium">{formatMoney(payment.amount)}</td></tr>
+            {fee && <tr><td className="label text-ink/50 py-1">{t("Lacagta Ku Dhiman")}</td><td className="text-end">{formatMoney(fee.balance)}</td></tr>}
+            <tr><td className="label text-ink/50 py-1">{t("Habka Lacagta")}</td><td className="text-end">{t(payment.paymentMethod)}</td></tr>
+            {payment.referenceNumber && <tr><td className="label text-ink/50 py-1">{t("Reference")}</td><td className="text-end">{payment.referenceNumber}</td></tr>}
+            <tr><td className="label text-ink/50 py-1">{t("Waxaa Qaabilay")}</td><td className="text-end">{payment.createdBy?.fullName || t("Admin")}</td></tr>
           </tbody>
         </table>
       </div>
 
       {!editing && (
         <div className="flex gap-3">
-          <button onClick={handlePrint} className="btn-primary">Print Receipt</button>
-          <button onClick={startEdit} className="btn-secondary">Wax Ka Beddel (Edit)</button>
+          <button onClick={handlePrint} className="btn-primary">{t("Print Receipt")}</button>
+          <button onClick={startEdit} className="btn-secondary">{t("Wax Ka Beddel (Edit)")}</button>
           {user?.role === "admin" && (
             <button onClick={() => setShowDeleteModal(true)} disabled={deleting} className="btn-danger">
-              {deleting ? "Waa la tirtirayaa..." : "Tirtir"}
+              {deleting ? t("Waa la tirtirayaa...") : t("Tirtir")}
             </button>
           )}
         </div>
@@ -132,55 +133,55 @@ const PaymentDetail = () => {
 
       {editing && (
         <form onSubmit={handleSave} className="card space-y-4">
-          <h3 className="font-serif text-lg">Wax Ka Beddel Lacag Bixinta</h3>
+          <h3 className="font-serif text-lg">{t("Wax Ka Beddel Lacag Bixinta")}</h3>
           {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
 
           <div>
-            <label className="label-field">Lacagta</label>
+            <label className="label-field">{t("Lacagta")}</label>
             <input type="number" min="0.01" step="0.01" required className="input-field" value={amount} onChange={(e) => setAmount(e.target.value)} />
           </div>
 
           <div>
-            <label className="label-field">Taariikhda</label>
+            <label className="label-field">{t("Taariikhda")}</label>
             <input type="date" required className="input-field" value={paymentDate} onChange={(e) => setPaymentDate(e.target.value)} />
           </div>
 
           <div>
-            <label className="label-field">Habka Lacagta (Payment Method)</label>
+            <label className="label-field">{t("Habka Lacagta (Payment Method)")}</label>
             <select className="input-field" value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)}>
-              <option>Cash</option>
-              <option>Mobile Money</option>
-              <option>Bank</option>
-              <option>Other</option>
+              <option value="Cash">{t("Cash")}</option>
+              <option value="Mobile Money">{t("Mobile Money")}</option>
+              <option value="Bank">{t("Bank")}</option>
+              <option value="Other">{t("Other")}</option>
             </select>
           </div>
 
           <div>
-            <label className="label-field">Reference Number (haddii loo baahdo)</label>
+            <label className="label-field">{t("Reference Number (haddii loo baahdo)")}</label>
             <input className="input-field" value={referenceNumber} onChange={(e) => setReferenceNumber(e.target.value)} />
           </div>
 
           <div>
-            <label className="label-field">Notes</label>
+            <label className="label-field">{t("Notes")}</label>
             <textarea className="input-field" rows={2} value={notes} onChange={(e) => setNotes(e.target.value)} />
           </div>
 
           <label className="flex items-center gap-2 text-sm text-ink/70">
             <input type="checkbox" checked={allowOverpayment} onChange={(e) => setAllowOverpayment(e.target.checked)} />
-            Ogolow overpayment (lacag ka badan Ku Dhiman-ka)
+            {t("Ogolow overpayment (lacag ka badan Ku Dhiman-ka)")}
           </label>
 
           <div className="flex gap-3">
-            <button className="btn-primary" disabled={saving}>{saving ? "Waa la kaydinayaa..." : "Kaydi"}</button>
-            <button type="button" className="btn-secondary" onClick={() => setEditing(false)}>Jooji (Cancel)</button>
+            <button className="btn-primary" disabled={saving}>{saving ? t("Waa la kaydinayaa...") : t("Kaydi")}</button>
+            <button type="button" className="btn-secondary" onClick={() => setEditing(false)}>{t("Jooji (Cancel)")}</button>
           </div>
         </form>
       )}
 
       <ConfirmDeleteModal
         open={showDeleteModal}
-        title="Tirtir Lacag Bixinta?"
-        message={`Waxaad tirtirayaa lacag-bixintan (${formatMoney(payment.amount)}). Balance-ka waalidku si toos ah ayuu u kordhi doonaa — lama soo celin karo.`}
+        title={t("Tirtir Lacag Bixinta?")}
+        message={t("Waxaad tirtirayaa lacag-bixintan ({amount}). Balance-ka waalidku si toos ah ayuu u kordhi doonaa — lama soo celin karo.", { amount: formatMoney(payment.amount) })}
         onConfirm={handleDelete}
         onClose={() => setShowDeleteModal(false)}
       />

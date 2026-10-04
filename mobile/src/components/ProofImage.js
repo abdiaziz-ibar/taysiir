@@ -2,6 +2,7 @@ import { useState } from "react";
 import { View, Text, Image, TouchableOpacity, Linking, StyleSheet } from "react-native";
 import { API_ORIGIN } from "../api/client";
 import { COLORS } from "../utils/format";
+import { t } from "../i18n";
 
 // Payment-proof screenshot. If the in-app image fails to load, say so and let
 // the user open it in the browser instead of leaving a silent blank space.
@@ -9,16 +10,16 @@ const ProofImage = ({ screenshotUrl, height = 180, onOpen }) => {
   const [failed, setFailed] = useState(false);
 
   if (!screenshotUrl) {
-    return <Text style={styles.none}>Sawir lama soo lifaaqin.</Text>;
+    return <Text style={styles.none}>{t("Sawir lama soo lifaaqin.")}</Text>;
   }
   const uri = `${API_ORIGIN}${screenshotUrl}`;
 
   if (failed) {
     return (
       <View style={styles.fail}>
-        <Text style={styles.failText}>Sawirka lama soo dejin karo halkan.</Text>
+        <Text style={styles.failText}>{t("Sawirka lama soo dejin karo halkan.")}</Text>
         <TouchableOpacity onPress={() => Linking.openURL(uri)}>
-          <Text style={styles.link}>Ku fur browser-ka</Text>
+          <Text style={styles.link}>{t("Ku fur browser-ka")}</Text>
         </TouchableOpacity>
       </View>
     );

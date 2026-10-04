@@ -7,6 +7,7 @@ import { useAcademicYear } from "../context/AcademicYearContext";
 import { formatMoney, statusLabel, statusBadgeClass } from "../utils/format";
 import { downloadExcel, parseExcelFile } from "../utils/excel";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+import { t } from "../i18n";
 
 const emptyForm = { fullName: "", phone: "", alternativePhone: "", address: "", email: "", notes: "", academicYearId: "", totalAmount: "" };
 
@@ -49,7 +50,7 @@ const Parents = () => {
   const handleDownloadTemplate = () => {
     downloadExcel("waalidiinta-template.xlsx", IMPORT_HEADERS, [
       ["Cali Xasan", "615111222", "", "Muqdisho", "cali@example.com", "", "100"],
-    ]);
+    ], { translate: false });
   };
 
   const handleFileSelected = async (e) => {
@@ -62,7 +63,7 @@ const Parents = () => {
     try {
       const table = await parseExcelFile(file);
       if (table.length < 2) {
-        setImportResult({ created: 0, errors: [{ row: 1, name: "", message: "Faylka waa madhan yahay ama qaab khalad ah ayuu leeyahay." }] });
+        setImportResult({ created: 0, errors: [{ row: 1, name: "", message: t("Faylka waa madhan yahay ama qaab khalad ah ayuu leeyahay.") }] });
         return;
       }
 
@@ -82,7 +83,7 @@ const Parents = () => {
       setImportResult(res.data);
       load();
     } catch (err) {
-      setImportResult({ created: 0, errors: [{ row: "-", name: "", message: err.response?.data?.message || "Khalad ayaa dhacay." }] });
+      setImportResult({ created: 0, errors: [{ row: "-", name: "", message: t(err.response?.data?.message || "Khalad ayaa dhacay.") }] });
     } finally {
       setImporting(false);
     }
@@ -112,12 +113,12 @@ const Parents = () => {
   const deleteMessage = () => {
     if (!deleteTarget) return "";
     if (deleteYear === "all") {
-      return `Waxaad tirtirayaa ${deleteTarget.fullName} oo dhan, iyo dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa sannad kasta — lama soo celin karo.`;
+      return t("Waxaad tirtirayaa {name} oo dhan, iyo dhammaan Fee-yadiisa iyo Lacag-bixinnadiisa sannad kasta — lama soo celin karo.", { name: deleteTarget.fullName });
     }
     if (deleteYear) {
-      return `Waxaad ka tirtirayaa sanadka ${deleteYearName} Fee-giisa iyo lacag-bixinnadiisa kaliya. ${deleteTarget.fullName} iyo sannadaha kale way hadhayaan.`;
+      return t("Waxaad ka tirtirayaa sanadka {year} Fee-giisa iyo lacag-bixinnadiisa kaliya. {name} iyo sannadaha kale way hadhayaan.", { year: deleteYearName, name: deleteTarget.fullName });
     }
-    return `Dooro sanadka aad ka tirtirayso ${deleteTarget.fullName}, ama "Dhammaan" si aad u tirtirto waalidka oo dhan.`;
+    return t('Dooro sanadka aad ka tirtirayso {name}, ama "Dhammaan" si aad u tirtirto waalidka oo dhan.', { name: deleteTarget.fullName });
   };
 
   const handleDelete = async () => {
@@ -143,7 +144,7 @@ const Parents = () => {
       setShowForm(false);
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -153,16 +154,15 @@ const Parents = () => {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-serif">Waalidiinta</h2>
+          <h2 className="text-xl font-serif">{t("Waalidiinta")}</h2>
           <p className="text-xs text-ink/50 mt-0.5">
-            Lacagta hoos ku qoran waa tii sanadka <span className="font-medium">{selectedYearName || "la doortay"}</span> kaliya.
-            Si aad u aragto wadarta dhammaan sannadaha, eeg <Link to="/reports/parents-summary" className="text-link hover:underline">Wadarta Waalidiinta</Link>.
+            {t("Lacagta hoos ku qoran waa tii sanadka")} <span className="font-medium">{selectedYearName || t("la doortay")}</span> {t("kaliya. Si aad u aragto wadarta dhammaan sannadaha, eeg")} <Link to="/reports/parents-summary" className="text-link hover:underline">{t("Wadarta Waalidiinta")}</Link>.
           </p>
         </div>
         <div className="flex gap-2 flex-wrap">
-          <button className="btn-secondary text-sm" onClick={handleDownloadTemplate}>⬇ Template</button>
+          <button className="btn-secondary text-sm" onClick={handleDownloadTemplate}>{t("⬇ Template")}</button>
           <button className="btn-secondary text-sm" onClick={() => fileInputRef.current.click()} disabled={importing}>
-            {importing ? "Waa la geliyaa..." : "⬆ Upload Excel"}
+            {importing ? t("Waa la geliyaa...") : t("⬆ Upload Excel")}
           </button>
           <input ref={fileInputRef} type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleFileSelected} />
           <button
@@ -172,7 +172,7 @@ const Parents = () => {
               setShowForm((v) => !v);
             }}
           >
-            {showForm ? "Jooji" : "+ Waalid Cusub"}
+            {showForm ? t("Jooji") : t("+ Waalid Cusub")}
           </button>
         </div>
       </div>
@@ -181,15 +181,15 @@ const Parents = () => {
         <div className={`card ${importResult.errors.length > 0 ? "border-amber" : "border-success"}`}>
           <div className="flex items-center justify-between mb-2">
             <p className="font-medium">
-              {importResult.created} waalid ayaa si guul leh loo daray
-              {importResult.errors.length > 0 ? `, ${importResult.errors.length} saf ayaa la booday` : ""}.
+              {t("{count} waalid ayaa si guul leh loo daray", { count: importResult.created })}
+              {importResult.errors.length > 0 ? t(", {count} saf ayaa la booday", { count: importResult.errors.length }) : ""}.
             </p>
             <button className="text-sm text-ink/50 hover:text-ink" onClick={() => setImportResult(null)}>✕</button>
           </div>
           {importResult.errors.length > 0 && (
             <ul className="text-sm text-danger space-y-1">
               {importResult.errors.map((e, i) => (
-                <li key={i}>Saf {e.row} {e.name ? `(${e.name})` : ""}: {e.message}</li>
+                <li key={i}>{t("Saf")} {e.row} {e.name ? `(${e.name})` : ""}: {e.message}</li>
               ))}
             </ul>
           )}
@@ -200,47 +200,47 @@ const Parents = () => {
         <form onSubmit={handleSubmit} className="card grid grid-cols-1 md:grid-cols-2 gap-4">
           {error && <div className="md:col-span-2 bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
           <div>
-            <label className="label-field">Magaca Waalidka</label>
-            <input className="input-field" required value={form.fullName} placeholder="Enter full name" onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
+            <label className="label-field">{t("Magaca Waalidka")}</label>
+            <input className="input-field" required value={form.fullName} placeholder={t("Enter full name")} onChange={(e) => setForm({ ...form, fullName: e.target.value })} />
           </div>
           <div>
-            <label className="label-field">Phone Number</label>
-            <input className="input-field" required value={form.phone} placeholder="Enter phone number" onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            <label className="label-field">{t("Phone Number")}</label>
+            <input className="input-field" required value={form.phone} placeholder={t("Enter phone number")} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           </div>
           <div>
-            <label className="label-field">Alternative Phone</label>
-            <input className="input-field" value={form.alternativePhone} placeholder="Enter alternative phone number" onChange={(e) => setForm({ ...form, alternativePhone: e.target.value })} />
+            <label className="label-field">{t("Alternative Phone")}</label>
+            <input className="input-field" value={form.alternativePhone} placeholder={t("Enter alternative phone number")} onChange={(e) => setForm({ ...form, alternativePhone: e.target.value })} />
           </div>
           <div>
-            <label className="label-field">Address</label>
-            <input className="input-field" required value={form.address} placeholder="Enter address" onChange={(e) => setForm({ ...form, address: e.target.value })} />
+            <label className="label-field">{t("Address")}</label>
+            <input className="input-field" required value={form.address} placeholder={t("Enter address")} onChange={(e) => setForm({ ...form, address: e.target.value })} />
           </div>
           <div>
-            <label className="label-field">Email (ikhtiyaari)</label>
-            <input className="input-field" value={form.email} placeholder="Enter email" onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            <label className="label-field">{t("Email (ikhtiyaari)")}</label>
+            <input className="input-field" value={form.email} placeholder={t("Enter email")} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           </div>
           <div className="md:col-span-2 border-t border-line pt-4">
-            <p className="text-sm text-ink/60 mb-3">Ikhtiyaari: hadda ku dar lacagta uu waalidkan ku leeyahay sanad dugsiyeedkan, si aadan mar dambe ugu noqon.</p>
+            <p className="text-sm text-ink/60 mb-3">{t("Ikhtiyaari: hadda ku dar lacagta uu waalidkan ku leeyahay sanad dugsiyeedkan, si aadan mar dambe ugu noqon.")}</p>
           </div>
           <div>
-            <label className="label-field">Sanad Dugsiyeedka</label>
+            <label className="label-field">{t("Sanad Dugsiyeedka")}</label>
             <select className="input-field" value={form.academicYearId} onChange={(e) => setForm({ ...form, academicYearId: e.target.value })}>
-              <option value="">-- Ha dooran --</option>
+              <option value="">{t("-- Ha dooran --")}</option>
               {years.map((y) => (
                 <option key={y._id} value={y._id}>{y.name}</option>
               ))}
             </select>
           </div>
           <div>
-            <label className="label-field">Wadarta Fee</label>
-            <input type="number" min="0" step="0.01" className="input-field" value={form.totalAmount} placeholder="Tusaale: 100" onChange={(e) => setForm({ ...form, totalAmount: e.target.value })} />
+            <label className="label-field">{t("Wadarta Fee")}</label>
+            <input type="number" min="0" step="0.01" className="input-field" value={form.totalAmount} placeholder={t("Tusaale: 100")} onChange={(e) => setForm({ ...form, totalAmount: e.target.value })} />
           </div>
           <div className="md:col-span-2">
-            <label className="label-field">Notes</label>
-            <textarea className="input-field" rows={2} value={form.notes} placeholder="Enter notes" onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            <label className="label-field">{t("Notes")}</label>
+            <textarea className="input-field" rows={2} value={form.notes} placeholder={t("Enter notes")} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
           </div>
           <div className="md:col-span-2">
-            <button className="btn-primary" disabled={saving}>{saving ? "Waa la kaydinayaa..." : "Kaydi Waalidka"}</button>
+            <button className="btn-primary" disabled={saving}>{saving ? t("Waa la kaydinayaa...") : t("Kaydi Waalidka")}</button>
           </div>
         </form>
       )}
@@ -248,22 +248,22 @@ const Parents = () => {
       <div className="flex flex-wrap gap-3">
         <input
           className="input-field max-w-xs"
-          placeholder="Raadi magaca ama phone..."
+          placeholder={t("Raadi magaca ama phone...")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
         />
         <select className="input-field !w-auto" value={status} onChange={(e) => setStatus(e.target.value)}>
-          <option value="">Dhammaan Status</option>
-          <option value="paid">Paid</option>
-          <option value="partial">Partial</option>
-          <option value="unpaid">Unpaid</option>
+          <option value="">{t("Dhammaan Status")}</option>
+          <option value="paid">{t("Paid")}</option>
+          <option value="partial">{t("Partial")}</option>
+          <option value="unpaid">{t("Unpaid")}</option>
         </select>
         <select className="input-field !w-auto" value={sort} onChange={(e) => setSort(e.target.value)}>
-          <option value="">Kala Sooc</option>
-          <option value="name">Magaca</option>
-          <option value="balance_desc">Deynta ugu badan</option>
-          <option value="balance_asc">Deynta ugu yar</option>
-          <option value="date">Taariikhda</option>
+          <option value="">{t("Kala Sooc")}</option>
+          <option value="name">{t("Magaca")}</option>
+          <option value="balance_desc">{t("Deynta ugu badan")}</option>
+          <option value="balance_asc">{t("Deynta ugu yar")}</option>
+          <option value="date">{t("Taariikhda")}</option>
         </select>
       </div>
 
@@ -275,7 +275,7 @@ const Parents = () => {
                 <button
                   onClick={toggleIdSort}
                   className="flex items-center gap-1 text-inherit hover:text-ink"
-                  title="Kala sooc ID-ga (low to high / high to low)"
+                  title={t("Kala sooc ID-ga (low to high / high to low)")}
                 >
                   ID
                   {idSortDir === "asc" && <ArrowUp size={13} />}
@@ -283,12 +283,12 @@ const Parents = () => {
                   {!idSortDir && <ArrowUpDown size={13} className="text-ink/30" />}
                 </button>
               </th>
-              <th>Magaca Waalidka</th>
-              <th>Phone</th>
-              <th className="text-right">Total Fee ({selectedYearName || "-"})</th>
-              <th className="text-right">La Bixiyey ({selectedYearName || "-"})</th>
-              <th className="text-right">Ku Dhiman ({selectedYearName || "-"})</th>
-              <th>Status</th>
+              <th>{t("Magaca Waalidka")}</th>
+              <th>{t("Phone")}</th>
+              <th className="text-end">{t("Total Fee (")}{selectedYearName || "-"})</th>
+              <th className="text-end">{t("La Bixiyey (")}{selectedYearName || "-"})</th>
+              <th className="text-end">{t("Ku Dhiman (")}{selectedYearName || "-"})</th>
+              <th>{t("Status")}</th>
               <th></th>
             </tr>
           </thead>
@@ -302,20 +302,20 @@ const Parents = () => {
                   </Link>
                 </td>
                 <td>{p.phone}</td>
-                <td className="text-right">{formatMoney(p.totalFee)}</td>
-                <td className="text-right">{formatMoney(p.totalPaid)}</td>
-                <td className="text-right">{formatMoney(p.balance)}</td>
+                <td className="text-end">{formatMoney(p.totalFee)}</td>
+                <td className="text-end">{formatMoney(p.totalPaid)}</td>
+                <td className="text-end">{formatMoney(p.balance)}</td>
                 <td><span className={statusBadgeClass(p.feeStatus)}>{statusLabel(p.feeStatus)}</span></td>
-                <td className="text-right whitespace-nowrap">
-                  <Link to={`/parents/${p._id}?edit=1`} className="text-sm text-link hover:underline mr-3">Edit</Link>
+                <td className="text-end whitespace-nowrap">
+                  <Link to={`/parents/${p._id}?edit=1`} className="text-sm text-link hover:underline me-3">{t("Edit")}</Link>
                   {user?.role === "admin" && (
-                    <button onClick={() => setDeleteTarget(p)} className="text-sm text-danger hover:underline">Tirtir</button>
+                    <button onClick={() => setDeleteTarget(p)} className="text-sm text-danger hover:underline">{t("Tirtir")}</button>
                   )}
                 </td>
               </tr>
             ))}
             {displayedParents.length === 0 && (
-              <tr><td colSpan={8} className="text-center text-ink/40 py-6">Waalid lama helin.</td></tr>
+              <tr><td colSpan={8} className="text-center text-ink/40 py-6">{t("Waalid lama helin.")}</td></tr>
             )}
           </tbody>
         </table>
@@ -323,25 +323,25 @@ const Parents = () => {
 
       <ConfirmDeleteModal
         open={!!deleteTarget}
-        title="Tirtir Waalidka?"
+        title={t("Tirtir Waalidka?")}
         message={deleteMessage()}
         disabled={!deleteYear}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
       >
         <div>
-          <label className="label-field">Sanad dugsiyeedka la tirtirayo</label>
+          <label className="label-field">{t("Sanad dugsiyeedka la tirtirayo")}</label>
           {deleteFees === null ? (
-            <p className="text-sm text-ink/50">Waa la soo shubayaa...</p>
+            <p className="text-sm text-ink/50">{t("Waa la soo shubayaa...")}</p>
           ) : (
             <select className="input-field" value={deleteYear} onChange={(e) => setDeleteYear(e.target.value)}>
-              <option value="">-- Dooro --</option>
+              <option value="">{t("-- Dooro --")}</option>
               {deleteFees.map((f) => (
                 <option key={f._id} value={f.academicYearId?._id}>
-                  {f.academicYearId?.name} (Fee {f.totalAmount})
+                  {f.academicYearId?.name} {t("(Fee")} {f.totalAmount})
                 </option>
               ))}
-              <option value="all">Dhammaan (waalidka oo dhan)</option>
+              <option value="all">{t("Dhammaan (waalidka oo dhan)")}</option>
             </select>
           )}
         </div>

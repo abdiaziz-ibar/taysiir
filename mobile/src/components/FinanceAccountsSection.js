@@ -4,6 +4,7 @@ import staffApi from "../api/staffClient";
 import { Card, Badge, ScreenModal, Field, Chip, ChipRow, PrimaryButton, ErrorText } from "./StaffUI";
 import ConfirmPasswordModal from "./ConfirmPasswordModal";
 import { COLORS } from "../utils/format";
+import { t } from "../i18n";
 
 const emptyForm = { fullName: "", username: "", password: "" };
 
@@ -34,7 +35,7 @@ const FinanceAccountsSection = () => {
       close();
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -42,7 +43,7 @@ const FinanceAccountsSection = () => {
 
   const saveNew = () => {
     if (!addForm.fullName.trim() || !addForm.username.trim() || !addForm.password) {
-      return setError("Magaca, Username iyo Password waa waajib.");
+      return setError(t("Magaca, Username iyo Password waa waajib."));
     }
     run(() => staffApi.post("/finance-users", addForm), () => setAddForm(null));
   };
@@ -63,8 +64,8 @@ const FinanceAccountsSection = () => {
       <Card>
         <View style={styles.titleRow}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.section}>Akoonnada Maaliyadda</Text>
-            <Text style={styles.note}>Waxay galaan qaybta Maaliyadda oo kaliya — lacagaha waalidiinta ma arkaan.</Text>
+            <Text style={styles.section}>{t("Akoonnada Maaliyadda")}</Text>
+            <Text style={styles.note}>{t("Waxay galaan qaybta Maaliyadda oo kaliya — lacagaha waalidiinta ma arkaan.")}</Text>
           </View>
           <TouchableOpacity
             onPress={() => {
@@ -72,18 +73,18 @@ const FinanceAccountsSection = () => {
               setAddForm({ ...emptyForm });
             }}
           >
-            <Text style={styles.add}>+ Cusub</Text>
+            <Text style={styles.add}>{t("+ Cusub")}</Text>
           </TouchableOpacity>
         </View>
 
-        {users.length === 0 && <Text style={styles.empty}>Weli akoon Maaliyadda ah lama abuurin.</Text>}
+        {users.length === 0 && <Text style={styles.empty}>{t("Weli akoon Maaliyadda ah lama abuurin.")}</Text>}
         {users.map((u) => (
           <View key={u._id} style={styles.row}>
             <View style={{ flex: 1 }}>
               <Text style={styles.name}>{u.fullName}</Text>
               <Text style={styles.sub}>{u.username}</Text>
             </View>
-            <Badge text={u.status === "active" ? "Active" : "Inactive"} color={u.status === "active" ? COLORS.success : COLORS.danger} />
+            <Badge text={u.status === "active" ? t("Active") : t("Inactive")} color={u.status === "active" ? COLORS.success : COLORS.danger} />
             <TouchableOpacity
               style={{ marginLeft: 12 }}
               onPress={() => {
@@ -91,55 +92,55 @@ const FinanceAccountsSection = () => {
                 setEditForm({ _id: u._id, fullName: u.fullName, status: u.status, password: "" });
               }}
             >
-              <Text style={styles.link}>Edit</Text>
+              <Text style={styles.link}>{t("Edit")}</Text>
             </TouchableOpacity>
             <TouchableOpacity style={{ marginLeft: 12 }} onPress={() => setDeleteTarget(u)}>
-              <Text style={styles.linkDanger}>Tirtir</Text>
+              <Text style={styles.linkDanger}>{t("Tirtir")}</Text>
             </TouchableOpacity>
           </View>
         ))}
       </Card>
 
-      <ScreenModal visible={!!addForm} title="Akoon Maaliyadda Cusub" onClose={() => setAddForm(null)}>
+      <ScreenModal visible={!!addForm} title={t("Akoon Maaliyadda Cusub")} onClose={() => setAddForm(null)}>
         <ErrorText text={error} />
         {addForm && (
           <>
-            <Field label="Magaca *" value={addForm.fullName} onChangeText={(v) => setAddForm({ ...addForm, fullName: v })} />
-            <Field label="Username *" value={addForm.username} onChangeText={(v) => setAddForm({ ...addForm, username: v })} autoCapitalize="none" autoCorrect={false} />
-            <Field label="Password * (ugu yaraan 6 xaraf)" value={addForm.password} onChangeText={(v) => setAddForm({ ...addForm, password: v })} secureTextEntry autoCapitalize="none" />
-            <PrimaryButton title="Kaydi Akoonka" onPress={saveNew} loading={saving} />
+            <Field label={t("Magaca *")} value={addForm.fullName} onChangeText={(v) => setAddForm({ ...addForm, fullName: v })} />
+            <Field label={t("Username *")} value={addForm.username} onChangeText={(v) => setAddForm({ ...addForm, username: v })} autoCapitalize="none" autoCorrect={false} />
+            <Field label={t("Password * (ugu yaraan 6 xaraf)")} value={addForm.password} onChangeText={(v) => setAddForm({ ...addForm, password: v })} secureTextEntry autoCapitalize="none" />
+            <PrimaryButton title={t("Kaydi Akoonka")} onPress={saveNew} loading={saving} />
           </>
         )}
       </ScreenModal>
 
-      <ScreenModal visible={!!editForm} title="Edit Akoonka Maaliyadda" onClose={() => setEditForm(null)}>
+      <ScreenModal visible={!!editForm} title={t("Edit Akoonka Maaliyadda")} onClose={() => setEditForm(null)}>
         <ErrorText text={error} />
         {editForm && (
           <>
-            <Field label="Magaca" value={editForm.fullName} onChangeText={(v) => setEditForm({ ...editForm, fullName: v })} />
-            <Text style={styles.label}>Xaalad</Text>
+            <Field label={t("Magaca")} value={editForm.fullName} onChangeText={(v) => setEditForm({ ...editForm, fullName: v })} />
+            <Text style={styles.label}>{t("Xaalad")}</Text>
             <ChipRow>
-              <Chip label="Active" active={editForm.status === "active"} onPress={() => setEditForm({ ...editForm, status: "active" })} />
-              <Chip label="Inactive" active={editForm.status === "inactive"} onPress={() => setEditForm({ ...editForm, status: "inactive" })} />
+              <Chip label={t("Active")} active={editForm.status === "active"} onPress={() => setEditForm({ ...editForm, status: "active" })} />
+              <Chip label={t("Inactive")} active={editForm.status === "inactive"} onPress={() => setEditForm({ ...editForm, status: "inactive" })} />
             </ChipRow>
             <Field
-              label="Password cusub (ka tag madhan haddii aadan beddelayn)"
+              label={t("Password cusub (ka tag madhan haddii aadan beddelayn)")}
               value={editForm.password}
               onChangeText={(v) => setEditForm({ ...editForm, password: v })}
               secureTextEntry
               autoCapitalize="none"
             />
-            <PrimaryButton title="Kaydi" onPress={saveEdit} loading={saving} />
+            <PrimaryButton title={t("Kaydi")} onPress={saveEdit} loading={saving} />
           </>
         )}
       </ScreenModal>
 
       <ConfirmPasswordModal
         visible={!!deleteTarget}
-        title="Tirtir Akoonka Maaliyadda?"
+        title={t("Tirtir Akoonka Maaliyadda?")}
         message={
           deleteTarget
-            ? `Waxaad tirtirayaa ${deleteTarget.fullName} (${deleteTarget.username}). Ma awoodo mar dambe inuu soo galo qaybta Maaliyadda. Diiwaannadiisii hore way hadhayaan.`
+            ? t("Waxaad tirtirayaa {name} ({username}). Ma awoodo mar dambe inuu soo galo qaybta Maaliyadda. Diiwaannadiisii hore way hadhayaan.", { name: deleteTarget.fullName, username: deleteTarget.username })
             : ""
         }
         onConfirm={handleDelete}

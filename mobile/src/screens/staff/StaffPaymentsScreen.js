@@ -18,6 +18,7 @@ import staffApi from "../../api/staffClient";
 import { useStaff } from "../../context/StaffContext";
 import { StaffHeader, YearChips, Chip } from "../../components/StaffUI";
 import { formatMoney, formatDate, COLORS } from "../../utils/format";
+import { t } from "../../i18n";
 
 const METHODS = ["Cash", "Mobile Money", "Bank", "Other"];
 const today = () => new Date().toISOString().slice(0, 10);
@@ -113,10 +114,10 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
 
   const handleSave = async () => {
     setError("");
-    if (!parent) return setError("Fadlan dooro waalidka.");
-    if (!(Number(amount) > 0)) return setError("Geli lacagta la bixiyey.");
-    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return setError("Taariikhda u qor sida YYYY-MM-DD.");
-    if (!fee && !(Number(newFeeAmount) > 0)) return setError("Waalidkan Fee lama dhigin — geli Wadarta Fee.");
+    if (!parent) return setError(t("Fadlan dooro waalidka."));
+    if (!(Number(amount) > 0)) return setError(t("Geli lacagta la bixiyey."));
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return setError(t("Taariikhda u qor sida YYYY-MM-DD."));
+    if (!fee && !(Number(newFeeAmount) > 0)) return setError(t("Waalidkan Fee lama dhigin — geli Wadarta Fee."));
 
     setSaving(true);
     try {
@@ -140,10 +141,10 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
         allowOverpayment: allowOver,
       });
       setShowForm(false);
-      setSuccess(`Lacag-bixinta waa la kaydiyay: ${res.data.payment.receiptNumber}`);
+      setSuccess(t("Lacag-bixinta waa la kaydiyay: {receipt}", { receipt: res.data.payment.receiptNumber }));
       load();
     } catch (err) {
-      setError(err.response?.data?.message || "Khalad ayaa dhacay.");
+      setError(t(err.response?.data?.message || "Khalad ayaa dhacay."));
     } finally {
       setSaving(false);
     }
@@ -153,11 +154,11 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <StaffHeader title="Lacag Bixinta" />
+      <StaffHeader title={t("Lacag Bixinta")} />
       <YearChips />
       <View style={styles.toolbar}>
         <TouchableOpacity style={styles.addBtn} onPress={() => openForm(null)}>
-          <Text style={styles.addBtnText}>+ Lacag Bixin Cusub</Text>
+          <Text style={styles.addBtnText}>{t("+ Lacag Bixin Cusub")}</Text>
         </TouchableOpacity>
       </View>
       {success ? <Text style={styles.success}>{success}</Text> : null}
@@ -172,13 +173,13 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
           keyExtractor={(p) => p._id}
           contentContainerStyle={{ padding: 12, paddingBottom: 30 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListEmptyComponent={<Text style={styles.empty}>Weli lacag lama bixin sanadkan.</Text>}
+          ListEmptyComponent={<Text style={styles.empty}>{t("Weli lacag lama bixin sanadkan.")}</Text>}
           renderItem={({ item: p }) => (
             <TouchableOpacity style={styles.row} onPress={() => navigation.navigate("PaymentDetail", { id: p._id })}>
               <View style={{ flex: 1 }}>
                 <Text style={styles.name}>{p.parentId?.fullName}</Text>
                 <Text style={styles.sub}>
-                  {p.receiptNumber} · {formatDate(p.paymentDate)} · {p.paymentMethod}
+                  {p.receiptNumber} · {formatDate(p.paymentDate)} · {t(p.paymentMethod)}
                 </Text>
               </View>
               <Text style={styles.amount}>{formatMoney(p.amount)}</Text>
@@ -190,22 +191,22 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
       <Modal visible={showForm} animationType="slide" onRequestClose={() => setShowForm(false)}>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Lacag Bixin Cusub</Text>
+            <Text style={styles.modalTitle}>{t("Lacag Bixin Cusub")}</Text>
             <TouchableOpacity onPress={() => setShowForm(false)}>
-              <Text style={styles.close}>Jooji</Text>
+              <Text style={styles.close}>{t("Jooji")}</Text>
             </TouchableOpacity>
           </View>
           <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
-            <Text style={styles.label}>1. Waalidka</Text>
+            <Text style={styles.label}>{t("1. Waalidka")}</Text>
             <TouchableOpacity style={styles.pickerBtn} onPress={() => { setPickerSearch(""); setShowPicker(true); }}>
               <Text style={parent ? styles.pickerText : styles.pickerPlaceholder}>
-                {parent ? `${parent.fullName} — ${parent.phone}` : "Dooro waalid..."}
+                {parent ? `${parent.fullName} — ${parent.phone}` : t("Dooro waalid...")}
               </Text>
             </TouchableOpacity>
 
-            <Text style={styles.label}>2. Sanad Dugsiyeedka</Text>
+            <Text style={styles.label}>{t("2. Sanad Dugsiyeedka")}</Text>
             <View style={styles.chipRow}>
               {years.map((y) => (
                 <Chip key={y._id} label={y.name} active={formYearId === y._id} onPress={() => setFormYearId(y._id)} />
@@ -216,20 +217,20 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
               <View style={styles.feeBox}>
                 {fee ? (
                   <Text style={styles.feeText}>
-                    Fee {formatMoney(fee.totalAmount)} · La bixiyey {formatMoney(fee.totalPaid)} · Ku dhiman{" "}
+                    {t("Fee")} {formatMoney(fee.totalAmount)} {t("· La bixiyey")} {formatMoney(fee.totalPaid)} {t("· Ku dhiman")}{" "}
                     <Text style={{ color: COLORS.danger, fontWeight: "700" }}>{formatMoney(fee.balance)}</Text>
                   </Text>
                 ) : (
                   <>
                     <Text style={[styles.feeText, { color: COLORS.amber }]}>
-                      Waalidkan Fee lama dhigin sanadka {formYearName}. Geli Wadarta Fee si loo sameeyo hal mar.
+                      {t("Waalidkan Fee lama dhigin sanadka")} {formYearName}{t(". Geli Wadarta Fee si loo sameeyo hal mar.")}
                     </Text>
                     <TextInput
                       style={[styles.input, { marginTop: 8 }]}
                       value={newFeeAmount}
                       onChangeText={setNewFeeAmount}
                       keyboardType="numeric"
-                      placeholder="Wadarta Fee"
+                      placeholder={t("Wadarta Fee")}
                       placeholderTextColor="#9CA3AF"
                     />
                   </>
@@ -237,29 +238,29 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
               </View>
             )}
 
-            <Text style={styles.label}>3. Lacagta La Bixiyey ($)</Text>
+            <Text style={styles.label}>{t("3. Lacagta La Bixiyey ($)")}</Text>
             <TextInput style={styles.input} value={amount} onChangeText={setAmount} keyboardType="numeric" />
 
-            <Text style={styles.label}>4. Habka Lacagta</Text>
+            <Text style={styles.label}>{t("4. Habka Lacagta")}</Text>
             <View style={styles.chipRow}>
               {METHODS.map((m) => (
-                <Chip key={m} label={m} active={method === m} onPress={() => setMethod(m)} />
+                <Chip key={m} label={t(m)} active={method === m} onPress={() => setMethod(m)} />
               ))}
             </View>
 
-            <Text style={styles.label}>5. Taariikhda (YYYY-MM-DD)</Text>
+            <Text style={styles.label}>{t("5. Taariikhda (YYYY-MM-DD)")}</Text>
             <TextInput style={styles.input} value={date} onChangeText={setDate} autoCapitalize="none" />
 
-            <Text style={styles.label}>Reference (haddii loo baahdo)</Text>
+            <Text style={styles.label}>{t("Reference (haddii loo baahdo)")}</Text>
             <TextInput style={styles.input} value={reference} onChangeText={setReference} />
 
             <View style={styles.switchRow}>
-              <Text style={styles.switchText}>Ogolow overpayment</Text>
+              <Text style={styles.switchText}>{t("Ogolow overpayment")}</Text>
               <Switch value={allowOver} onValueChange={setAllowOver} />
             </View>
 
             <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving}>
-              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>Save</Text>}
+              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>{t("Save")}</Text>}
             </TouchableOpacity>
           </ScrollView>
         </KeyboardAvoidingView>
@@ -267,16 +268,16 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
         <Modal visible={showPicker} animationType="fade" onRequestClose={() => setShowPicker(false)}>
           <View style={{ flex: 1, backgroundColor: COLORS.paper }}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Dooro Waalid</Text>
+              <Text style={styles.modalTitle}>{t("Dooro Waalid")}</Text>
               <TouchableOpacity onPress={() => setShowPicker(false)}>
-                <Text style={styles.close}>Xir</Text>
+                <Text style={styles.close}>{t("Xir")}</Text>
               </TouchableOpacity>
             </View>
             <TextInput
               style={[styles.input, { margin: 12 }]}
               value={pickerSearch}
               onChangeText={setPickerSearch}
-              placeholder="Raadi magaca ama phone..."
+              placeholder={t("Raadi magaca ama phone...")}
               placeholderTextColor="#9CA3AF"
               autoFocus
             />
