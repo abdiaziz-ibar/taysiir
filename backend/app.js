@@ -13,6 +13,10 @@ const reportRoutes = require("./routes/reports");
 const userRoutes = require("./routes/users");
 const parentPortalRoutes = require("./routes/parentPortal");
 const paymentProofRoutes = require("./routes/paymentProofs");
+const employeeRoutes = require("./routes/employees");
+const salaryRoutes = require("./routes/salaries");
+const expenseRoutes = require("./routes/expenses");
+const financeRoutes = require("./routes/finance");
 
 const app = express();
 
@@ -59,6 +63,10 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/parent-portal", parentPortalRoutes);
 app.use("/api/payment-proofs", paymentProofRoutes);
+app.use("/api/employees", employeeRoutes);
+app.use("/api/salaries", salaryRoutes);
+app.use("/api/expenses", expenseRoutes);
+app.use("/api/finance", financeRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

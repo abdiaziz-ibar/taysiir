@@ -18,6 +18,8 @@ import StaffParentsSummaryScreen from "../screens/staff/StaffParentsSummaryScree
 import StaffAcademicYearsScreen from "../screens/staff/StaffAcademicYearsScreen";
 import StaffUsersScreen from "../screens/staff/StaffUsersScreen";
 import StaffSettingsScreen from "../screens/staff/StaffSettingsScreen";
+import StaffExpensesScreen from "../screens/staff/StaffExpensesScreen";
+import StaffFinanceReportScreen from "../screens/staff/StaffFinanceReportScreen";
 import { COLORS } from "../utils/format";
 
 const Tab = createBottomTabNavigator();
@@ -57,6 +59,8 @@ const StaffNavigator = () => (
       <Stack.Screen name="AcademicYears" component={StaffAcademicYearsScreen} />
       <Stack.Screen name="Users" component={StaffUsersScreen} />
       <Stack.Screen name="Settings" component={StaffSettingsScreen} />
+      <Stack.Screen name="Expenses" component={StaffExpensesScreen} />
+      <Stack.Screen name="FinanceReport" component={StaffFinanceReportScreen} />
     </Stack.Navigator>
   </StaffProvider>
 );

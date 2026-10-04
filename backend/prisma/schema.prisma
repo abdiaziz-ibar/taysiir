@@ -8,33 +8,35 @@ datasource db {
 }
 
 model User {
-  id        String    @id @default(uuid())
-  fullName  String
-  username  String    @unique
-  email     String?
-  password  String
-  role      String    @default("staff") // "admin" | "staff"
-  status    String    @default("active") // "active" | "inactive"
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  payments  Payment[]
+  id             String          @id @default(uuid())
+  fullName       String
+  username       String          @unique
+  email          String?
+  password       String
+  role           String          @default("staff") // "admin" | "staff"
+  status         String          @default("active") // "active" | "inactive"
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  payments       Payment[]
+  salaryPayments SalaryPayment[]
+  expenses       Expense[]
 
   @@map("users")
 }
 
 model Parent {
-  id               String    @id @default(uuid())
-  parentId         String    @unique // display code, e.g. P001
+  id               String         @id @default(uuid())
+  parentId         String         @unique // display code, e.g. P001
   fullName         String
   phone            String
   alternativePhone String?
   address          String?
-  email            String?   @unique // optional contact info, unrelated to portal login
+  email            String?        @unique // optional contact info, unrelated to portal login
   notes            String?
-  status           String    @default("active")
+  status           String         @default("active")
   password         String? // set once the parent creates their own portal password
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
   fees             Fee[]
   payments         Payment[]
   paymentProofs    PaymentProof[]
@@ -92,10 +94,10 @@ model Payment {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  parent       Parent       @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  academicYear AcademicYear @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
-  fee          Fee          @relation(fields: [feeId], references: [id], onDelete: Cascade)
-  createdBy    User?        @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  parent        Parent         @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  academicYear  AcademicYear   @relation(fields: [academicYearId], references: [id], onDelete: Cascade)
+  fee           Fee            @relation(fields: [feeId], references: [id], onDelete: Cascade)
+  createdBy     User?          @relation(fields: [createdById], references: [id], onDelete: SetNull)
   paymentProofs PaymentProof[]
 
   @@map("payments")
@@ -116,8 +118,8 @@ model PaymentProof {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  parent   Parent               @relation(fields: [parentId], references: [id], onDelete: Cascade)
-  payment  Payment?             @relation(fields: [paymentId], references: [id], onDelete: SetNull)
+  parent   Parent                @relation(fields: [parentId], references: [id], onDelete: Cascade)
+  payment  Payment?              @relation(fields: [paymentId], references: [id], onDelete: SetNull)
   messages PaymentProofMessage[]
 
   @@map("payment_proofs")
@@ -134,4 +136,68 @@ model PaymentProofMessage {
   proof PaymentProof @relation(fields: [proofId], references: [id], onDelete: Cascade)
 
   @@map("payment_proof_messages")
+}
+
+// A school employee who is paid a monthly salary (teacher or other staff).
+// Separate from `User`: an employee doesn't need a system login.
+model Employee {
+  id            String   @id @default(uuid())
+  employeeId    String   @unique // display code, e.g. E001
+  fullName      String
+  phone         String?
+  type          String   @default("teacher") // "teacher" | "staff"
+  position      String? // e.g. "Macallinka Xisaabta", "Waardiye"
+  monthlySalary Float    @default(0)
+  status        String   @default("active") // "active" | "inactive"
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  salaryPayments SalaryPayment[]
+
+  @@map("employees")
+}
+
+// One salary payout. `period` ("YYYY-MM") is the month the salary is FOR,
+// which can differ from paymentDate (e.g. paying August's salary in September).
+// Several payments may exist for one employee+period (partial / advance).
+model SalaryPayment {
+  id            String   @id @default(uuid())
+  voucherNumber String   @unique // e.g. SAL-2026-00001
+  employeeId    String
+  period        String
+  amount        Float
+  salaryDue     Float // the employee's monthly salary when this was recorded, so later raises don't rewrite past months
+  paymentDate   DateTime @default(now())
+  paymentMethod String // "Cash" | "Mobile Money" | "Bank" | "Other"
+  notes         String?
+  createdById   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  employee  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdBy User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([period])
+  @@map("salary_payments")
+}
+
+// Any other school spending (electricity, rent, supplies, repairs...).
+model Expense {
+  id            String   @id @default(uuid())
+  voucherNumber String   @unique // e.g. EXP-2026-00001
+  category      String
+  description   String
+  amount        Float
+  expenseDate   DateTime @default(now())
+  paymentMethod String // "Cash" | "Mobile Money" | "Bank" | "Other"
+  notes         String?
+  createdById   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([expenseDate])
+  @@map("expenses")
 }

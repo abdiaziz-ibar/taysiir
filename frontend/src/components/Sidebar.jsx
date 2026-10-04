@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import {
   LayoutDashboard,
   Users,
@@ -16,6 +17,9 @@ import {
   UserCog,
   Settings as SettingsIcon,
   Receipt,
+  ReceiptText,
+  Landmark,
+  PiggyBank,
   ChevronDown,
   ChevronRight,
   X,
@@ -40,6 +44,8 @@ const NavItem = ({ to, icon: Icon, children, end, onClick }) => (
 
 const Sidebar = ({ open, onClose }) => {
   const [reportsOpen, setReportsOpen] = useState(true);
+  const [financeOpen, setFinanceOpen] = useState(true);
+  const { user } = useAuth();
 
   return (
     <>
@@ -97,6 +103,27 @@ const Sidebar = ({ open, onClose }) => {
               <NavItem to="/reports/parents-summary" icon={Users2} onClick={onClose}>Wadarta Waalidiinta</NavItem>
               <NavItem to="/reports/debts" icon={FileWarning} onClick={onClose}>Warbixinta Deymaha</NavItem>
             </div>
+          )}
+
+          {user?.role === "admin" && (
+            <>
+              <button
+                onClick={() => setFinanceOpen((o) => !o)}
+                className={`${linkBase} ${linkInactive} w-full justify-between`}
+              >
+                <span className="flex items-center gap-3">
+                  <Landmark size={17} className="shrink-0" />
+                  Maaliyadda
+                </span>
+                {financeOpen ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
+              </button>
+              {financeOpen && (
+                <div className="pl-4 space-y-1">
+                  <NavItem to="/expenses" icon={ReceiptText} onClick={onClose}>Qarashaadka</NavItem>
+                  <NavItem to="/reports/finance" icon={PiggyBank} onClick={onClose}>Warbixinta Maaliyadda</NavItem>
+                </div>
+              )}
+            </>
           )}
 
           <NavItem to="/academic-years" icon={GraduationCap} onClick={onClose}>Sanad Dugsiyeedka</NavItem>

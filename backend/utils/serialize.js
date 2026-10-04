@@ -60,6 +60,25 @@ const serializePaymentProof = (proof) => {
   return out;
 };
 
+const serializeEmployee = (employee) => withUnderscoreId(employee);
+
+const serializeSalaryPayment = (payment) => {
+  if (!payment) return payment;
+  const { employee, createdBy, ...rest } = payment;
+  const out = withUnderscoreId(rest);
+  if (employee) out.employeeId = serializeEmployee(employee);
+  if (createdBy) out.createdBy = serializeUser(createdBy);
+  return out;
+};
+
+const serializeExpense = (expense) => {
+  if (!expense) return expense;
+  const { createdBy, ...rest } = expense;
+  const out = withUnderscoreId(rest);
+  if (createdBy) out.createdBy = serializeUser(createdBy);
+  return out;
+};
+
 module.exports = {
   withUnderscoreId,
   serializeUser,
@@ -69,4 +88,7 @@ module.exports = {
   serializePayment,
   serializePaymentProof,
   serializePaymentProofMessage,
+  serializeEmployee,
+  serializeSalaryPayment,
+  serializeExpense,
 };
