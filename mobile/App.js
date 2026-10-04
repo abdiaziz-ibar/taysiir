@@ -7,12 +7,13 @@ import { AuthProvider, useAuth } from "./src/context/AuthContext";
 import LoginScreen from "./src/screens/LoginScreen";
 import DashboardScreen from "./src/screens/DashboardScreen";
 import StaffNavigator from "./src/navigation/StaffNavigator";
+import FinanceNavigator from "./src/navigation/FinanceNavigator";
 import { COLORS } from "./src/utils/format";
 
 const Stack = createNativeStackNavigator();
 
 const RootNavigator = () => {
-  const { parent, staff, loading } = useAuth();
+  const { parent, staff, finance, loading } = useAuth();
 
   if (loading) {
     return (
@@ -28,6 +29,8 @@ const RootNavigator = () => {
         <Stack.Screen name="Dashboard" component={DashboardScreen} />
       ) : staff ? (
         <Stack.Screen name="Staff" component={StaffNavigator} />
+      ) : finance ? (
+        <Stack.Screen name="Finance" component={FinanceNavigator} />
       ) : (
         <Stack.Screen name="Login" component={LoginScreen} />
       )}

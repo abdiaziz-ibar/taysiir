@@ -2,16 +2,19 @@ import { createContext, useContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "../api/client";
 import staffApi, { setStaffUnauthorizedHandler } from "../api/staffClient";
+import financeApi, { setFinanceUnauthorizedHandler } from "../api/financeClient";
 
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
   const [parent, setParent] = useState(null);
   const [staff, setStaff] = useState(null);
+  const [finance, setFinance] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     setStaffUnauthorizedHandler(() => setStaff(null));
+    setFinanceUnauthorizedHandler(() => setFinance(null));
 
     const restoreParent = async () => {
       const token = await AsyncStorage.getItem("parentToken");
@@ -35,7 +38,18 @@ export const AuthProvider = ({ children }) => {
       }
     };
 
-    Promise.all([restoreParent(), restoreStaff()]).finally(() => setLoading(false));
+    const restoreFinance = async () => {
+      const token = await AsyncStorage.getItem("financeToken");
+      if (!token) return;
+      try {
+        const res = await financeApi.get("/finance-auth/me");
+        setFinance(res.data.user);
+      } catch (err) {
+        await AsyncStorage.removeItem("financeToken");
+      }
+    };
+
+    Promise.all([restoreParent(), restoreStaff(), restoreFinance()]).finally(() => setLoading(false));
   }, []);
 
   const login = async (phone, password) => {
@@ -69,8 +83,22 @@ export const AuthProvider = ({ children }) => {
     setStaff(null);
   };
 
+  const financeLogin = async (username, password) => {
+    const res = await financeApi.post("/finance-auth/login", { username, password });
+    await AsyncStorage.setItem("financeToken", res.data.token);
+    setFinance(res.data.user);
+    return res.data.user;
+  };
+
+  const financeLogout = async () => {
+    await AsyncStorage.removeItem("financeToken");
+    setFinance(null);
+  };
+
   return (
-    <AuthContext.Provider value={{ parent, staff, loading, login, register, logout, staffLogin, staffLogout }}>
+    <AuthContext.Provider
+      value={{ parent, staff, finance, loading, login, register, logout, staffLogin, staffLogout, financeLogin, financeLogout }}
+    >
       {children}
     </AuthContext.Provider>
   );

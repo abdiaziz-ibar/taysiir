@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import staffApi from "../api/staffClient";
+import financeApi, { verifyFinancePassword } from "../api/financeClient";
 import { Loading, Card, Badge, ScreenModal, Field, Chip, ChipRow, PrimaryButton, ErrorText } from "./StaffUI";
 import ConfirmPasswordModal from "./ConfirmPasswordModal";
 import { COLORS, formatMoney } from "../utils/format";
@@ -19,7 +19,7 @@ const EmployeesPanel = () => {
   const [saving, setSaving] = useState(false);
 
   const load = useCallback(async () => {
-    const res = await staffApi.get("/employees", { params: { search: search || undefined, type: type || undefined } });
+    const res = await financeApi.get("/employees", { params: { search: search || undefined, type: type || undefined } });
     setEmployees(res.data);
   }, [search, type]);
 
@@ -57,8 +57,8 @@ const EmployeesPanel = () => {
     try {
       const { _id, ...rest } = form;
       const payload = { ...rest, monthlySalary: Number(rest.monthlySalary) };
-      if (_id) await staffApi.put(`/employees/${_id}`, payload);
-      else await staffApi.post("/employees", payload);
+      if (_id) await financeApi.put(`/employees/${_id}`, payload);
+      else await financeApi.post("/employees", payload);
       setForm(null);
       load();
     } catch (err) {
@@ -69,7 +69,7 @@ const EmployeesPanel = () => {
   };
 
   const handleDelete = async () => {
-    await staffApi.delete(`/employees/${deleteTarget._id}`);
+    await financeApi.delete(`/employees/${deleteTarget._id}`);
     setDeleteTarget(null);
     load();
   };
@@ -167,6 +167,7 @@ const EmployeesPanel = () => {
             ? `Waxaad tirtirayaa ${deleteTarget.fullName} (${deleteTarget.employeeId}). Haddii uu leeyahay mushahar hore loo bixiyey, lama tirtiri karo — ka dhig Inactive.`
             : ""
         }
+        verify={verifyFinancePassword}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
       />

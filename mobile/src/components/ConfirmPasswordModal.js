@@ -5,7 +5,11 @@ import { COLORS } from "../utils/format";
 
 // Step-up confirmation for irreversible actions: the logged-in admin
 // re-types their own password before onConfirm runs (same as the web).
-const ConfirmPasswordModal = ({ visible, title, message, onConfirm, onClose, children, disabled }) => {
+// `verify(password)` re-checks the password before onConfirm runs; defaults to the logged-in
+// system user, and the finance section passes its own.
+const verifyStaff = (password) => staffApi.post("/auth/verify-password", { password });
+
+const ConfirmPasswordModal = ({ visible, title, message, onConfirm, onClose, children, disabled, verify = verifyStaff }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -21,7 +25,7 @@ const ConfirmPasswordModal = ({ visible, title, message, onConfirm, onClose, chi
     setError("");
     setBusy(true);
     try {
-      await staffApi.post("/auth/verify-password", { password });
+      await verify(password);
       setPassword("");
       await onConfirm();
     } catch (err) {

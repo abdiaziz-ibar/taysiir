@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../api/axios";
 import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
+import FinanceUsersPanel from "../components/FinanceUsersPanel";
 
 const emptyForm = { fullName: "", username: "", email: "", password: "", role: "staff" };
 
@@ -116,7 +117,7 @@ const Users = () => {
                   <p className="text-sm font-medium truncate">
                     {l.name || l.identifier}
                     <span className="text-ink/40 font-normal">
-                      {" "}· {l.scope === "parent" ? "Waalid" : l.scope === "verify" ? "Password-ka tirtirka" : "System User"}
+                      {" "}· {l.scope === "parent" ? "Waalid" : l.scope === "finance" ? "Maaliyadda" : l.scope === "verify" ? "Password-ka tirtirka" : "System User"}
                     </span>
                   </p>
                   <p className="text-xs text-ink/50">
@@ -176,6 +177,8 @@ const Users = () => {
           </tbody>
         </table>
       </div>
+
+      <FinanceUsersPanel />
 
       <ConfirmDeleteModal
         open={!!deleteTarget}

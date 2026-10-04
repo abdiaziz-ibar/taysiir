@@ -15,10 +15,11 @@ import {
   ErrorText,
 } from "../../components/StaffUI";
 import ConfirmPasswordModal from "../../components/ConfirmPasswordModal";
+import FinanceAccountsSection from "../../components/FinanceAccountsSection";
 import { COLORS } from "../../utils/format";
 
 const emptyForm = { fullName: "", username: "", email: "", password: "", role: "staff" };
-const SCOPE_LABEL = { parent: "Waalid", verify: "Password-ka tirtirka", staff: "System User" };
+const SCOPE_LABEL = { parent: "Waalid", verify: "Password-ka tirtirka", staff: "System User", finance: "Maaliyadda" };
 
 const StaffUsersScreen = ({ navigation }) => {
   const [users, setUsers] = useState(null);
@@ -144,6 +145,8 @@ const StaffUsersScreen = ({ navigation }) => {
               </View>
             </Card>
           ))}
+
+          <FinanceAccountsSection />
         </ScrollView>
       )}
 

@@ -1,13 +1,13 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Download, TrendingDown, Banknote } from "lucide-react";
-import api from "../api/axios";
-import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
-import StatCard from "../components/StatCard";
-import SalaryPanel from "../components/SalaryPanel";
+import api, { verifyFinancePassword } from "../../api/financeAxios";
+import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
+import StatCard from "../../components/StatCard";
+import SalaryPanel from "../../components/finance/SalaryPanel";
 import Employees from "./Employees";
-import { formatMoney, formatDate } from "../utils/format";
-import { downloadExcel } from "../utils/excel";
-import { EXPENSE_CATEGORIES, EMPLOYEE_TYPES, PAYMENT_METHODS, currentMonth, shiftMonth, monthLabel, todayISO } from "../utils/finance";
+import { formatMoney, formatDate } from "../../utils/format";
+import { downloadExcel } from "../../utils/excel";
+import { EXPENSE_CATEGORIES, EMPLOYEE_TYPES, PAYMENT_METHODS, currentMonth, shiftMonth, monthLabel, todayISO } from "../../utils/finance";
 
 // Not a stored expense category: choosing it switches to salary payments to
 // teachers / staff (their own table), so everything the school pays out lives on this one page.
@@ -495,6 +495,7 @@ const Expenses = () => {
         open={!!deleteTarget}
         title="Tirtir Kharashka?"
         message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.voucherNumber} (${deleteTarget.description} — ${formatMoney(deleteTarget.amount)}). Lama soo celin karo.` : ""}
+        verify={verifyFinancePassword}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
       />

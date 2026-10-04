@@ -5,7 +5,8 @@ import { COLORS } from "../utils/format";
 
 const empty = { current: "", next: "", confirm: "" };
 
-const ParentChangePasswordModal = ({ visible, onClose }) => {
+// Defaults to the parent portal; the finance section passes its own client and path.
+const ParentChangePasswordModal = ({ visible, onClose, client = api, path = "/parent-portal/change-password" }) => {
   const [form, setForm] = useState(empty);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
@@ -23,7 +24,7 @@ const ParentChangePasswordModal = ({ visible, onClose }) => {
     if (form.next !== form.confirm) return setError("Labada password ee cusub iskuma eka.");
     setSaving(true);
     try {
-      await api.post("/parent-portal/change-password", { currentPassword: form.current, newPassword: form.next });
+      await client.post(path, { currentPassword: form.current, newPassword: form.next });
       setDone(true);
     } catch (err) {
       setError(err.response?.data?.message || "Khalad ayaa dhacay.");

@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const { getSalarySummary, createSalaryPayment, updateSalaryPayment, deleteSalaryPayment } = require("../controllers/salaryController");
-const { protect, authorize } = require("../middleware/auth");
+const { protectFinance } = require("../middleware/financeAuth");
 
-router.use(protect, authorize("admin"));
+// Finance-section login only (not system users, not parents).
+router.use(protectFinance);
 router.get("/summary", getSalarySummary);
 router.post("/", createSalaryPayment);
 router.put("/:id", updateSalaryPayment);

@@ -117,7 +117,7 @@ const createExpense = async (req, res, next) => {
       data: {
         ...data,
         voucherNumber: await nextVoucherNumber("expense", "EXP"),
-        createdById: req.user?._id || null,
+        createdById: req.financeUser?._id || null,
       },
     });
     res.status(201).json(serializeExpense(expense));

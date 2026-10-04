@@ -1,7 +1,8 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 import ParentProtectedRoute from "./components/ParentProtectedRoute";
-import AdminRoute from "./components/AdminRoute";
+import FinanceProtectedRoute from "./components/FinanceProtectedRoute";
+import FinanceLayout from "./components/FinanceLayout";
 import Layout from "./components/Layout";
 
 import Login from "./pages/Login";
@@ -23,8 +24,8 @@ import AcademicYears from "./pages/AcademicYears";
 import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import PaymentProofs from "./pages/PaymentProofs";
-import Expenses from "./pages/Expenses";
-import FinanceReport from "./pages/reports/FinanceReport";
+import Expenses from "./pages/finance/Expenses";
+import FinanceReport from "./pages/finance/FinanceReport";
 
 function App() {
   return (
@@ -35,6 +36,14 @@ function App() {
 
       <Route element={<ParentProtectedRoute />}>
         <Route path="/portal/dashboard" element={<ParentPortalDashboard />} />
+      </Route>
+
+      <Route element={<FinanceProtectedRoute />}>
+        <Route element={<FinanceLayout />}>
+          <Route path="/finance" element={<Navigate to="/finance/expenses" replace />} />
+          <Route path="/finance/expenses" element={<Expenses />} />
+          <Route path="/finance/report" element={<FinanceReport />} />
+        </Route>
       </Route>
 
       <Route element={<ProtectedRoute />}>
@@ -60,13 +69,6 @@ function App() {
           <Route path="/reports/all-years" element={<AllYearsReport />} />
           <Route path="/reports/parents-summary" element={<ParentsSummaryReport />} />
           <Route path="/reports/debts" element={<DebtsReport />} />
-
-          <Route element={<AdminRoute />}>
-            <Route path="/employees" element={<Navigate to="/expenses" replace />} />
-            <Route path="/salaries" element={<Navigate to="/expenses" replace />} />
-            <Route path="/expenses" element={<Expenses />} />
-            <Route path="/reports/finance" element={<FinanceReport />} />
-          </Route>
 
           <Route path="/academic-years" element={<AcademicYears />} />
           <Route path="/users" element={<Users />} />

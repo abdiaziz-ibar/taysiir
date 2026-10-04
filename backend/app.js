@@ -17,6 +17,8 @@ const employeeRoutes = require("./routes/employees");
 const salaryRoutes = require("./routes/salaries");
 const expenseRoutes = require("./routes/expenses");
 const financeRoutes = require("./routes/finance");
+const financeAuthRoutes = require("./routes/financeAuth");
+const financeUserRoutes = require("./routes/financeUsers");
 
 const app = express();
 
@@ -67,6 +69,8 @@ app.use("/api/employees", employeeRoutes);
 app.use("/api/salaries", salaryRoutes);
 app.use("/api/expenses", expenseRoutes);
 app.use("/api/finance", financeRoutes);
+app.use("/api/finance-auth", financeAuthRoutes);
+app.use("/api/finance-users", financeUserRoutes);
 
 app.use(notFound);
 app.use(errorHandler);

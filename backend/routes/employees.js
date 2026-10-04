@@ -1,10 +1,10 @@
 const express = require("express");
 const router = express.Router();
 const { getEmployees, createEmployee, updateEmployee, deleteEmployee } = require("../controllers/employeeController");
-const { protect, authorize } = require("../middleware/auth");
+const { protectFinance } = require("../middleware/financeAuth");
 
-// Payroll data is sensitive: admins only.
-router.use(protect, authorize("admin"));
+// Finance-section login only (not system users, not parents).
+router.use(protectFinance);
 router.get("/", getEmployees);
 router.post("/", createEmployee);
 router.put("/:id", updateEmployee);

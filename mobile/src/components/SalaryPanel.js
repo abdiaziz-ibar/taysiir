@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
-import staffApi from "../api/staffClient";
+import financeApi, { verifyFinancePassword } from "../api/financeClient";
 import { Loading, Card, Badge, ScreenModal, Field, Chip, ChipRow, PrimaryButton, ErrorText, feeStatusColor, feeStatusText } from "./StaffUI";
 import ConfirmPasswordModal from "./ConfirmPasswordModal";
 import { COLORS, formatMoney, formatDate } from "../utils/format";
@@ -25,7 +25,7 @@ const SalaryPanel = ({ period, refreshKey }) => {
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const load = useCallback(async () => {
-    const res = await staffApi.get("/salaries/summary", { params: { period } });
+    const res = await financeApi.get("/salaries/summary", { params: { period } });
     setData(res.data);
   }, [period]);
 
@@ -59,8 +59,8 @@ const SalaryPanel = ({ period, refreshKey }) => {
     setSaving(true);
     try {
       const body = { amount, paymentDate: pay.date, paymentMethod: pay.method, notes: pay.notes, allowOverpayment: pay.allow };
-      if (pay.payment) await staffApi.put(`/salaries/${pay.payment._id}`, body);
-      else await staffApi.post("/salaries", { ...body, employeeId: pay.row.employee._id, period });
+      if (pay.payment) await financeApi.put(`/salaries/${pay.payment._id}`, body);
+      else await financeApi.post("/salaries", { ...body, employeeId: pay.row.employee._id, period });
       setPay(null);
       load();
     } catch (err) {
@@ -71,7 +71,7 @@ const SalaryPanel = ({ period, refreshKey }) => {
   };
 
   const handleDelete = async () => {
-    await staffApi.delete(`/salaries/${deleteTarget._id}`);
+    await financeApi.delete(`/salaries/${deleteTarget._id}`);
     setDeleteTarget(null);
     load();
   };
@@ -189,6 +189,7 @@ const SalaryPanel = ({ period, refreshKey }) => {
             ? `Waxaad tirtirayaa ${deleteTarget.voucherNumber} (${formatMoney(deleteTarget.amount)} — ${deleteTarget.employee.fullName}). Ku dhimanka shaqaalahan ayaa dib u kordhi doona.`
             : ""
         }
+        verify={verifyFinancePassword}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
       />

@@ -13,5 +13,13 @@ const generateParentToken = (parentId) =>
     expiresIn: "30d",
   });
 
+// Finance-section tokens (type "finance"): usable only on the finance routes,
+// and the finance routes accept nothing else.
+const generateFinanceToken = (financeUserId) =>
+  jwt.sign({ id: financeUserId, type: "finance" }, process.env.JWT_SECRET, {
+    expiresIn: process.env.JWT_EXPIRES_IN || "7d",
+  });
+
 module.exports = generateToken;
+module.exports.generateFinanceToken = generateFinanceToken;
 module.exports.generateParentToken = generateParentToken;

@@ -1,11 +1,16 @@
 import { useCallback, useState } from "react";
 import { View, Text, ScrollView, StyleSheet } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import staffApi from "../../api/staffClient";
-import { useStaff } from "../../context/StaffContext";
-import { ScreenHeader, YearChips, Loading, Card } from "../../components/StaffUI";
+import financeApi from "../../api/financeClient";
+import { Loading, Card, Chip } from "../../components/StaffUI";
+import { FinanceHeader } from "../../components/FinanceUI";
 import { formatMoney, COLORS } from "../../utils/format";
-import { formatSigned } from "../../utils/finance";
+
+// School years run September → August, so a date before September belongs to the year that began last calendar year.
+const currentStartYear = () => {
+  const now = new Date();
+  return now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
+};
 
 const Stat = ({ label, value, color }) => (
   <View style={styles.stat}>
@@ -14,37 +19,42 @@ const Stat = ({ label, value, color }) => (
   </View>
 );
 
-const StaffFinanceReportScreen = ({ navigation }) => {
-  const { selectedYearId } = useStaff();
+const FinanceReportScreen = () => {
+  const [startYear, setStartYear] = useState(currentStartYear());
   const [data, setData] = useState(null);
+
+  // The year picker: next school year back to four years ago.
+  const years = Array.from({ length: 6 }, (_, i) => currentStartYear() + 1 - i);
 
   useFocusEffect(
     useCallback(() => {
-      if (!selectedYearId) return;
       setData(null);
-      staffApi.get("/finance/summary", { params: { academicYearId: selectedYearId } }).then((res) => setData(res.data));
-    }, [selectedYearId])
+      financeApi.get("/finance/summary", { params: { startYear } }).then((res) => setData(res.data));
+    }, [startYear])
   );
-
-  const net = data?.totals.net ?? 0;
-  const netColor = net >= 0 ? COLORS.success : COLORS.danger;
 
   return (
     <View style={styles.flex}>
-      <ScreenHeader title="Warbixinta Maaliyadda" onBack={navigation.goBack} />
-      <YearChips />
+      <FinanceHeader title="Warbixinta" />
+      <View>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 12, paddingVertical: 10 }}>
+          {years.map((y) => (
+            <Chip key={y} label={`${y}-${y + 1}`} active={startYear === y} onPress={() => setStartYear(y)} />
+          ))}
+        </ScrollView>
+      </View>
+
       {data === null ? (
         <Loading />
       ) : (
         <ScrollView contentContainerStyle={{ padding: 12, paddingBottom: 40 }}>
-          <Text style={styles.year}>{data.academicYear}</Text>
-          <Text style={styles.note}>Dakhli = lacagaha waalidiinta ee sanadkan. Mushaharka & qarashaadka = marka la bixiyey (Sebtembar → Ogosto).</Text>
+          <Text style={styles.year}>{data.schoolYear}</Text>
+          <Text style={styles.note}>Mushaharka iyo qarashaadka marka la bixiyey (Sebtembar → Ogosto).</Text>
 
           <View style={styles.grid}>
-            <Stat label="Dakhli (Fees)" value={formatMoney(data.totals.income)} color={COLORS.success} />
             <Stat label="Mushaharka" value={formatMoney(data.totals.salaries)} />
             <Stat label="Qarashaadka" value={formatMoney(data.totals.expenses)} color={COLORS.danger} />
-            <Stat label={net >= 0 ? "Faa'iido" : "Khasaare"} value={formatSigned(net)} color={netColor} />
+            <Stat label="Wadarta Baxday" value={formatMoney(data.totals.total)} color={COLORS.danger} />
           </View>
 
           <Card>
@@ -52,12 +62,10 @@ const StaffFinanceReportScreen = ({ navigation }) => {
             {data.months.map((m) => (
               <View key={m.month} style={styles.monthRow}>
                 <Text style={styles.monthName}>{m.month}</Text>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.monthLine}>
-                    Dakhli {formatMoney(m.income)} · Mushahar {formatMoney(m.salaries)} · Kharash {formatMoney(m.expenses)}
-                  </Text>
-                </View>
-                <Text style={[styles.monthNet, { color: m.net >= 0 ? COLORS.success : COLORS.danger }]}>{formatSigned(m.net)}</Text>
+                <Text style={styles.monthLine}>
+                  Mushahar {formatMoney(m.salaries)} · Kharash {formatMoney(m.expenses)}
+                </Text>
+                <Text style={styles.monthTotal}>{formatMoney(m.total)}</Text>
               </View>
             ))}
           </Card>
@@ -90,11 +98,11 @@ const styles = StyleSheet.create({
   title: { fontSize: 15, fontWeight: "700", color: COLORS.ink, marginBottom: 10 },
   monthRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8, borderTopWidth: 1, borderTopColor: COLORS.line },
   monthName: { width: 74, fontSize: 12, fontWeight: "600", color: COLORS.ink },
-  monthLine: { fontSize: 11, color: "rgba(20,24,33,0.6)" },
-  monthNet: { width: 76, textAlign: "right", fontSize: 12, fontWeight: "700" },
+  monthLine: { flex: 1, fontSize: 11, color: "rgba(20,24,33,0.6)" },
+  monthTotal: { width: 70, textAlign: "right", fontSize: 12, fontWeight: "700", color: COLORS.ink },
   catRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 6 },
   catName: { fontSize: 13, color: COLORS.ink },
   catValue: { fontSize: 13, fontWeight: "600", color: COLORS.ink },
 });
 
-export default StaffFinanceReportScreen;
+export default FinanceReportScreen;

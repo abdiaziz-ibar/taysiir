@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Wallet, Users, BarChart3, BellRing, User, Lock, Eye, EyeOff, Phone } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import parentApi from "../api/parentAxios";
+import financeApi from "../api/financeAxios";
 
 const FEATURES = [
   { icon: Wallet, label: "Fee Management" },
@@ -20,8 +21,9 @@ const Logo = ({ light }) => (
   </div>
 );
 
-const StaffLoginForm = () => {
-  const { login } = useAuth();
+// Username + password login, shared by System Users and the finance section;
+// each supplies its own login call and where to go afterwards.
+const UsernameLoginForm = ({ doLogin, redirectTo, rememberKey }) => {
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -32,7 +34,7 @@ const StaffLoginForm = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("rememberedUsername");
+    const saved = localStorage.getItem(rememberKey);
     if (saved) {
       setUsername(saved);
       setRememberMe(true);
@@ -44,10 +46,10 @@ const StaffLoginForm = () => {
     setError("");
     setLoading(true);
     try {
-      await login(username, password);
-      if (rememberMe) localStorage.setItem("rememberedUsername", username);
-      else localStorage.removeItem("rememberedUsername");
-      navigate("/dashboard");
+      await doLogin(username, password);
+      if (rememberMe) localStorage.setItem(rememberKey, username);
+      else localStorage.removeItem(rememberKey);
+      navigate(redirectTo);
     } catch (err) {
       setError(err.response?.data?.message || "Login-ku wuu fashilmay.");
     } finally {
@@ -118,6 +120,21 @@ const StaffLoginForm = () => {
     </form>
   );
 };
+
+const StaffLoginForm = () => {
+  const { login } = useAuth();
+  return <UsernameLoginForm doLogin={login} redirectTo="/dashboard" rememberKey="rememberedUsername" />;
+};
+
+const financeLogin = async (username, password) => {
+  const res = await financeApi.post("/finance-auth/login", { username, password });
+  localStorage.setItem("financeToken", res.data.token);
+  localStorage.setItem("finance", JSON.stringify(res.data.user));
+};
+
+const FinanceLoginForm = () => (
+  <UsernameLoginForm doLogin={financeLogin} redirectTo="/finance/expenses" rememberKey="rememberedFinanceUsername" />
+);
 
 const ParentLoginForm = () => {
   const navigate = useNavigate();
@@ -246,7 +263,7 @@ const ParentLoginForm = () => {
 
 const Login = () => {
   const [searchParams] = useSearchParams();
-  const [mode, setMode] = useState(searchParams.get("as") === "parent" ? "parent" : "staff");
+  const [mode, setMode] = useState(["parent", "finance"].includes(searchParams.get("as")) ? searchParams.get("as") : "staff");
   const expired = searchParams.get("expired") === "1";
 
   return (
@@ -322,6 +339,13 @@ const Login = () => {
             >
               Parents
             </button>
+            <button
+              type="button"
+              onClick={() => setMode("finance")}
+              className={`flex-1 py-2 rounded-full text-sm font-medium transition-colors ${mode === "finance" ? "bg-surface shadow-sm text-ink" : "text-ink/50 hover:text-ink"}`}
+            >
+              Maaliyadda
+            </button>
           </div>
 
           {expired && (
@@ -332,10 +356,14 @@ const Login = () => {
 
           <h2 className="font-serif text-2xl">Ku Soo Dhawoow</h2>
           <p className="text-sm text-ink/50 mt-1 mb-6">
-            {mode === "staff" ? "Gal xisaabtaada si aad u sii wadato." : "Gal xisaabta waalidnimo si aad u aragto lacagtaada."}
+            {mode === "staff"
+              ? "Gal xisaabtaada si aad u sii wadato."
+              : mode === "finance"
+                ? "Gal xisaabta Maaliyadda (mushaharka iyo qarashaadka)."
+                : "Gal xisaabta waalidnimo si aad u aragto lacagtaada."}
           </p>
 
-          {mode === "staff" ? <StaffLoginForm /> : <ParentLoginForm />}
+          {mode === "staff" ? <StaffLoginForm /> : mode === "finance" ? <FinanceLoginForm /> : <ParentLoginForm />}
 
           <p className="text-center text-xs text-ink/40 mt-8">
             © {new Date().getFullYear()} Taysir Foundation

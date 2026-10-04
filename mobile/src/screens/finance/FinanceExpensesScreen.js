@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
-import staffApi from "../../api/staffClient";
-import { ScreenHeader, Loading, Card, ScreenModal, Field, Chip, ChipRow, PrimaryButton, ErrorText } from "../../components/StaffUI";
+import financeApi, { verifyFinancePassword } from "../../api/financeClient";
+import { Loading, Card, ScreenModal, Field, Chip, ChipRow, PrimaryButton, ErrorText } from "../../components/StaffUI";
+import { FinanceHeader } from "../../components/FinanceUI";
 import ConfirmPasswordModal from "../../components/ConfirmPasswordModal";
 import MonthNav from "../../components/MonthNav";
 import SalaryPanel from "../../components/SalaryPanel";
@@ -43,7 +44,7 @@ const SalaryEntry = ({ initialPeriod, onSaved, onNeedEmployees }) => {
     setRows(null);
     setEmployeeId("");
     setAmount("");
-    staffApi.get("/salaries/summary", { params: { period } }).then((res) => setRows(res.data.rows));
+    financeApi.get("/salaries/summary", { params: { period } }).then((res) => setRows(res.data.rows));
   }, [period]);
 
   const candidates = (rows || []).filter((r) => r.employee.type === empType && r.employee.status === "active");
@@ -68,7 +69,7 @@ const SalaryEntry = ({ initialPeriod, onSaved, onNeedEmployees }) => {
     setError("");
     setSaving(true);
     try {
-      await staffApi.post("/salaries", { employeeId, period, amount: Number(amount), paymentDate: date, paymentMethod: method, notes, allowOverpayment: allow });
+      await financeApi.post("/salaries", { employeeId, period, amount: Number(amount), paymentDate: date, paymentMethod: method, notes, allowOverpayment: allow });
       onSaved(period);
     } catch (err) {
       setError(err.response?.data?.message || "Khalad ayaa dhacay.");
@@ -171,10 +172,10 @@ const StaffExpensesScreen = ({ navigation }) => {
 
   const load = useCallback(async () => {
     if (isSalaryView) return;
-    const res = await staffApi.get("/expenses", { params: { month: month || undefined, category: category || undefined } });
+    const res = await financeApi.get("/expenses", { params: { month: month || undefined, category: category || undefined } });
     setData(res.data);
     if (category === "" && month) {
-      const s = await staffApi.get("/salaries/summary", { params: { period: month } });
+      const s = await financeApi.get("/salaries/summary", { params: { period: month } });
       setSalaryPaid(s.data.totals.paid);
     } else {
       setSalaryPaid(null);
@@ -217,8 +218,8 @@ const StaffExpensesScreen = ({ navigation }) => {
     try {
       const { _id, ...rest } = form;
       const payload = { ...rest, amount: Number(rest.amount) };
-      if (_id) await staffApi.put(`/expenses/${_id}`, payload);
-      else await staffApi.post("/expenses", payload);
+      if (_id) await financeApi.put(`/expenses/${_id}`, payload);
+      else await financeApi.post("/expenses", payload);
       setForm(null);
       load();
     } catch (err) {
@@ -244,7 +245,7 @@ const StaffExpensesScreen = ({ navigation }) => {
   };
 
   const handleDelete = async () => {
-    await staffApi.delete(`/expenses/${deleteTarget._id}`);
+    await financeApi.delete(`/expenses/${deleteTarget._id}`);
     setDeleteTarget(null);
     load();
   };
@@ -257,15 +258,7 @@ const StaffExpensesScreen = ({ navigation }) => {
 
   return (
     <View style={styles.flex}>
-      <ScreenHeader
-        title={isSalaryView ? "Mushaharka" : "Qarashaadka"}
-        onBack={navigation.goBack}
-        right={
-          <TouchableOpacity onPress={openNew}>
-            <Text style={styles.add}>+ Cusub</Text>
-          </TouchableOpacity>
-        }
-      />
+      <FinanceHeader title={isSalaryView ? "Mushaharka" : "Qarashaadka"} action={{ label: "+ Cusub", onPress: openNew }} />
 
       {month ? <MonthNav period={month} onChange={setMonth} /> : <Text style={styles.allLabel}>Dhammaan bilaha</Text>}
       {!isSalaryView && (
@@ -378,6 +371,7 @@ const StaffExpensesScreen = ({ navigation }) => {
         visible={!!deleteTarget}
         title="Tirtir Kharashka?"
         message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.voucherNumber} (${deleteTarget.description} — ${formatMoney(deleteTarget.amount)}). Lama soo celin karo.` : ""}
+        verify={verifyFinancePassword}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
       />
@@ -387,7 +381,6 @@ const StaffExpensesScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
-  add: { color: "#fff", fontSize: 13, fontWeight: "600" },
   allLabel: { textAlign: "center", fontSize: 16, fontWeight: "700", color: COLORS.ink, paddingVertical: 14 },
   monthToggle: { flexDirection: "row", justifyContent: "center", paddingBottom: 8 },
   totalBox: { backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, marginBottom: 12, borderWidth: 1, borderColor: COLORS.line },

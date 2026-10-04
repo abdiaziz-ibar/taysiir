@@ -4,7 +4,7 @@ import parentApi from "../../api/parentAxios";
 
 const emptyForm = { currentPassword: "", newPassword: "", confirmPassword: "" };
 
-const ChangePasswordModal = ({ open, onClose }) => {
+const ChangePasswordModal = ({ open, onClose, api = parentApi, path = "/parent-portal/change-password" }) => {
   const [form, setForm] = useState(emptyForm);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
@@ -28,7 +28,7 @@ const ChangePasswordModal = ({ open, onClose }) => {
     }
     setSaving(true);
     try {
-      await parentApi.post("/parent-portal/change-password", {
+      await api.post(path, {
         currentPassword: form.currentPassword,
         newPassword: form.newPassword,
       });

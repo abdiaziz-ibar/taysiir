@@ -7,51 +7,40 @@ const MONTHS = [
   "May", "June", "July", "August",
 ];
 
-// GET /api/finance/summary?academicYearId=
-// Money in vs. money out for one school year (September → August).
-//  - income:   fee payments belonging to that academic year (same figure as
-//              the other reports, even when a parent paid late)
-//  - salaries/expenses: by the date they were paid, inside the Sep→Aug window
+const currentSchoolYearStart = () => {
+  const now = new Date();
+  return now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
+};
+
+// GET /api/finance/summary?startYear=2026
+// What the school paid out in one school year (September → August): salaries
+// and other expenses, by the date they were paid. Independent of the fees
+// system — it doesn't read parents, fees or fee payments.
 const getFinanceSummary = async (req, res, next) => {
   try {
-    let { academicYearId } = req.query;
-    if (!academicYearId) {
-      academicYearId = (await prisma.academicYear.findFirst({ where: { isActive: true } }))?.id;
+    const startYear = req.query.startYear === undefined ? currentSchoolYearStart() : Number(req.query.startYear);
+    if (!Number.isInteger(startYear) || startYear < 2000 || startYear > 2100) {
+      return res.status(400).json({ message: "Sanadka khalad ah." });
     }
-    if (!academicYearId) return res.json(null);
 
-    const year = await prisma.academicYear.findUnique({ where: { id: academicYearId } });
-    if (!year) return res.status(404).json({ message: "Sanad Dugsiyeedka lama helin." });
+    const start = new Date(startYear, 8, 1);
+    const end = new Date(startYear + 1, 8, 1);
 
-    const start = new Date(year.startYear, 8, 1);
-    const end = new Date(year.startYear + 1, 8, 1);
-
-    const [payments, salaries, expenses] = await Promise.all([
-      prisma.payment.findMany({ where: { academicYearId } }),
+    const [salaries, expenses] = await Promise.all([
       prisma.salaryPayment.findMany({ where: { paymentDate: { gte: start, lt: end } } }),
       prisma.expense.findMany({ where: { expenseDate: { gte: start, lt: end } } }),
     ]);
 
-    const months = MONTHS.map((month, idx) => ({
-      month,
-      monthIndex: (8 + idx) % 12,
-      income: 0,
-      salaries: 0,
-      expenses: 0,
-    }));
-    const add = (rows, dateKey, valueKey, field) =>
+    const months = MONTHS.map((month, idx) => ({ month, monthIndex: (8 + idx) % 12, salaries: 0, expenses: 0 }));
+    const add = (rows, dateKey, field) =>
       rows.forEach((r) => {
         const bucket = months.find((m) => m.monthIndex === new Date(r[dateKey]).getMonth());
-        if (bucket) bucket[field] += r[valueKey];
+        if (bucket) bucket[field] += r.amount;
       });
-    add(payments, "paymentDate", "amount", "income");
-    add(salaries, "paymentDate", "amount", "salaries");
-    add(expenses, "expenseDate", "amount", "expenses");
+    add(salaries, "paymentDate", "salaries");
+    add(expenses, "expenseDate", "expenses");
 
-    const rows = months.map(({ monthIndex, ...m }) => {
-      const totalOut = m.salaries + m.expenses;
-      return { ...m, totalOut, net: m.income - totalOut };
-    });
+    const rows = months.map(({ monthIndex, ...m }) => ({ ...m, total: m.salaries + m.expenses }));
     const total = (key) => rows.reduce((s, r) => s + r[key], 0);
 
     const byCat = {};
@@ -60,15 +49,10 @@ const getFinanceSummary = async (req, res, next) => {
     });
 
     res.json({
-      academicYear: year.name,
+      schoolYear: `${startYear}-${startYear + 1}`,
+      startYear,
       months: rows,
-      totals: {
-        income: total("income"),
-        salaries: total("salaries"),
-        expenses: total("expenses"),
-        totalOut: total("totalOut"),
-        net: total("net"),
-      },
+      totals: { salaries: total("salaries"), expenses: total("expenses"), total: total("total") },
       expensesByCategory: Object.entries(byCat)
         .map(([category, amount]) => ({ category, total: amount }))
         .sort((a, b) => b.total - a.total),

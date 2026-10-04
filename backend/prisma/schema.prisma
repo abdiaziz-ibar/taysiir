@@ -8,18 +8,16 @@ datasource db {
 }
 
 model User {
-  id             String          @id @default(uuid())
-  fullName       String
-  username       String          @unique
-  email          String?
-  password       String
-  role           String          @default("staff") // "admin" | "staff"
-  status         String          @default("active") // "active" | "inactive"
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  payments       Payment[]
-  salaryPayments SalaryPayment[]
-  expenses       Expense[]
+  id        String    @id @default(uuid())
+  fullName  String
+  username  String    @unique
+  email     String?
+  password  String
+  role      String    @default("staff") // "admin" | "staff"
+  status    String    @default("active") // "active" | "inactive"
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  payments  Payment[]
 
   @@map("users")
 }
@@ -175,8 +173,8 @@ model SalaryPayment {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  employee  Employee @relation(fields: [employeeId], references: [id], onDelete: Cascade)
-  createdBy User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  employee  Employee     @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+  createdBy FinanceUser? @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([period])
   @@map("salary_payments")
@@ -196,8 +194,27 @@ model Expense {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
-  createdBy User? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy FinanceUser? @relation(fields: [createdById], references: [id], onDelete: SetNull)
 
   @@index([expenseDate])
   @@map("expenses")
+}
+
+// Login accounts for the independent finance section (payroll + expenses).
+// Separate from `User` (the fees system) and `Parent` (the parent portal):
+// its own login and token type, and no access to fee data. Created by the
+// system admin.
+model FinanceUser {
+  id        String   @id @default(uuid())
+  fullName  String
+  username  String   @unique
+  password  String
+  status    String   @default("active") // "active" | "inactive"
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  salaryPayments SalaryPayment[]
+  expenses       Expense[]
+
+  @@map("finance_users")
 }

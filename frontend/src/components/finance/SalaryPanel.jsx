@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { Download, Wallet, CheckCircle2, AlertCircle } from "lucide-react";
-import api from "../api/axios";
-import ConfirmDeleteModal from "./ConfirmDeleteModal";
-import StatCard from "./StatCard";
-import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../utils/format";
-import { downloadExcel } from "../utils/excel";
-import { EMPLOYEE_TYPES, PAYMENT_METHODS, monthLabel, todayISO } from "../utils/finance";
+import api, { verifyFinancePassword } from "../../api/financeAxios";
+import ConfirmDeleteModal from "../ConfirmDeleteModal";
+import StatCard from "../StatCard";
+import { formatMoney, formatDate, statusLabel, statusBadgeClass } from "../../utils/format";
+import { downloadExcel } from "../../utils/excel";
+import { EMPLOYEE_TYPES, PAYMENT_METHODS, monthLabel, todayISO } from "../../utils/finance";
 
 // Records the month's salary payment, or (when `payment` is given) edits the one already recorded:
 // each employee gets one payment per month.
@@ -266,6 +266,7 @@ const SalaryPanel = ({ period, refreshKey }) => {
         open={!!deleteTarget}
         title="Tirtir Mushaharka La Bixiyey?"
         message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.voucherNumber} (${formatMoney(deleteTarget.amount)} — ${deleteTarget.employee.fullName}). Ku dhimanka shaqaalahan ayaa dib u kordhi doona.` : ""}
+        verify={verifyFinancePassword}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
       />

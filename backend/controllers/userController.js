@@ -74,8 +74,12 @@ const getLockedAccounts = async (req, res, next) => {
           name = (await prisma.user.findUnique({ where: { username: l.identifier } }))?.fullName;
         } else if (l.scope === "parent") {
           name = (await prisma.parent.findFirst({ where: { phone: l.identifier } }))?.fullName;
+        } else if (l.scope === "finance") {
+          name = (await prisma.financeUser.findUnique({ where: { username: l.identifier } }))?.fullName;
         } else if (l.scope === "verify") {
-          name = (await prisma.user.findUnique({ where: { id: l.identifier } }))?.fullName;
+          name =
+            (await prisma.user.findUnique({ where: { id: l.identifier } }))?.fullName ||
+            (await prisma.financeUser.findUnique({ where: { id: l.identifier } }))?.fullName;
         }
         return { ...l, name: name || null };
       })
@@ -90,7 +94,7 @@ const getLockedAccounts = async (req, res, next) => {
 const unlockAccount = async (req, res, next) => {
   try {
     const { scope, identifier } = req.body;
-    if (!["staff", "parent", "verify"].includes(scope) || !identifier) {
+    if (!["staff", "parent", "finance", "verify"].includes(scope) || !identifier) {
       return res.status(400).json({ message: "scope iyo identifier waa waajib." });
     }
     reset(scope, identifier);

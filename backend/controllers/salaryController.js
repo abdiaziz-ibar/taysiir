@@ -110,7 +110,7 @@ const createSalaryPayment = async (req, res, next) => {
         paymentDate: paymentDate ? new Date(paymentDate) : new Date(),
         paymentMethod,
         notes: notes ? String(notes).trim() || null : null,
-        createdById: req.user?._id || null,
+        createdById: req.financeUser?._id || null,
       },
       include: { employee: true },
     });

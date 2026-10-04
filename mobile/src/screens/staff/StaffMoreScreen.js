@@ -12,13 +12,6 @@ const GROUPS = [
     ],
   },
   {
-    title: "Maaliyadda",
-    items: [
-      { icon: "🧾", label: "Qarashaadka & Mushaharka", route: "Expenses", adminOnly: true },
-      { icon: "📈", label: "Warbixinta Maaliyadda", route: "FinanceReport", adminOnly: true },
-    ],
-  },
-  {
     title: "Warbixinnada",
     items: [
       { icon: "📅", label: "Warbixin Bille", route: "MonthlyReport" },
@@ -45,7 +38,7 @@ const StaffMoreScreen = ({ navigation }) => {
     <View style={styles.flex}>
       <StaffHeader title="Dheeri" />
       <ScrollView contentContainerStyle={{ padding: 14, paddingBottom: 40 }}>
-        {GROUPS.filter((g) => g.items.some((i) => !i.adminOnly || isAdmin)).map((g) => (
+        {GROUPS.map((g) => (
           <View key={g.title} style={{ marginBottom: 14 }}>
             <Text style={styles.group}>{g.title}</Text>
             <View style={styles.card}>

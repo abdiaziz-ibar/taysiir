@@ -14,7 +14,7 @@ import { useAuth } from "../context/AuthContext";
 import { COLORS } from "../utils/format";
 
 const LoginScreen = () => {
-  const { login, register, staffLogin } = useAuth();
+  const { login, register, staffLogin, financeLogin } = useAuth();
   const [role, setRole] = useState("staff");
   const [username, setUsername] = useState("");
   const [mode, setMode] = useState("login");
@@ -26,14 +26,14 @@ const LoginScreen = () => {
 
   const handleSubmit = async () => {
     setError("");
-    if (role === "staff") {
+    if (role === "staff" || role === "finance") {
       if (!username.trim() || !password) {
         setError("Username iyo Password waa waajib.");
         return;
       }
       setLoading(true);
       try {
-        await staffLogin(username.trim().toLowerCase(), password);
+        await (role === "finance" ? financeLogin : staffLogin)(username.trim().toLowerCase(), password);
       } catch (err) {
         setError(err.response?.data?.message || "Login-ku wuu fashilmay.");
       } finally {
@@ -94,9 +94,19 @@ const LoginScreen = () => {
             >
               <Text style={[styles.roleText, role === "parent" && styles.roleTextActive]}>Parents</Text>
             </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.roleTab, role === "finance" && styles.roleTabActive]}
+              onPress={() => {
+                setRole("finance");
+                setError("");
+                setPassword("");
+              }}
+            >
+              <Text style={[styles.roleText, role === "finance" && styles.roleTextActive]}>Maaliyadda</Text>
+            </TouchableOpacity>
           </View>
 
-          {role === "staff" ? (
+          {role === "staff" || role === "finance" ? (
             <>
               {error ? <Text style={styles.error}>{error}</Text> : null}
               <Text style={styles.label}>Username</Text>
@@ -221,7 +231,7 @@ const styles = StyleSheet.create({
   roleRow: { flexDirection: "row", backgroundColor: COLORS.paper, borderRadius: 999, padding: 4, marginBottom: 16 },
   roleTab: { flex: 1, paddingVertical: 9, borderRadius: 999, alignItems: "center" },
   roleTabActive: { backgroundColor: COLORS.surface, shadowColor: "#000", shadowOpacity: 0.1, shadowRadius: 3, elevation: 2 },
-  roleText: { color: "rgba(20,24,33,0.5)", fontSize: 13, fontWeight: "600" },
+  roleText: { color: "rgba(20,24,33,0.5)", fontSize: 12, fontWeight: "600" },
   roleTextActive: { color: COLORS.ink },
   card: { backgroundColor: COLORS.surface, borderRadius: 12, padding: 20, width: "100%", maxWidth: 380 },
   tabRow: { flexDirection: "row", backgroundColor: COLORS.paper, borderRadius: 999, padding: 4, marginBottom: 16 },

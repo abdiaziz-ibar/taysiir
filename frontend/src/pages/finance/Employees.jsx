@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
-import api from "../api/axios";
-import ConfirmDeleteModal from "../components/ConfirmDeleteModal";
-import { formatMoney } from "../utils/format";
-import { EMPLOYEE_TYPES } from "../utils/finance";
+import api, { verifyFinancePassword } from "../../api/financeAxios";
+import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
+import { formatMoney } from "../../utils/format";
+import { EMPLOYEE_TYPES } from "../../utils/finance";
 
 const emptyForm = { fullName: "", type: "teacher", position: "", phone: "", monthlySalary: "", notes: "", status: "active" };
 
@@ -199,6 +199,7 @@ const Employees = () => {
         open={!!deleteTarget}
         title="Tirtir Shaqaalaha?"
         message={deleteTarget ? `Waxaad tirtirayaa ${deleteTarget.fullName} (${deleteTarget.employeeId}). Haddii uu leeyahay mushahar hore loo bixiyey, lama tirtiri karo — ka dhig Inactive.` : ""}
+        verify={verifyFinancePassword}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
       />

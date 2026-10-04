@@ -4,7 +4,11 @@ import api from "../api/axios";
 
 // Step-up confirmation for irreversible deletes: the admin currently
 // logged in must re-type their own password before the delete proceeds.
-const ConfirmDeleteModal = ({ open, title, message, onConfirm, onClose, children, disabled }) => {
+// `verify(password)` re-checks the password before onConfirm runs; it defaults to the
+// logged-in system user, and the finance section passes its own.
+const verifyStaff = (password) => api.post("/auth/verify-password", { password });
+
+const ConfirmDeleteModal = ({ open, title, message, onConfirm, onClose, children, disabled, verify = verifyStaff }) => {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [checking, setChecking] = useState(false);
@@ -27,7 +31,7 @@ const ConfirmDeleteModal = ({ open, title, message, onConfirm, onClose, children
     setError("");
     setChecking(true);
     try {
-      await api.post("/auth/verify-password", { password });
+      await verify(password);
       reset();
       await onConfirm();
     } catch (err) {
