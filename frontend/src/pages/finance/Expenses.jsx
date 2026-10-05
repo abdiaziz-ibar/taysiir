@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, TrendingDown, Banknote } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, TrendingDown, Banknote, Repeat } from "lucide-react";
 import api, { verifyFinancePassword } from "../../api/financeAxios";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
 import StatCard from "../../components/StatCard";
@@ -30,7 +30,11 @@ const emptyForm = () => ({
   expenseDate: todayISO(),
   paymentMethod: "Cash",
   notes: "",
+  recurring: true, // new regular costs repeat every month by default
 });
+
+// A recurring row from the server has the id "rec:<templateId>:<YYYY-MM>".
+const rowMonth = (x) => x._id.split(":")[2];
 
 // The "Mushaharka" branch of the new-expense form: pick Macalin or Shaqaale,
 // then the person, then pay.
@@ -182,6 +186,7 @@ const Expenses = () => {
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [editingRow, setEditingRow] = useState(null); // the row being edited (recurring rows edit "from this month on")
 
   const isSalaryView = category === SALARY_KEY;
 
@@ -209,7 +214,9 @@ const Expenses = () => {
 
   const openNew = () => {
     setEditingId(null);
-    setForm({ ...emptyForm(), category: isSalaryView ? SALARY_KEY : category || EXPENSE_CATEGORIES[0] });
+    setEditingRow(null);
+    const first = isSalaryView ? SALARY_KEY : category || EXPENSE_CATEGORIES[0];
+    setForm({ ...emptyForm(), category: first, recurring: first !== "Kale" });
     setError("");
     setShowForm(true);
   };
@@ -223,7 +230,9 @@ const Expenses = () => {
       expenseDate: x.expenseDate.slice(0, 10),
       paymentMethod: x.paymentMethod,
       notes: x.notes || "",
+      recurring: !!x.recurring,
     });
+    setEditingRow(x);
     setError("");
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -232,6 +241,7 @@ const Expenses = () => {
   const closeForm = () => {
     setShowForm(false);
     setEditingId(null);
+    setEditingRow(null);
   };
 
   const handleSubmit = async (e) => {
@@ -242,7 +252,10 @@ const Expenses = () => {
     setSaving(true);
     try {
       const payload = { ...form, amount: Number(form.amount) };
-      if (editingId) await api.put(`/expenses/${editingId}`, payload);
+      if (editingRow?.recurring) {
+        // Changes this month and every later one; earlier months keep what they had.
+        await api.put(`/expenses/recurring/${editingRow.recurringId}`, { ...payload, month: rowMonth(editingRow) });
+      } else if (editingId) await api.put(`/expenses/${editingId}`, payload);
       else await api.post("/expenses", payload);
       closeForm();
       load();
@@ -269,15 +282,27 @@ const Expenses = () => {
   };
 
   const handleDelete = async () => {
-    await api.delete(`/expenses/${deleteTarget._id}`);
+    if (deleteTarget.recurring) await api.delete(`/expenses/recurring/${deleteTarget.recurringId}`, { params: { month: rowMonth(deleteTarget) } });
+    else await api.delete(`/expenses/${deleteTarget._id}`);
     setDeleteTarget(null);
     load();
+  };
+
+  // One click: every regular cost of this month becomes a monthly one from here on.
+  const repeatThisMonth = async () => {
+    if (!window.confirm(t("Dhammaan kharashyada bishan (marka laga reebo \"Kale\") ka dhig kuwo bil kasta ah, oo bilaha soo socda isla muuqda?"))) return;
+    try {
+      await api.post("/expenses/recurring/from-month", { month });
+      load();
+    } catch (err) {
+      window.alert(t(err.response?.data?.message || "Khalad ayaa dhacay."));
+    }
   };
 
   const exportExcel = () => {
     const headers = ["Voucher", "Taariikh", "Nooca", "Sharaxaad", "Habka", "Faallo", "Lacag"];
     const rows = data.expenses.map((x) => [
-      x.voucherNumber,
+      x.voucherNumber || (x.recurring ? t("Bil kasta") : ""),
       formatDate(x.expenseDate),
       x.category,
       x.description,
@@ -292,6 +317,8 @@ const Expenses = () => {
   const expenseCategoryOptions = EXPENSE_CATEGORIES.includes(form.category) || form.category === SALARY_KEY
     ? EXPENSE_CATEGORIES
     : [form.category, ...EXPENSE_CATEGORIES];
+
+  const canRepeatMonth = !!month && !!data && data.expenses.some((x) => !x.recurring && x.category !== "Kale");
 
   const showSalaryCard = category === "" && month && salaryPaid !== null;
 
@@ -315,7 +342,7 @@ const Expenses = () => {
             <select
               className="input-field md:max-w-sm"
               value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
+              onChange={(e) => setForm({ ...form, category: e.target.value, ...(editingId ? {} : { recurring: e.target.value !== "Kale" }) })}
             >
               {!editingId && <option value={SALARY_KEY}>{t(SALARY_LABEL)}</option>}
               {expenseCategoryOptions.map((c) => (
@@ -329,6 +356,11 @@ const Expenses = () => {
           ) : (
             <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {error && <div className="md:col-span-2 bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}
+              {editingRow?.recurring && (
+                <p className="md:col-span-2 text-xs bg-navy/5 text-navy rounded-md px-3 py-2">
+                  {t("Kharashkan waa bil kasta. Isbeddelku wuxuu khuseeyaa {month} iyo bilaha xiga; bilihii hore isma beddelayaan.", { month: monthLabel(rowMonth(editingRow)) })}
+                </p>
+              )}
               {!editingId && form.category !== "Kale" && (
                 <p className="md:col-span-2 text-xs text-ink/50">
                   {t("Nooc kasta hal mar bishii ayaa la diiwaan gelin karaa. Haddii aad rabto inaad wax ka beddesho, liiska ka dooro oo Edit samee.")}
@@ -338,10 +370,12 @@ const Expenses = () => {
                 <label className="label-field">{t("Lacagta ($) *")}</label>
                 <input required type="number" min="0.01" step="0.01" className="input-field" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
               </div>
-              <div>
-                <label className="label-field">{t("Taariikhda")}</label>
-                <input type="date" required className="input-field" value={form.expenseDate} onChange={(e) => setForm({ ...form, expenseDate: e.target.value })} />
-              </div>
+              {!editingRow?.recurring && (
+                <div>
+                  <label className="label-field">{t("Taariikhda")}</label>
+                  <input type="date" required className="input-field" value={form.expenseDate} onChange={(e) => setForm({ ...form, expenseDate: e.target.value })} />
+                </div>
+              )}
               <div className="md:col-span-2">
                 <label className="label-field">{t("Sharaxaad *")}</label>
                 <input required className="input-field" placeholder={t("Tusaale: Biilka korontada bisha Sebtembar")} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
@@ -358,6 +392,17 @@ const Expenses = () => {
                 <label className="label-field">{t("Faallo (ikhtiyaari)")}</label>
                 <input className="input-field" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
               </div>
+              {form.category !== "Kale" && !editingRow?.recurring && (
+                <label className="md:col-span-2 flex items-start gap-2 text-sm text-ink/80 bg-navy/5 rounded-md px-3 py-2">
+                  <input type="checkbox" className="mt-1" checked={form.recurring} onChange={(e) => setForm({ ...form, recurring: e.target.checked })} />
+                  <span>
+                    <b>{t("Bil kasta (hal mar geli)")}</b>
+                    <span className="block text-xs text-ink/60">
+                      {t("Bisha dooratay iyo bilaha xiga isla kharashkan ayaa si toos ah u muuqan doona. Bilihii hore waxba kuma darmaan.")}
+                    </span>
+                  </span>
+                </label>
+              )}
               <div className="md:col-span-2">
                 <button className="btn-primary" disabled={saving}>{saving ? t("Waa la kaydinayaa...") : t("Kaydi")}</button>
               </div>
@@ -391,7 +436,12 @@ const Expenses = () => {
         {!isSalaryView && (
           <>
             <input className="input-field md:max-w-[200px]" placeholder={t("Raadi sharaxaad...")} value={search} onChange={(e) => setSearch(e.target.value)} />
-            <button className="btn-secondary text-sm inline-flex items-center gap-1.5 md:ms-auto" onClick={exportExcel} disabled={!data || data.expenses.length === 0}>
+            {canRepeatMonth && (
+              <button className="btn-secondary text-sm inline-flex items-center gap-1.5 md:ms-auto" onClick={repeatThisMonth}>
+                <Repeat size={15} /> {t("Ka dhig bil kasta")}
+              </button>
+            )}
+            <button className={`btn-secondary text-sm inline-flex items-center gap-1.5 ${canRepeatMonth ? "" : "md:ms-auto"}`} onClick={exportExcel} disabled={!data || data.expenses.length === 0}>
               <Download size={15} /> Excel
             </button>
           </>
@@ -467,8 +517,12 @@ const Expenses = () => {
               </thead>
               <tbody>
                 {data.expenses.map((x) => (
-                  <tr key={x._id}>
-                    <td className="text-ink/60">{x.voucherNumber}</td>
+                  <tr key={x._id} className={x.projected ? "opacity-70" : ""}>
+                    <td className="text-ink/60">
+                      {x.voucherNumber || (
+                        <span className="badge bg-navy/10 text-navy inline-flex items-center gap-1"><Repeat size={11} /> {t("Bil kasta")}</span>
+                      )}
+                    </td>
                     <td>{formatDate(x.expenseDate)}</td>
                     <td>{t(x.category)}</td>
                     <td>
@@ -495,7 +549,9 @@ const Expenses = () => {
       <ConfirmDeleteModal
         open={!!deleteTarget}
         title={t("Tirtir Kharashka?")}
-        message={deleteTarget ? t("Waxaad tirtirayaa {voucher} ({description} — {amount}). Lama soo celin karo.", { voucher: deleteTarget.voucherNumber, description: deleteTarget.description, amount: formatMoney(deleteTarget.amount) }) : ""}
+        message={deleteTarget?.recurring
+          ? t("Kharashkan bil kasta ah ({description} — {amount}) wuu joogsanayaa {month} iyo wixii ka dambeeya. Bilihii hore waa sidooda.", { description: deleteTarget.description, amount: formatMoney(deleteTarget.amount), month: monthLabel(rowMonth(deleteTarget)) })
+          : deleteTarget ? t("Waxaad tirtirayaa {voucher} ({description} — {amount}). Lama soo celin karo.", { voucher: deleteTarget.voucherNumber, description: deleteTarget.description, amount: formatMoney(deleteTarget.amount) }) : ""}
         verify={verifyFinancePassword}
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}

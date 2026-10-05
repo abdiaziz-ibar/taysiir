@@ -4,7 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import staffApi from "../../api/staffClient";
 import { useStaff } from "../../context/StaffContext";
 import { ScreenHeader, YearChips, Loading, Card, MonthBars } from "../../components/StaffUI";
-import { formatMoney, COLORS } from "../../utils/format";
+import { formatMoney, COLORS, SHADOW } from "../../utils/format";
 import { t } from "../../i18n";
 
 const Stat = ({ label, value, color }) => (
@@ -59,8 +59,8 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
   year: { fontSize: 20, fontWeight: "700", color: COLORS.ink, marginBottom: 10 },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  stat: { width: "48.5%", backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: COLORS.line },
-  statLabel: { fontSize: 10, color: "rgba(20,24,33,0.5)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
+  stat: { width: "48.5%", backgroundColor: COLORS.surface, borderRadius: 18, padding: 14, marginBottom: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: COLORS.line, ...SHADOW.card },
+  statLabel: { fontSize: 10, color: COLORS.muted, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
   statValue: { fontSize: 19, fontWeight: "700", color: COLORS.ink },
   title: { fontSize: 15, fontWeight: "700", color: COLORS.ink, marginBottom: 12 },
 });

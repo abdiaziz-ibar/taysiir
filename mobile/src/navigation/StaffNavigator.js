@@ -1,7 +1,9 @@
-import { Text } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { StaffProvider } from "../context/StaffContext";
+import TabIcon from "../components/TabIcon";
+import { tabBarOptions } from "./tabBarOptions";
 import StaffDashboardScreen from "../screens/staff/StaffDashboardScreen";
 import StaffParentsScreen from "../screens/staff/StaffParentsScreen";
 import StaffParentDetailScreen from "../screens/staff/StaffParentDetailScreen";
@@ -18,30 +20,25 @@ import StaffParentsSummaryScreen from "../screens/staff/StaffParentsSummaryScree
 import StaffAcademicYearsScreen from "../screens/staff/StaffAcademicYearsScreen";
 import StaffUsersScreen from "../screens/staff/StaffUsersScreen";
 import StaffSettingsScreen from "../screens/staff/StaffSettingsScreen";
-import { COLORS } from "../utils/format";
 import { t } from "../i18n";
 
 const Tab = createBottomTabNavigator();
 const Stack = createNativeStackNavigator();
 
-const tabIcon = (emoji) => ({ focused }) => <Text style={{ fontSize: 18, opacity: focused ? 1 : 0.55 }}>{emoji}</Text>;
+const icon = (name) => ({ focused, color }) => <TabIcon name={name} focused={focused} color={color} />;
 
-const Tabs = () => (
-  <Tab.Navigator
-    screenOptions={{
-      headerShown: false,
-      tabBarActiveTintColor: COLORS.navy,
-      tabBarInactiveTintColor: "rgba(20,24,33,0.5)",
-      tabBarLabelStyle: { fontSize: 11 },
-    }}
-  >
-    <Tab.Screen name="Home" component={StaffDashboardScreen} options={{ title: t("Dashboard"), tabBarIcon: tabIcon("📊") }} />
-    <Tab.Screen name="Parents" component={StaffParentsScreen} options={{ title: t("Waalidiinta"), tabBarIcon: tabIcon("👥") }} />
-    <Tab.Screen name="Payments" component={StaffPaymentsScreen} options={{ title: t("Lacag Bixin"), tabBarIcon: tabIcon("💵") }} />
-    <Tab.Screen name="Proofs" component={StaffProofsScreen} options={{ title: t("Caddayn"), tabBarIcon: tabIcon("🧾") }} />
-    <Tab.Screen name="More" component={StaffMoreScreen} options={{ title: t("Dheeri"), tabBarIcon: tabIcon("☰") }} />
-  </Tab.Navigator>
-);
+const Tabs = () => {
+  const insets = useSafeAreaInsets();
+  return (
+    <Tab.Navigator screenOptions={tabBarOptions(insets)}>
+      <Tab.Screen name="Home" component={StaffDashboardScreen} options={{ title: t("Dashboard"), tabBarIcon: icon("grid") }} />
+      <Tab.Screen name="Parents" component={StaffParentsScreen} options={{ title: t("Waalidiinta"), tabBarIcon: icon("people") }} />
+      <Tab.Screen name="Payments" component={StaffPaymentsScreen} options={{ title: t("Lacag Bixin"), tabBarIcon: icon("card") }} />
+      <Tab.Screen name="Proofs" component={StaffProofsScreen} options={{ title: t("Caddayn"), tabBarIcon: icon("receipt") }} />
+      <Tab.Screen name="More" component={StaffMoreScreen} options={{ title: t("Dheeri"), tabBarIcon: icon("ellipsis-horizontal-circle") }} />
+    </Tab.Navigator>
+  );
+};
 
 const StaffNavigator = () => (
   <StaffProvider>

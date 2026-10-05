@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   title: { fontSize: 15, fontWeight: "700", color: COLORS.ink, marginBottom: 12 },
   row: { flexDirection: "row", paddingVertical: 9, borderTopWidth: 1, borderTopColor: COLORS.line, alignItems: "center" },
   month: { flex: 1, fontSize: 14, color: COLORS.ink },
-  count: { fontSize: 12, color: "rgba(20,24,33,0.5)", marginRight: 12 },
+  count: { fontSize: 12, color: COLORS.muted, marginRight: 12 },
   amount: { fontSize: 14, fontWeight: "600", color: COLORS.success },
 });
 

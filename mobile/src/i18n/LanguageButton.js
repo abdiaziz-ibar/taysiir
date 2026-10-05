@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { View, Text, TouchableOpacity, Modal, Alert, StyleSheet } from "react-native";
 import { LANGS, getLang, setLang, needsRestart, t } from "./index";
-import { COLORS } from "../utils/format";
+import { COLORS, RADIUS } from "../utils/theme";
+import Icon from "../components/Icon";
 
 // Small "🌐 SO" pill that opens a language list (Soomaali · English · العربية).
 // `light` is for dark headers.
@@ -20,7 +21,8 @@ const LanguageButton = ({ light = false }) => {
   return (
     <>
       <TouchableOpacity style={[styles.pill, light && styles.pillLight]} onPress={() => setOpen(true)}>
-        <Text style={[styles.pillText, light && styles.pillTextLight]}>🌐 {current.short}</Text>
+        <Icon name="globe-outline" size={16} color={light ? "#fff" : COLORS.ink} />
+        <Text style={[styles.pillText, light && styles.pillTextLight]}>{current.short}</Text>
       </TouchableOpacity>
       <Modal visible={open} transparent animationType="fade" onRequestClose={() => setOpen(false)}>
         <TouchableOpacity style={styles.overlay} activeOpacity={1} onPress={() => setOpen(false)}>
@@ -39,12 +41,12 @@ const LanguageButton = ({ light = false }) => {
 };
 
 const styles = StyleSheet.create({
-  pill: { borderWidth: 1, borderColor: COLORS.line, borderRadius: 999, paddingHorizontal: 10, paddingVertical: 5, backgroundColor: COLORS.surface },
-  pillLight: { borderColor: "rgba(255,255,255,0.25)", backgroundColor: "transparent" },
-  pillText: { fontSize: 12, color: COLORS.ink, fontWeight: "600" },
-  pillTextLight: { color: "rgba(255,255,255,0.85)" },
+  pill: { flexDirection: "row", alignItems: "center", gap: 5, height: 38, borderRadius: RADIUS.pill, paddingHorizontal: 12, backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.line },
+  pillLight: { backgroundColor: "rgba(255,255,255,0.14)", borderColor: "transparent" },
+  pillText: { fontSize: 12.5, color: COLORS.ink, fontWeight: "700" },
+  pillTextLight: { color: "#fff" },
   overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.4)", justifyContent: "center", alignItems: "center" },
-  card: { backgroundColor: COLORS.surface, borderRadius: 14, paddingVertical: 6, width: 240 },
+  card: { backgroundColor: COLORS.surface, borderRadius: RADIUS.lg, paddingVertical: 6, width: 250 },
   row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingHorizontal: 18, paddingVertical: 14 },
   rowText: { fontSize: 16, color: COLORS.ink },
   rowActive: { fontWeight: "700", color: COLORS.navy },

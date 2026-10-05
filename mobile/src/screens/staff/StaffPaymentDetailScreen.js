@@ -144,7 +144,7 @@ const StaffPaymentDetailScreen = ({ route, navigation }) => {
         <Field label={t("Notes")} value={notes} onChangeText={setNotes} multiline />
         <View style={styles.switchRow}>
           <Text style={styles.switchText}>{t("Ogolow overpayment")}</Text>
-          <Switch value={allowOver} onValueChange={setAllowOver} />
+          <Switch value={allowOver} onValueChange={setAllowOver} trackColor={{ false: COLORS.line, true: COLORS.success }} thumbColor="#fff" />
         </View>
         <PrimaryButton title={t("Kaydi")} onPress={handleSave} loading={saving} />
       </ScreenModal>
@@ -167,9 +167,9 @@ const styles = StyleSheet.create({
   editBtnText: { color: COLORS.ink, fontWeight: "600", fontSize: 14 },
   deleteBtn: { backgroundColor: COLORS.danger, borderRadius: 999, paddingVertical: 12, alignItems: "center" },
   deleteBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
-  label: { fontSize: 13, color: "rgba(20,24,33,0.7)", marginBottom: 6, marginTop: 12 },
+  label: { fontSize: 13, color: COLORS.muted, marginBottom: 6, marginTop: 12 },
   switchRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 16 },
-  switchText: { fontSize: 13, color: "rgba(20,24,33,0.7)" },
+  switchText: { fontSize: 13, color: COLORS.muted },
 });
 
 export default StaffPaymentDetailScreen;

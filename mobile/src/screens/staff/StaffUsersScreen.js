@@ -216,17 +216,17 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
   add: { color: "#fff", fontSize: 13, fontWeight: "600" },
   section: { fontSize: 15, fontWeight: "700", color: COLORS.ink, marginBottom: 8 },
-  empty: { color: "rgba(20,24,33,0.4)", fontSize: 13 },
+  empty: { color: COLORS.faint, fontSize: 13 },
   lockRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8, borderTopWidth: 1, borderTopColor: COLORS.line },
   unlockBtn: { borderWidth: 1, borderColor: COLORS.line, borderRadius: 999, paddingHorizontal: 16, paddingVertical: 7 },
   unlockText: { color: COLORS.ink, fontSize: 13, fontWeight: "600" },
   head: { flexDirection: "row", alignItems: "center" },
   name: { fontSize: 15, fontWeight: "600", color: COLORS.ink },
-  sub: { fontSize: 12, color: "rgba(20,24,33,0.5)", marginTop: 2 },
+  sub: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
   actions: { flexDirection: "row", gap: 18, marginTop: 10, borderTopWidth: 1, borderTopColor: COLORS.line, paddingTop: 10 },
   link: { color: COLORS.navy, fontSize: 13, fontWeight: "600" },
   linkDanger: { color: COLORS.danger, fontSize: 13, fontWeight: "600" },
-  label: { fontSize: 13, color: "rgba(20,24,33,0.7)", marginBottom: 6, marginTop: 12 },
+  label: { fontSize: 13, color: COLORS.muted, marginBottom: 6, marginTop: 12 },
 });
 
 export default StaffUsersScreen;

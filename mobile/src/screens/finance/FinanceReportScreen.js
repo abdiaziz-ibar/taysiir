@@ -4,7 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import financeApi from "../../api/financeClient";
 import { Loading, Card, Chip } from "../../components/StaffUI";
 import { FinanceHeader } from "../../components/FinanceUI";
-import { formatMoney, COLORS } from "../../utils/format";
+import { formatMoney, COLORS, SHADOW } from "../../utils/format";
 import { t } from "../../i18n";
 
 // School years run September → August, so a date before September belongs to the year that began last calendar year.
@@ -91,15 +91,15 @@ const FinanceReportScreen = () => {
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
   year: { fontSize: 20, fontWeight: "700", color: COLORS.ink },
-  note: { fontSize: 11, color: "rgba(20,24,33,0.5)", marginTop: 2, marginBottom: 10 },
+  note: { fontSize: 11, color: COLORS.muted, marginTop: 2, marginBottom: 10 },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  stat: { width: "48.5%", backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: COLORS.line },
-  statLabel: { fontSize: 10, color: "rgba(20,24,33,0.5)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
+  stat: { width: "48.5%", backgroundColor: COLORS.surface, borderRadius: 18, padding: 14, marginBottom: 10, borderWidth: StyleSheet.hairlineWidth, borderColor: COLORS.line, ...SHADOW.card },
+  statLabel: { fontSize: 10, color: COLORS.muted, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
   statValue: { fontSize: 19, fontWeight: "700", color: COLORS.ink },
   title: { fontSize: 15, fontWeight: "700", color: COLORS.ink, marginBottom: 10 },
   monthRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8, borderTopWidth: 1, borderTopColor: COLORS.line },
   monthName: { width: 74, fontSize: 12, fontWeight: "600", color: COLORS.ink },
-  monthLine: { flex: 1, fontSize: 11, color: "rgba(20,24,33,0.6)" },
+  monthLine: { flex: 1, fontSize: 11, color: COLORS.muted },
   monthTotal: { width: 70, textAlign: "right", fontSize: 12, fontWeight: "700", color: COLORS.ink },
   catRow: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 6 },
   catName: { fontSize: 13, color: COLORS.ink },

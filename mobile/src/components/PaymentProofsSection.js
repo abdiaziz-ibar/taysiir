@@ -15,7 +15,7 @@ import * as ImagePicker from "expo-image-picker";
 import * as ImageManipulator from "expo-image-manipulator";
 import api from "../api/client";
 import ProofImage from "./ProofImage";
-import { formatMoney, formatDate, COLORS } from "../utils/format";
+import { formatMoney, formatDate, COLORS, SHADOW } from "../utils/format";
 import { t } from "../i18n";
 
 const statusColor = (status) => (status === "confirmed" ? COLORS.success : COLORS.amber);
@@ -198,7 +198,7 @@ const PaymentProofsSection = ({ payments }) => {
                 value={amount}
                 onChangeText={setAmount}
                 placeholder={t("Tusaale: 50")}
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={COLORS.faint}
                 keyboardType="numeric"
               />
             </>
@@ -210,7 +210,7 @@ const PaymentProofsSection = ({ payments }) => {
             value={message}
             onChangeText={setMessage}
             placeholder={type === "complaint" ? t("Tusaale: Lacagtii aan bixiyey lama xisaabin.") : t("Tusaale: Waxaan ku bixiyey EVC Plus.")}
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={COLORS.faint}
             multiline
           />
 
@@ -268,7 +268,7 @@ const PaymentProofsSection = ({ payments }) => {
                     value={replyText}
                     onChangeText={setReplyText}
                     placeholder={t("Qor fariin...")}
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={COLORS.faint}
                   />
                   <TouchableOpacity
                     style={styles.replyBtn}
@@ -302,35 +302,35 @@ const PaymentProofsSection = ({ payments }) => {
 const styles = StyleSheet.create({
   deleteBtn: { alignSelf: "flex-start", marginTop: 12, paddingVertical: 4 },
   deleteBtnText: { color: COLORS.danger, fontSize: 13, fontWeight: "600" },
-  section: { backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, marginBottom: 14, borderWidth: 1, borderColor: COLORS.line },
+  section: { backgroundColor: COLORS.surface, borderRadius: 18, padding: 14, marginBottom: 14, borderWidth: StyleSheet.hairlineWidth, borderColor: COLORS.line, ...SHADOW.card },
   headerRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 10 },
   sectionTitle: { fontSize: 16, fontWeight: "700", color: COLORS.ink, flexShrink: 1 },
-  smallBtn: { borderWidth: 1, borderColor: COLORS.line, borderRadius: 999, paddingHorizontal: 12, paddingVertical: 6 },
-  smallBtnText: { fontSize: 12, color: COLORS.ink },
-  formBox: { backgroundColor: COLORS.paper, borderRadius: 10, padding: 12, marginBottom: 12 },
+  smallBtn: { backgroundColor: COLORS.brand, borderRadius: 999, paddingHorizontal: 14, paddingVertical: 8 },
+  smallBtnText: { fontSize: 12.5, color: "#fff", fontWeight: "700" },
+  formBox: { backgroundColor: COLORS.paper, borderRadius: 14, padding: 14, marginBottom: 12 },
   tabRow: { flexDirection: "row", backgroundColor: COLORS.surface, borderRadius: 999, padding: 3, marginBottom: 10 },
   tab: { flex: 1, paddingVertical: 7, borderRadius: 999, alignItems: "center" },
   tabActive: { backgroundColor: COLORS.navy },
-  tabText: { fontSize: 12, color: "rgba(20,24,33,0.6)" },
+  tabText: { fontSize: 12, color: COLORS.muted },
   tabTextActive: { color: "#fff" },
   error: { backgroundColor: "rgba(179,64,42,0.1)", color: COLORS.danger, padding: 8, borderRadius: 8, marginBottom: 8, fontSize: 12 },
-  label: { fontSize: 12, color: "rgba(20,24,33,0.6)", marginBottom: 4, marginTop: 8 },
-  input: { borderWidth: 1, borderColor: COLORS.line, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, fontSize: 13, color: COLORS.ink, backgroundColor: COLORS.surface },
+  label: { fontSize: 12, color: COLORS.muted, marginBottom: 4, marginTop: 8 },
+  input: { borderWidth: 1.2, borderColor: COLORS.line, borderRadius: 14, paddingHorizontal: 10, paddingVertical: 8, fontSize: 13, color: COLORS.ink, backgroundColor: COLORS.surface },
   textarea: { minHeight: 64, textAlignVertical: "top" },
-  pickBtn: { borderWidth: 1, borderColor: COLORS.line, borderRadius: 8, paddingVertical: 9, alignItems: "center", backgroundColor: COLORS.surface },
+  pickBtn: { borderWidth: 1.2, borderColor: COLORS.line, borderRadius: 14, paddingVertical: 9, alignItems: "center", backgroundColor: COLORS.surface },
   pickBtnText: { fontSize: 12, color: COLORS.navy },
   previewImg: { width: "100%", height: 140, borderRadius: 8, marginTop: 8, resizeMode: "cover" },
-  submitBtn: { backgroundColor: COLORS.brand, borderRadius: 999, paddingVertical: 11, alignItems: "center", marginTop: 12 },
+  submitBtn: { backgroundColor: COLORS.brand, borderRadius: 14, paddingVertical: 13, alignItems: "center", marginTop: 14 },
   submitBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
-  emptyText: { color: "rgba(20,24,33,0.4)", fontSize: 12, textAlign: "center", paddingVertical: 10 },
-  proofItem: { borderWidth: 1, borderColor: COLORS.line, borderRadius: 10, marginBottom: 8, overflow: "hidden" },
+  emptyText: { color: COLORS.faint, fontSize: 12, textAlign: "center", paddingVertical: 10 },
+  proofItem: { backgroundColor: COLORS.paper, borderRadius: 14, marginBottom: 8, overflow: "hidden" },
   proofHeader: { padding: 12 },
   proofBadgeRow: { flexDirection: "row", gap: 6, marginBottom: 6 },
   badge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: 999 },
   badgeText: { fontSize: 10, fontWeight: "700" },
   proofMessage: { fontSize: 13, color: COLORS.ink },
-  proofDate: { fontSize: 11, color: "rgba(20,24,33,0.4)", marginTop: 4 },
-  threadBox: { borderTopWidth: 1, borderTopColor: COLORS.line, padding: 12, backgroundColor: COLORS.paper },
+  proofDate: { fontSize: 11, color: COLORS.faint, marginTop: 4 },
+  threadBox: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.line, padding: 12, backgroundColor: COLORS.surface },
   msgBubble: { maxWidth: "82%", borderRadius: 10, padding: 8, marginBottom: 6 },
   msgParent: { backgroundColor: COLORS.navy, alignSelf: "flex-end" },
   msgStaff: { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.line, alignSelf: "flex-start" },

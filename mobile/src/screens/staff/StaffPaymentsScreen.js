@@ -16,8 +16,9 @@ import {
 } from "react-native";
 import staffApi from "../../api/staffClient";
 import { useStaff } from "../../context/StaffContext";
-import { StaffHeader, YearChips, Chip } from "../../components/StaffUI";
-import { formatMoney, formatDate, COLORS } from "../../utils/format";
+import { StaffHeader, YearChips, Chip, ListRow, EmptyState, Loading, Fab, SuccessText, AppHeader, IconButton, Avatar, SearchBar } from "../../components/StaffUI";
+import Icon from "../../components/Icon";
+import { formatMoney, formatDate, COLORS, SHADOW } from "../../utils/format";
 import { t } from "../../i18n";
 
 const METHODS = ["Cash", "Mobile Money", "Bank", "Other"];
@@ -156,46 +157,44 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
     <View style={styles.flex}>
       <StaffHeader title={t("Lacag Bixinta")} />
       <YearChips />
-      <View style={styles.toolbar}>
-        <TouchableOpacity style={styles.addBtn} onPress={() => openForm(null)}>
-          <Text style={styles.addBtnText}>{t("+ Lacag Bixin Cusub")}</Text>
-        </TouchableOpacity>
-      </View>
-      {success ? <Text style={styles.success}>{success}</Text> : null}
+      {success ? (
+        <View style={{ paddingHorizontal: 16, paddingTop: 10 }}>
+          <SuccessText text={success} />
+        </View>
+      ) : null}
 
       {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={COLORS.navy} size="large" />
-        </View>
+        <Loading />
       ) : (
         <FlatList
           data={payments}
           keyExtractor={(p) => p._id}
-          contentContainerStyle={{ padding: 12, paddingBottom: 30 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListEmptyComponent={<Text style={styles.empty}>{t("Weli lacag lama bixin sanadkan.")}</Text>}
+          ListEmptyComponent={<EmptyState icon="card-outline" text={t("Weli lacag lama bixin sanadkan.")} />}
+          showsVerticalScrollIndicator={false}
           renderItem={({ item: p }) => (
-            <TouchableOpacity style={styles.row} onPress={() => navigation.navigate("PaymentDetail", { id: p._id })}>
-              <View style={{ flex: 1 }}>
-                <Text style={styles.name}>{p.parentId?.fullName}</Text>
-                <Text style={styles.sub}>
-                  {p.receiptNumber} · {formatDate(p.paymentDate)} · {t(p.paymentMethod)}
-                </Text>
-              </View>
+            <ListRow
+              left={
+                <View style={styles.payIcon}>
+                  <Icon name="arrow-down" size={18} color={COLORS.success} />
+                </View>
+              }
+              title={p.parentId?.fullName}
+              subtitle={`${p.receiptNumber} · ${formatDate(p.paymentDate)} · ${t(p.paymentMethod)}`}
+              onPress={() => navigation.navigate("PaymentDetail", { id: p._id })}
+            >
               <Text style={styles.amount}>{formatMoney(p.amount)}</Text>
-            </TouchableOpacity>
+            </ListRow>
           )}
         />
       )}
 
+      <Fab onPress={() => openForm(null)} label={t("Lacag Bixin Cusub")} />
+
       <Modal visible={showForm} animationType="slide" onRequestClose={() => setShowForm(false)}>
         <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{t("Lacag Bixin Cusub")}</Text>
-            <TouchableOpacity onPress={() => setShowForm(false)}>
-              <Text style={styles.close}>{t("Jooji")}</Text>
-            </TouchableOpacity>
-          </View>
+          <AppHeader title={t("Lacag Bixin Cusub")} actions={<IconButton name="close" onPress={() => setShowForm(false)} label="Close" />} />
           <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
             {error ? <Text style={styles.error}>{error}</Text> : null}
 
@@ -231,7 +230,7 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
                       onChangeText={setNewFeeAmount}
                       keyboardType="numeric"
                       placeholder={t("Wadarta Fee")}
-                      placeholderTextColor="#9CA3AF"
+                      placeholderTextColor={COLORS.faint}
                     />
                   </>
                 )}
@@ -256,7 +255,7 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
 
             <View style={styles.switchRow}>
               <Text style={styles.switchText}>{t("Ogolow overpayment")}</Text>
-              <Switch value={allowOver} onValueChange={setAllowOver} />
+              <Switch value={allowOver} onValueChange={setAllowOver} trackColor={{ false: COLORS.line, true: COLORS.success }} thumbColor="#fff" />
             </View>
 
             <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving}>
@@ -267,37 +266,23 @@ const StaffPaymentsScreen = ({ route, navigation }) => {
 
         <Modal visible={showPicker} animationType="fade" onRequestClose={() => setShowPicker(false)}>
           <View style={{ flex: 1, backgroundColor: COLORS.paper }}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{t("Dooro Waalid")}</Text>
-              <TouchableOpacity onPress={() => setShowPicker(false)}>
-                <Text style={styles.close}>{t("Xir")}</Text>
-              </TouchableOpacity>
-            </View>
-            <TextInput
-              style={[styles.input, { margin: 12 }]}
-              value={pickerSearch}
-              onChangeText={setPickerSearch}
-              placeholder={t("Raadi magaca ama phone...")}
-              placeholderTextColor="#9CA3AF"
-              autoFocus
-            />
+            <AppHeader title={t("Dooro Waalid")} actions={<IconButton name="close" onPress={() => setShowPicker(false)} label="Close" />} />
+            <SearchBar style={{ margin: 16 }} value={pickerSearch} onChangeText={setPickerSearch} placeholder={t("Raadi magaca ama phone...")} />
             <FlatList
               data={pickerList}
               keyExtractor={(p) => p._id}
               keyboardShouldPersistTaps="handled"
               renderItem={({ item: p }) => (
-                <TouchableOpacity
-                  style={styles.pickRow}
+                <ListRow
+                  style={{ marginHorizontal: 16 }}
+                  left={<Avatar name={p.fullName} size={40} />}
+                  title={p.fullName}
+                  subtitle={`${p.parentId} · ${p.phone}`}
                   onPress={() => {
                     setParent({ _id: p._id, fullName: p.fullName, phone: p.phone });
                     setShowPicker(false);
                   }}
-                >
-                  <Text style={styles.name}>{p.fullName}</Text>
-                  <Text style={styles.sub}>
-                    {p.parentId} · {p.phone}
-                  </Text>
-                </TouchableOpacity>
+                />
               )}
             />
           </View>
@@ -311,23 +296,23 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   toolbar: { paddingHorizontal: 12 },
-  addBtn: { backgroundColor: COLORS.brand, borderRadius: 999, paddingVertical: 12, alignItems: "center" },
+  addBtn: { backgroundColor: COLORS.brand, borderRadius: 14, paddingVertical: 14, alignItems: "center" },
   addBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
-  success: { backgroundColor: "rgba(47,122,77,0.1)", color: COLORS.success, margin: 12, marginBottom: 0, padding: 10, borderRadius: 8, fontSize: 13 },
-  empty: { textAlign: "center", color: "rgba(20,24,33,0.4)", paddingVertical: 30 },
+  success: { backgroundColor: "rgba(47,122,77,0.1)", color: COLORS.success, margin: 12, marginBottom: 0, padding: 10, borderRadius: 12, fontSize: 13 },
+  empty: { textAlign: "center", color: COLORS.faint, paddingVertical: 30 },
   row: {
     flexDirection: "row",
     alignItems: "center",
     backgroundColor: COLORS.surface,
-    borderRadius: 12,
+    borderRadius: 18,
     padding: 14,
     marginBottom: 8,
-    borderWidth: 1,
-    borderColor: COLORS.line,
-  },
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: COLORS.line, ...SHADOW.card },
   name: { fontSize: 15, fontWeight: "600", color: COLORS.ink },
-  sub: { fontSize: 12, color: "rgba(20,24,33,0.5)", marginTop: 3 },
-  amount: { fontSize: 15, fontWeight: "700", color: COLORS.success },
+  sub: { fontSize: 12, color: COLORS.muted, marginTop: 3 },
+  amount: { fontSize: 15, fontWeight: "800", color: COLORS.success },
+  payIcon: { width: 42, height: 42, borderRadius: 14, backgroundColor: COLORS.successTint, alignItems: "center", justifyContent: "center" },
   modalHeader: {
     backgroundColor: COLORS.navyDark,
     paddingTop: 52,
@@ -340,28 +325,28 @@ const styles = StyleSheet.create({
   modalTitle: { color: "#fff", fontSize: 18, fontWeight: "700" },
   close: { color: "rgba(255,255,255,0.8)", fontSize: 14 },
   modalBody: { padding: 18, paddingBottom: 60 },
-  error: { backgroundColor: "rgba(179,64,42,0.1)", color: COLORS.danger, padding: 10, borderRadius: 8, marginBottom: 10, fontSize: 13 },
-  label: { fontSize: 13, color: "rgba(20,24,33,0.7)", marginBottom: 6, marginTop: 14 },
+  error: { backgroundColor: "rgba(179,64,42,0.1)", color: COLORS.danger, padding: 10, borderRadius: 12, marginBottom: 10, fontSize: 13 },
+  label: { fontSize: 13, color: COLORS.muted, marginBottom: 6, marginTop: 14 },
   input: {
-    borderWidth: 1,
+    borderWidth: 1.2,
     borderColor: COLORS.line,
-    borderRadius: 8,
+    borderRadius: 14,
     paddingHorizontal: 12,
     paddingVertical: 10,
     fontSize: 15,
     color: COLORS.ink,
     backgroundColor: COLORS.surface,
   },
-  pickerBtn: { borderWidth: 1, borderColor: COLORS.line, borderRadius: 8, padding: 12, backgroundColor: COLORS.surface },
+  pickerBtn: { borderWidth: 1.2, borderColor: COLORS.line, borderRadius: 14, padding: 12, backgroundColor: COLORS.surface },
   pickerText: { fontSize: 15, color: COLORS.ink },
-  pickerPlaceholder: { fontSize: 15, color: "#9CA3AF" },
+  pickerPlaceholder: { fontSize: 15, color: COLORS.faint },
   pickRow: { paddingHorizontal: 18, paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: COLORS.line, backgroundColor: COLORS.surface },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  feeBox: { backgroundColor: COLORS.paper, borderRadius: 8, padding: 12, marginTop: 12, borderWidth: 1, borderColor: COLORS.line },
-  feeText: { fontSize: 13, color: "rgba(20,24,33,0.75)" },
+  feeBox: { backgroundColor: COLORS.paper, borderRadius: 14, padding: 12, marginTop: 12, borderWidth: 1.2, borderColor: COLORS.line },
+  feeText: { fontSize: 13, color: COLORS.muted },
   switchRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 16 },
-  switchText: { fontSize: 13, color: "rgba(20,24,33,0.7)" },
-  saveBtn: { backgroundColor: COLORS.brand, borderRadius: 999, paddingVertical: 13, alignItems: "center", marginTop: 22 },
+  switchText: { fontSize: 13, color: COLORS.muted },
+  saveBtn: { backgroundColor: COLORS.brand, borderRadius: 14, paddingVertical: 15, alignItems: "center", marginTop: 22 },
   saveBtnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
 });
 

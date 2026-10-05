@@ -4,6 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import staffApi from "../../api/staffClient";
 import { ScreenHeader, Loading, Card, Badge } from "../../components/StaffUI";
 import { formatMoney, COLORS } from "../../utils/format";
+import { SHADOW } from "../../utils/theme";
 import { t } from "../../i18n";
 
 const Line = ({ label, value, color }) => (
@@ -57,7 +58,7 @@ const StaffAllYearsReportScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
-  total: { backgroundColor: COLORS.navy, borderRadius: 12, padding: 16, marginBottom: 12 },
+  total: { backgroundColor: COLORS.navy, borderRadius: 22, padding: 16, marginBottom: 12, ...SHADOW.raised },
   totalLabel: { color: "rgba(255,255,255,0.65)", fontSize: 12 },
   totalValue: { color: "#fff", fontSize: 26, fontWeight: "700", marginTop: 4 },
   totalSub: { color: "rgba(255,255,255,0.75)", fontSize: 12, marginTop: 4 },

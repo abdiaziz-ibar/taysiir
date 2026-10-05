@@ -3,7 +3,7 @@ import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet } from "r
 import { useFocusEffect } from "@react-navigation/native";
 import staffApi from "../../api/staffClient";
 import { ScreenHeader, Loading, Chip, Badge, feeStatusColor, feeStatusText } from "../../components/StaffUI";
-import { formatMoney, COLORS } from "../../utils/format";
+import { formatMoney, COLORS, SHADOW } from "../../utils/format";
 import { t } from "../../i18n";
 
 const idNum = (code) => parseInt((code || "").replace(/\D/g, ""), 10) || 0;
@@ -76,7 +76,7 @@ const StaffParentsSummaryScreen = ({ navigation }) => {
                 value={search}
                 onChangeText={setSearch}
                 placeholder={t("Raadi magaca, phone ama ID...")}
-                placeholderTextColor="#9CA3AF"
+                placeholderTextColor={COLORS.faint}
               />
               <View style={styles.sorts}>
                 {SORTS.map(([key, label]) => (
@@ -140,17 +140,17 @@ const StaffParentsSummaryScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
-  total: { backgroundColor: COLORS.navy, borderRadius: 12, padding: 16, marginBottom: 10 },
+  total: { backgroundColor: COLORS.navy, borderRadius: 22, padding: 16, marginBottom: 10, ...SHADOW.raised },
   totalLabel: { color: "rgba(255,255,255,0.65)", fontSize: 12 },
   totalValue: { color: "#fff", fontSize: 26, fontWeight: "700", marginTop: 4 },
   totalSub: { color: "rgba(255,255,255,0.75)", fontSize: 12, marginTop: 4 },
-  search: { borderWidth: 1, borderColor: COLORS.line, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 9, backgroundColor: COLORS.surface, fontSize: 14, color: COLORS.ink },
+  search: { borderWidth: StyleSheet.hairlineWidth, borderColor: COLORS.line, borderRadius: 18, paddingHorizontal: 12, paddingVertical: 9, backgroundColor: COLORS.surface, fontSize: 14, color: COLORS.ink, ...SHADOW.card },
   sorts: { flexDirection: "row", flexWrap: "wrap", rowGap: 6, marginVertical: 10 },
-  empty: { textAlign: "center", color: "rgba(20,24,33,0.4)", paddingVertical: 30 },
-  item: { backgroundColor: COLORS.surface, borderRadius: 12, marginBottom: 8, borderWidth: 1, borderColor: COLORS.line, overflow: "hidden" },
+  empty: { textAlign: "center", color: COLORS.faint, paddingVertical: 30 },
+  item: { backgroundColor: COLORS.surface, borderRadius: 18, marginBottom: 8, borderWidth: StyleSheet.hairlineWidth, borderColor: COLORS.line, overflow: "hidden", ...SHADOW.card },
   itemHead: { flexDirection: "row", alignItems: "center", padding: 14 },
   name: { fontSize: 15, fontWeight: "600", color: COLORS.ink },
-  sub: { fontSize: 12, color: "rgba(20,24,33,0.5)", marginTop: 3 },
+  sub: { fontSize: 12, color: COLORS.muted, marginTop: 3 },
   debt: { fontSize: 14, fontWeight: "700", color: COLORS.danger },
   years: { borderTopWidth: 1, borderTopColor: COLORS.line, padding: 12, backgroundColor: COLORS.paper },
   yearRow: { flexDirection: "row", alignItems: "center", paddingVertical: 8 },

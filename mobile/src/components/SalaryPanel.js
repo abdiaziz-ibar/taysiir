@@ -1,26 +1,20 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import financeApi, { verifyFinancePassword } from "../api/financeClient";
-import { Loading, Card, Badge, ScreenModal, Field, Chip, ChipRow, PrimaryButton, ErrorText, feeStatusColor, feeStatusText } from "./StaffUI";
+import { Loading, Card, Badge, ScreenModal, Field, Chip, ChipRow, Segmented, PrimaryButton, ErrorText, Avatar, EmptyState, feeStatusColor, feeStatusText } from "./StaffUI";
 import ConfirmPasswordModal from "./ConfirmPasswordModal";
-import { COLORS, formatMoney, formatDate } from "../utils/format";
+import Icon from "./Icon";
+import { COLORS, RADIUS, SHADOW, formatMoney, formatDate } from "../utils/format";
 import { EMPLOYEE_TYPES, PAYMENT_METHODS, monthLabel, todayISO, isValidDate } from "../utils/finance";
 import { t } from "../i18n";
 
-const Stat = ({ label, value, color }) => (
-  <View style={styles.stat}>
-    <Text style={styles.statLabel}>{label}</Text>
-    <Text style={[styles.statValue, color && { color }]}>{value}</Text>
-  </View>
-);
-
-// Payroll for one month, shown inside the Qarashaadka screen when the
-// "Mushaharka" category is chosen. The month comes from the screen.
+// Payroll for one month: a summary, a Macalin/Shaqaale switch, and one card per person.
+// The month comes from the screen that hosts it.
 const SalaryPanel = ({ period, refreshKey }) => {
   const [data, setData] = useState(null);
   const [type, setType] = useState(""); // "" = Macalin + Shaqaale
 
-  const [pay, setPay] = useState(null); // { row, amount, date, method, notes, allow }
+  const [pay, setPay] = useState(null); // { row, payment?, amount, date, method, notes, allow }
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -41,6 +35,7 @@ const SalaryPanel = ({ period, refreshKey }) => {
     paid: rows.reduce((s, r) => s + r.totalPaid, 0),
     balance: rows.reduce((s, r) => s + r.balance, 0),
   };
+  const pct = totals.salary > 0 ? Math.min(100, Math.round((totals.paid / totals.salary) * 100)) : 0;
 
   // One payment per employee per month: "Bixi" records it, "Edit" changes the one already recorded.
   const openPay = (row, payment) => {
@@ -79,79 +74,100 @@ const SalaryPanel = ({ period, refreshKey }) => {
 
   return (
     <View>
-      <ChipRow>
-        <Chip label={t("Dhammaan")} active={type === ""} onPress={() => setType("")} />
-        <Chip label={t("Macalimiin")} active={type === "teacher"} onPress={() => setType("teacher")} />
-        <Chip label={t("Shaqaale")} active={type === "staff"} onPress={() => setType("staff")} />
-      </ChipRow>
+      <Segmented
+        value={type}
+        onChange={setType}
+        options={[
+          { value: "", label: t("Dhammaan") },
+          { value: "teacher", label: t("Macalimiin") },
+          { value: "staff", label: t("Shaqaale") },
+        ]}
+      />
 
       {data === null ? (
-        <View style={{ height: 120 }}>
+        <View style={{ height: 140 }}>
           <Loading />
         </View>
       ) : (
-        <View style={{ marginTop: 12 }}>
-          <View style={styles.statsRow}>
-            <Stat label={t("Mushahar")} value={formatMoney(totals.salary)} />
-            <Stat label={t("La Bixiyey")} value={formatMoney(totals.paid)} color={COLORS.success} />
-            <Stat label={t("Ku Dhiman")} value={formatMoney(totals.balance)} color={COLORS.danger} />
+        <View style={{ marginTop: 14 }}>
+          <View style={styles.summary}>
+            <View style={styles.summaryTop}>
+              <View style={styles.sumCol}>
+                <Text style={styles.sumLabel}>{t("Mushahar")}</Text>
+                <Text style={styles.sumValue}>{formatMoney(totals.salary)}</Text>
+              </View>
+              <View style={styles.sumCol}>
+                <Text style={styles.sumLabel}>{t("La Bixiyey")}</Text>
+                <Text style={[styles.sumValue, { color: COLORS.success }]}>{formatMoney(totals.paid)}</Text>
+              </View>
+              <View style={styles.sumCol}>
+                <Text style={styles.sumLabel}>{t("Ku Dhiman")}</Text>
+                <Text style={[styles.sumValue, { color: COLORS.danger }]}>{formatMoney(totals.balance)}</Text>
+              </View>
+            </View>
+            <View style={styles.track}>
+              <View style={[styles.fill, { width: `${pct}%` }]} />
+            </View>
           </View>
 
-          {rows.length === 0 && <Text style={styles.empty}>{t("Shaqaale Active ah ma jiro. Ku dar tab-ka \"Shaqaalaha\".")}</Text>}
+          {rows.length === 0 ? (
+            <EmptyState icon="people-outline" text={t("Shaqaale Active ah ma jiro.")} />
+          ) : (
+            rows.map((r) => {
+              const paidRow = r.payments.length > 0;
+              const p = r.payments[0];
+              return (
+                <Card key={r.employee._id}>
+                  <View style={styles.head}>
+                    <Avatar name={r.employee.fullName} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.name} numberOfLines={1}>
+                        {r.employee.fullName}
+                      </Text>
+                      <Text style={styles.sub} numberOfLines={1}>
+                        {EMPLOYEE_TYPES[r.employee.type]}
+                        {r.employee.position ? ` · ${r.employee.position}` : ""}
+                      </Text>
+                    </View>
+                    <Badge text={feeStatusText(r.status)} color={feeStatusColor(r.status)} />
+                  </View>
 
-          {rows.map((r) => (
-            <Card key={r.employee._id}>
-              <View style={styles.head}>
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.name}>{r.employee.fullName}</Text>
-                  <Text style={styles.sub}>
-                    {r.employee.employeeId} · {EMPLOYEE_TYPES[r.employee.type]}
-                    {r.employee.position ? ` · ${r.employee.position}` : ""}
-                  </Text>
-                </View>
-                <Badge text={feeStatusText(r.status)} color={feeStatusColor(r.status)} />
-              </View>
+                  <View style={styles.amountRow}>
+                    <Text style={styles.amountMain}>
+                      {formatMoney(r.totalPaid)} <Text style={styles.amountOf}>/ {formatMoney(r.monthlySalary)}</Text>
+                    </Text>
+                    {r.balance > 0 ? <Text style={styles.amountLeft}>{formatMoney(r.balance)} {t("Ku Dhiman")}</Text> : null}
+                  </View>
 
-              <View style={styles.amounts}>
-                <View style={styles.amountCol}>
-                  <Text style={styles.amountLabel}>{t("Mushahar")}</Text>
-                  <Text style={styles.amountValue}>{formatMoney(r.monthlySalary)}</Text>
-                </View>
-                <View style={styles.amountCol}>
-                  <Text style={styles.amountLabel}>{t("La Bixiyey")}</Text>
-                  <Text style={[styles.amountValue, { color: COLORS.success }]}>{formatMoney(r.totalPaid)}</Text>
-                </View>
-                <View style={styles.amountCol}>
-                  <Text style={styles.amountLabel}>{t("Ku Dhiman")}</Text>
-                  <Text style={[styles.amountValue, { color: COLORS.danger }]}>{formatMoney(r.balance)}</Text>
-                </View>
-              </View>
-
-              {r.payments.map((p) => (
-                <View key={p._id} style={styles.payRow}>
-                  <View style={{ flex: 1 }}>
-                    <Text style={styles.payText}>
+                  {paidRow ? (
+                    <Text style={styles.meta}>
                       {p.voucherNumber} · {formatDate(p.paymentDate)} · {t(p.paymentMethod)}
                     </Text>
-                    {p.notes ? <Text style={styles.sub}>{p.notes}</Text> : null}
-                  </View>
-                  <Text style={styles.payAmount}>{formatMoney(p.amount)}</Text>
-                  <TouchableOpacity onPress={() => openPay(r, p)} style={{ marginLeft: 12 }}>
-                    <Text style={styles.link}>{t("Edit")}</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={() => setDeleteTarget({ ...p, employee: r.employee })} style={{ marginLeft: 12 }}>
-                    <Text style={styles.linkDanger}>{t("Tirtir")}</Text>
-                  </TouchableOpacity>
-                </View>
-              ))}
+                  ) : null}
 
-              {r.payments.length === 0 && (
-                <TouchableOpacity style={styles.payBtn} onPress={() => openPay(r)}>
-                  <Text style={styles.payBtnText}>{t("Bixi Mushahar")}</Text>
-                </TouchableOpacity>
-              )}
-            </Card>
-          ))}
+                  <View style={styles.actions}>
+                    {!paidRow ? (
+                      <TouchableOpacity style={styles.primary} onPress={() => openPay(r)} activeOpacity={0.85}>
+                        <Icon name="cash-outline" size={17} color="#fff" />
+                        <Text style={styles.primaryText}>{t("Bixi Mushahar")}</Text>
+                      </TouchableOpacity>
+                    ) : (
+                      <>
+                        <TouchableOpacity style={styles.outline} onPress={() => openPay(r, p)} activeOpacity={0.85}>
+                          <Icon name="create-outline" size={17} color={COLORS.navy} />
+                          <Text style={styles.outlineText}>{t("Edit")}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={styles.danger} onPress={() => setDeleteTarget({ ...p, employee: r.employee })} activeOpacity={0.85}>
+                          <Icon name="trash-outline" size={17} color={COLORS.danger} />
+                          <Text style={styles.dangerText}>{t("Tirtir")}</Text>
+                        </TouchableOpacity>
+                      </>
+                    )}
+                  </View>
+                </Card>
+              );
+            })
+          )}
         </View>
       )}
 
@@ -161,7 +177,7 @@ const SalaryPanel = ({ period, refreshKey }) => {
           <>
             <Text style={styles.modalName}>{pay.row.employee.fullName}</Text>
             <Text style={styles.sub}>
-              {monthLabel(period)} {t("· Mushahar")} {formatMoney(pay.row.monthlySalary)} {t("· Ku dhiman")} {formatMoney(pay.row.balance)}
+              {monthLabel(period)} {t("· Mushahar")} {formatMoney(pay.row.monthlySalary)}
             </Text>
             <Field label={t("Lacagta ($) *")} value={pay.amount} onChangeText={(v) => setPay({ ...pay, amount: v })} keyboardType="decimal-pad" />
             <Field label={t("Taariikhda (YYYY-MM-DD)")} value={pay.date} onChangeText={(v) => setPay({ ...pay, date: v })} autoCapitalize="none" />
@@ -199,27 +215,30 @@ const SalaryPanel = ({ period, refreshKey }) => {
 };
 
 const styles = StyleSheet.create({
-  statsRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
-  stat: { flex: 1, backgroundColor: COLORS.surface, borderRadius: 12, padding: 12, borderWidth: 1, borderColor: COLORS.line },
-  statLabel: { fontSize: 10, color: "rgba(20,24,33,0.5)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 4 },
-  statValue: { fontSize: 16, fontWeight: "700", color: COLORS.ink },
-  empty: { textAlign: "center", color: "rgba(20,24,33,0.4)", paddingVertical: 30 },
-  head: { flexDirection: "row", alignItems: "center" },
-  name: { fontSize: 15, fontWeight: "600", color: COLORS.ink },
-  sub: { fontSize: 12, color: "rgba(20,24,33,0.5)", marginTop: 2 },
-  amounts: { flexDirection: "row", marginTop: 12 },
-  amountCol: { flex: 1 },
-  amountLabel: { fontSize: 10, color: "rgba(20,24,33,0.5)", textTransform: "uppercase" },
-  amountValue: { fontSize: 15, fontWeight: "700", color: COLORS.ink, marginTop: 2 },
-  payRow: { flexDirection: "row", alignItems: "center", marginTop: 10, paddingTop: 10, borderTopWidth: 1, borderTopColor: COLORS.line },
-  payText: { fontSize: 12, color: COLORS.ink },
-  payAmount: { fontSize: 13, fontWeight: "700", color: COLORS.ink },
-  link: { color: COLORS.navy, fontSize: 12, fontWeight: "600" },
-  linkDanger: { color: COLORS.danger, fontSize: 12, fontWeight: "600" },
-  payBtn: { backgroundColor: COLORS.brand, borderRadius: 999, paddingVertical: 10, alignItems: "center", marginTop: 12 },
-  payBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
-  modalName: { fontSize: 17, fontWeight: "700", color: COLORS.ink },
-  label: { fontSize: 13, color: "rgba(20,24,33,0.7)", marginBottom: 6, marginTop: 12 },
+  summary: { backgroundColor: COLORS.surface, borderRadius: RADIUS.lg, padding: 16, marginBottom: 14, ...SHADOW.card },
+  summaryTop: { flexDirection: "row" },
+  sumCol: { flex: 1 },
+  sumLabel: { fontSize: 11, color: COLORS.muted, textTransform: "uppercase", letterSpacing: 0.5 },
+  sumValue: { fontSize: 18, fontWeight: "800", color: COLORS.ink, marginTop: 3 },
+  track: { height: 7, backgroundColor: COLORS.paper, borderRadius: 4, overflow: "hidden", marginTop: 14 },
+  fill: { height: 7, backgroundColor: COLORS.success, borderRadius: 4 },
+  head: { flexDirection: "row", alignItems: "center", gap: 12 },
+  name: { fontSize: 15, fontWeight: "800", color: COLORS.ink },
+  sub: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
+  amountRow: { flexDirection: "row", alignItems: "baseline", justifyContent: "space-between", marginTop: 14 },
+  amountMain: { fontSize: 20, fontWeight: "800", color: COLORS.ink },
+  amountOf: { fontSize: 13, fontWeight: "600", color: COLORS.muted },
+  amountLeft: { fontSize: 12.5, fontWeight: "700", color: COLORS.danger },
+  meta: { fontSize: 11.5, color: COLORS.muted, marginTop: 8 },
+  actions: { flexDirection: "row", gap: 10, marginTop: 14 },
+  primary: { flex: 1, flexDirection: "row", gap: 7, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.brand, borderRadius: RADIUS.md, height: 44 },
+  primaryText: { color: "#fff", fontWeight: "800", fontSize: 14 },
+  outline: { flex: 1, flexDirection: "row", gap: 7, alignItems: "center", justifyContent: "center", borderWidth: 1.2, borderColor: COLORS.navy, borderRadius: RADIUS.md, height: 44 },
+  outlineText: { color: COLORS.navy, fontWeight: "800", fontSize: 14 },
+  danger: { flex: 1, flexDirection: "row", gap: 7, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.dangerTint, borderRadius: RADIUS.md, height: 44 },
+  dangerText: { color: COLORS.danger, fontWeight: "800", fontSize: 14 },
+  modalName: { fontSize: 18, fontWeight: "800", color: COLORS.ink },
+  label: { fontSize: 12.5, color: COLORS.muted, fontWeight: "600", marginBottom: 6, marginTop: 14 },
 });
 
 export default SalaryPanel;

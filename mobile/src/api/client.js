@@ -1,8 +1,9 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-export const API_BASE = "https://taysiir.idraakict.com/api";
-export const API_ORIGIN = "https://taysiir.idraakict.com";
+// EXPO_PUBLIC_API_ORIGIN lets a local build (e.g. a web preview) point at another backend.
+export const API_ORIGIN = process.env.EXPO_PUBLIC_API_ORIGIN || "https://taysiir.idraakict.com";
+export const API_BASE = `${API_ORIGIN}/api`;
 
 const api = axios.create({ baseURL: API_BASE });
 

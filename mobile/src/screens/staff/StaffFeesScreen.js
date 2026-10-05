@@ -5,7 +5,7 @@ import staffApi from "../../api/staffClient";
 import { useStaff } from "../../context/StaffContext";
 import { ScreenHeader, YearChips, Loading } from "../../components/StaffUI";
 import FeeRow from "../../components/FeeRow";
-import { COLORS } from "../../utils/format";
+import { COLORS, SHADOW } from "../../utils/format";
 import { t } from "../../i18n";
 
 const StaffFeesScreen = ({ navigation }) => {
@@ -42,7 +42,7 @@ const StaffFeesScreen = ({ navigation }) => {
         value={search}
         onChangeText={setSearch}
         placeholder={t("Raadi magaca ama phone...")}
-        placeholderTextColor="#9CA3AF"
+        placeholderTextColor={COLORS.faint}
       />
       {fees === null ? (
         <Loading />
@@ -74,17 +74,16 @@ const StaffFeesScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
   search: {
-    borderWidth: 1,
+    borderWidth: StyleSheet.hairlineWidth,
     borderColor: COLORS.line,
-    borderRadius: 10,
+    borderRadius: 18,
     paddingHorizontal: 12,
     paddingVertical: 9,
     backgroundColor: COLORS.surface,
     fontSize: 14,
     color: COLORS.ink,
-    marginHorizontal: 12,
-  },
-  empty: { textAlign: "center", color: "rgba(20,24,33,0.4)", paddingVertical: 30 },
+    marginHorizontal: 12, ...SHADOW.card },
+  empty: { textAlign: "center", color: COLORS.faint, paddingVertical: 30 },
 });
 
 export default StaffFeesScreen;

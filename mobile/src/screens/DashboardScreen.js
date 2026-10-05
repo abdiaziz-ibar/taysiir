@@ -1,20 +1,17 @@
 import { useCallback, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, StyleSheet, RefreshControl } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { useFocusEffect } from "@react-navigation/native";
 import api from "../api/client";
 import { useAuth } from "../context/AuthContext";
-import { formatMoney, formatDate, statusLabel, COLORS } from "../utils/format";
+import { formatMoney, formatDate, statusLabel } from "../utils/format";
+import { COLORS, RADIUS, SHADOW } from "../utils/theme";
 import PaymentProofsSection from "../components/PaymentProofsSection";
 import ParentChangePasswordModal from "../components/ParentChangePasswordModal";
 import LanguageButton from "../i18n/LanguageButton";
+import Icon from "../components/Icon";
+import { AppHeader, IconButton, Card, SectionTitle, EmptyState, Badge, Loading, feeStatusColor } from "../components/StaffUI";
 import { t } from "../i18n";
-
-const StatCard = ({ label, value, accent }) => (
-  <View style={styles.statCard}>
-    <Text style={styles.statLabel}>{label}</Text>
-    <Text style={[styles.statValue, accent && { color: accent }]}>{value}</Text>
-  </View>
-);
 
 const DashboardScreen = () => {
   const { parent, logout } = useAuth();
@@ -39,10 +36,25 @@ const DashboardScreen = () => {
     setRefreshing(false);
   };
 
+  const header = (
+    <AppHeader
+      title={t("Xisaabta Waalidka")}
+      subtitle="Taysir Foundation"
+      actions={
+        <>
+          <LanguageButton light />
+          <IconButton name="key-outline" onPress={() => setShowPassword(true)} label="Password" />
+          <IconButton name="log-out-outline" onPress={logout} label="Log out" />
+        </>
+      }
+    />
+  );
+
   if (!data) {
     return (
-      <View style={styles.loadingScreen}>
-        <ActivityIndicator color={COLORS.navy} size="large" />
+      <View style={styles.flex}>
+        {header}
+        <Loading />
       </View>
     );
   }
@@ -55,80 +67,103 @@ const DashboardScreen = () => {
 
   return (
     <View style={styles.flex}>
-      <View style={styles.header}>
-        <View style={styles.headerLeft}>
-          <View style={styles.logoBadge}>
-            <Text style={styles.logoText}>TF</Text>
-          </View>
-          <View>
-            <Text style={styles.headerTitle}>Taysir Foundation</Text>
-            <Text style={styles.headerSubtitle}>{t("Xisaabta Waalidka")}</Text>
-          </View>
-        </View>
-        <View style={styles.headerActions}>
-          <LanguageButton light />
-          <TouchableOpacity style={styles.logoutBtn} onPress={() => setShowPassword(true)}>
-            <Text style={styles.logoutText}>{t("Password")}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.logoutBtn} onPress={logout}>
-            <Text style={styles.logoutText}>{t("Ka Bax")}</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
+      {header}
 
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        showsVerticalScrollIndicator={false}
       >
-        <View style={styles.hero}>
+        <LinearGradient colors={[COLORS.navy, COLORS.navyLight]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
           <Text style={styles.heroGreeting}>{t("Salaan,")}</Text>
-          <Text style={styles.heroName}>{parent?.fullName}</Text>
+          <Text style={styles.heroName} numberOfLines={1}>
+            {parent?.fullName}
+          </Text>
+
+          <Text style={styles.heroLabel}>{t("Ku Dhiman")}</Text>
+          <Text style={styles.heroAmount}>{formatMoney(totalBalance)}</Text>
+
           <View style={styles.progressTrack}>
             <View style={[styles.progressFill, { width: `${paidPct}%` }]} />
           </View>
-          <Text style={styles.heroPct}>{paidPct}{t("% ee lacagta guud ayaa la bixiyey")}</Text>
-        </View>
+          <Text style={styles.heroPct}>
+            {paidPct}
+            {t("% ee lacagta guud ayaa la bixiyey")}
+          </Text>
 
-        <View style={styles.statsRow}>
-          <StatCard label={t("Wadarta Lacagta")} value={formatMoney(totalFee)} />
-          <StatCard label={t("La Bixiyey")} value={formatMoney(totalPaid)} accent={COLORS.success} />
-        </View>
-        <StatCard label={t("Ku Dhiman")} value={formatMoney(totalBalance)} accent={COLORS.danger} />
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t("Sanad Dugsiyeedka")}</Text>
-          {fees.length === 0 && <Text style={styles.emptyText}>{t("Weli Fee lama dhigin.")}</Text>}
-          {fees.map((f) => (
-            <View key={f._id} style={styles.row}>
-              <View style={styles.rowMain}>
-                <Text style={styles.rowTitle}>{f.academicYearId?.name}</Text>
-                <Text style={styles.rowSub}>
-                  {formatMoney(f.totalAmount)} · {statusLabel(f.status)}
-                </Text>
-              </View>
-              <View style={styles.rowRight}>
-                <Text style={styles.rowSuccess}>{formatMoney(f.totalPaid)}</Text>
-                <Text style={styles.rowDanger}>{formatMoney(f.balance)}</Text>
-              </View>
+          <View style={styles.miniRow}>
+            <View style={styles.mini}>
+              <Text style={styles.miniLabel}>{t("Wadarta Lacagta")}</Text>
+              <Text style={styles.miniValue}>{formatMoney(totalFee)}</Text>
             </View>
-          ))}
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>{t("Taariikhda Lacag Bixinta")}</Text>
-          {payments.length === 0 && <Text style={styles.emptyText}>{t("Weli lacag lama bixin.")}</Text>}
-          {payments.map((p) => (
-            <View key={p._id} style={styles.row}>
-              <View style={styles.rowMain}>
-                <Text style={styles.rowTitle}>{p.receiptNumber}</Text>
-                <Text style={styles.rowSub}>
-                  {formatDate(p.paymentDate)} · {t(p.paymentMethod)}
-                </Text>
-              </View>
-              <Text style={styles.rowAmount}>{formatMoney(p.amount)}</Text>
+            <View style={styles.mini}>
+              <Text style={styles.miniLabel}>{t("La Bixiyey")}</Text>
+              <Text style={[styles.miniValue, { color: "#86EFAC" }]}>{formatMoney(totalPaid)}</Text>
             </View>
-          ))}
-        </View>
+          </View>
+        </LinearGradient>
+
+        <SectionTitle>{t("Sanad Dugsiyeedka")}</SectionTitle>
+        {fees.length === 0 ? (
+          <Card>
+            <EmptyState compact icon="school-outline" text={t("Weli Fee lama dhigin.")} />
+          </Card>
+        ) : (
+          fees.map((f) => {
+            const pct = f.totalAmount > 0 ? Math.min(100, Math.round((f.totalPaid / f.totalAmount) * 100)) : 0;
+            return (
+              <Card key={f._id}>
+                <View style={styles.feeHead}>
+                  <View style={styles.feeIcon}>
+                    <Icon name="school" size={18} color={COLORS.navy} />
+                  </View>
+                  <View style={{ flex: 1 }}>
+                    <Text style={styles.feeYear}>{f.academicYearId?.name}</Text>
+                    <Text style={styles.feeSub}>{formatMoney(f.totalAmount)}</Text>
+                  </View>
+                  <Badge text={statusLabel(f.status)} color={feeStatusColor(f.status)} />
+                </View>
+                <View style={styles.feeTrack}>
+                  <View style={[styles.feeFill, { width: `${pct}%` }]} />
+                </View>
+                <View style={styles.feeNumbers}>
+                  <View>
+                    <Text style={styles.numLabel}>{t("La Bixiyey")}</Text>
+                    <Text style={[styles.num, { color: COLORS.success }]}>{formatMoney(f.totalPaid)}</Text>
+                  </View>
+                  <View style={{ alignItems: "flex-end" }}>
+                    <Text style={styles.numLabel}>{t("Ku Dhiman")}</Text>
+                    <Text style={[styles.num, { color: COLORS.danger }]}>{formatMoney(f.balance)}</Text>
+                  </View>
+                </View>
+              </Card>
+            );
+          })
+        )}
+
+        <SectionTitle>{t("Taariikhda Lacag Bixinta")}</SectionTitle>
+        {payments.length === 0 ? (
+          <Card>
+            <EmptyState compact icon="receipt-outline" text={t("Weli lacag lama bixin.")} />
+          </Card>
+        ) : (
+          <Card style={{ paddingVertical: 4 }}>
+            {payments.map((p, i) => (
+              <View key={p._id} style={[styles.payRow, i > 0 && styles.payRowBorder]}>
+                <View style={styles.payIcon}>
+                  <Icon name="arrow-down" size={16} color={COLORS.success} />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Text style={styles.payTitle}>{p.receiptNumber}</Text>
+                  <Text style={styles.paySub}>
+                    {formatDate(p.paymentDate)} · {t(p.paymentMethod)}
+                  </Text>
+                </View>
+                <Text style={styles.payAmount}>{formatMoney(p.amount)}</Text>
+              </View>
+            ))}
+          </Card>
+        )}
 
         <PaymentProofsSection payments={payments} />
       </ScrollView>
@@ -140,48 +175,34 @@ const DashboardScreen = () => {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
-  loadingScreen: { flex: 1, alignItems: "center", justifyContent: "center", backgroundColor: COLORS.paper },
-  header: {
-    backgroundColor: COLORS.navyDark,
-    paddingHorizontal: 20,
-    paddingTop: 54,
-    paddingBottom: 18,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    flexWrap: "wrap",
-    rowGap: 10,
-  },
-  headerLeft: { flexDirection: "row", alignItems: "center", gap: 10 },
-  logoBadge: { width: 38, height: 38, borderRadius: 10, backgroundColor: "#0ea5e9", alignItems: "center", justifyContent: "center", marginRight: 10 },
-  logoText: { color: "#fff", fontWeight: "700" },
-  headerTitle: { color: "#fff", fontSize: 16, fontWeight: "700" },
-  headerSubtitle: { color: "rgba(255,255,255,0.5)", fontSize: 11 },
-  headerActions: { flexDirection: "row", gap: 8 },
-  logoutBtn: { borderWidth: 1, borderColor: "rgba(255,255,255,0.2)", borderRadius: 999, paddingHorizontal: 14, paddingVertical: 7 },
-  logoutText: { color: "rgba(255,255,255,0.8)", fontSize: 13 },
   content: { padding: 16, paddingBottom: 48 },
-  hero: { backgroundColor: COLORS.navy, borderRadius: 14, padding: 18, marginBottom: 14 },
-  heroGreeting: { color: "rgba(255,255,255,0.6)", fontSize: 13 },
-  heroName: { color: "#fff", fontSize: 22, fontWeight: "700", marginBottom: 12 },
-  progressTrack: { height: 8, backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 999, overflow: "hidden" },
-  progressFill: { height: 8, backgroundColor: "#fff", borderRadius: 999 },
-  heroPct: { color: "rgba(255,255,255,0.7)", fontSize: 11, marginTop: 8 },
-  statsRow: { flexDirection: "row", gap: 10, marginBottom: 10 },
-  statCard: { flex: 1, backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, marginBottom: 10, borderWidth: 1, borderColor: COLORS.line },
-  statLabel: { fontSize: 10, color: "rgba(20,24,33,0.5)", textTransform: "uppercase", marginBottom: 6, letterSpacing: 0.5 },
-  statValue: { fontSize: 20, fontWeight: "700", color: COLORS.ink },
-  section: { backgroundColor: COLORS.surface, borderRadius: 12, padding: 14, marginTop: 4, marginBottom: 14, borderWidth: 1, borderColor: COLORS.line },
-  sectionTitle: { fontSize: 16, fontWeight: "700", color: COLORS.ink, marginBottom: 10 },
-  emptyText: { color: "rgba(20,24,33,0.4)", fontSize: 13, textAlign: "center", paddingVertical: 12 },
-  row: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", paddingVertical: 10, borderTopWidth: 1, borderTopColor: COLORS.line },
-  rowMain: { flex: 1 },
-  rowTitle: { fontSize: 14, fontWeight: "600", color: COLORS.ink },
-  rowSub: { fontSize: 12, color: "rgba(20,24,33,0.5)", marginTop: 2 },
-  rowRight: { alignItems: "flex-end" },
-  rowSuccess: { color: COLORS.success, fontSize: 13, fontWeight: "600" },
-  rowDanger: { color: COLORS.danger, fontSize: 12, marginTop: 2 },
-  rowAmount: { color: COLORS.ink, fontSize: 14, fontWeight: "600" },
+  hero: { borderRadius: RADIUS.xl, padding: 20, marginBottom: 8, ...SHADOW.raised },
+  heroGreeting: { color: "rgba(255,255,255,0.7)", fontSize: 13 },
+  heroName: { color: "#fff", fontSize: 22, fontWeight: "800", marginBottom: 18 },
+  heroLabel: { color: "rgba(255,255,255,0.7)", fontSize: 12, textTransform: "uppercase", letterSpacing: 0.8 },
+  heroAmount: { color: "#fff", fontSize: 38, fontWeight: "800", marginTop: 2, marginBottom: 14 },
+  progressTrack: { height: 8, backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 4, overflow: "hidden" },
+  progressFill: { height: 8, backgroundColor: "#4ADE80", borderRadius: 4 },
+  heroPct: { color: "rgba(255,255,255,0.75)", fontSize: 12, marginTop: 8 },
+  miniRow: { flexDirection: "row", gap: 10, marginTop: 16 },
+  mini: { flex: 1, backgroundColor: "rgba(255,255,255,0.12)", borderRadius: RADIUS.md, padding: 12 },
+  miniLabel: { color: "rgba(255,255,255,0.7)", fontSize: 11 },
+  miniValue: { color: "#fff", fontSize: 18, fontWeight: "800", marginTop: 3 },
+  feeHead: { flexDirection: "row", alignItems: "center", gap: 12 },
+  feeIcon: { width: 40, height: 40, borderRadius: 13, backgroundColor: COLORS.navyTint, alignItems: "center", justifyContent: "center" },
+  feeYear: { fontSize: 16, fontWeight: "800", color: COLORS.ink },
+  feeSub: { fontSize: 12, color: COLORS.muted, marginTop: 1 },
+  feeTrack: { height: 7, backgroundColor: COLORS.paper, borderRadius: 4, overflow: "hidden", marginTop: 14 },
+  feeFill: { height: 7, backgroundColor: COLORS.success, borderRadius: 4 },
+  feeNumbers: { flexDirection: "row", justifyContent: "space-between", marginTop: 12 },
+  numLabel: { fontSize: 11, color: COLORS.muted },
+  num: { fontSize: 16, fontWeight: "800", marginTop: 2 },
+  payRow: { flexDirection: "row", alignItems: "center", paddingVertical: 12, gap: 12 },
+  payRowBorder: { borderTopWidth: StyleSheet.hairlineWidth, borderTopColor: COLORS.line },
+  payIcon: { width: 36, height: 36, borderRadius: 12, backgroundColor: COLORS.successTint, alignItems: "center", justifyContent: "center" },
+  payTitle: { fontSize: 14, fontWeight: "700", color: COLORS.ink },
+  paySub: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
+  payAmount: { fontSize: 15, fontWeight: "800", color: COLORS.success },
 });
 
 export default DashboardScreen;

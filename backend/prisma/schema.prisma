@@ -213,8 +213,31 @@ model FinanceUser {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  salaryPayments SalaryPayment[]
-  expenses       Expense[]
+  salaryPayments    SalaryPayment[]
+  expenses          Expense[]
+  recurringExpenses RecurringExpense[]
 
   @@map("finance_users")
+}
+
+// A cost that repeats every month (electricity, rent...). It is entered once; every
+// month from startMonth on shows it by default. Changing it from a month on closes this
+// row at the month before and starts a new one — so past months keep their old amount.
+model RecurringExpense {
+  id            String   @id @default(uuid())
+  category      String
+  description   String
+  amount        Float
+  paymentMethod String // "Cash" | "Mobile Money" | "Bank" | "Other"
+  notes         String?
+  startMonth    String // "YYYY-MM": first month it applies to
+  endMonth      String? // "YYYY-MM": last month it applies to; null = keeps going
+  createdById   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  createdBy FinanceUser? @relation(fields: [createdById], references: [id], onDelete: SetNull)
+
+  @@index([startMonth])
+  @@map("recurring_expenses")
 }

@@ -6,6 +6,7 @@ import { useStaff } from "../../context/StaffContext";
 import { ScreenHeader, YearChips, Loading } from "../../components/StaffUI";
 import FeeRow from "../../components/FeeRow";
 import { formatMoney, COLORS } from "../../utils/format";
+import { SHADOW } from "../../utils/theme";
 import { t } from "../../i18n";
 
 const StaffDebtsScreen = ({ navigation }) => {
@@ -64,10 +65,10 @@ const StaffDebtsScreen = ({ navigation }) => {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
-  total: { backgroundColor: COLORS.navy, borderRadius: 12, padding: 16, marginBottom: 12 },
+  total: { backgroundColor: COLORS.navy, borderRadius: 22, padding: 16, marginBottom: 12, ...SHADOW.raised },
   totalLabel: { color: "rgba(255,255,255,0.65)", fontSize: 12 },
   totalValue: { color: "#fff", fontSize: 26, fontWeight: "700", marginTop: 4 },
-  empty: { textAlign: "center", color: "rgba(20,24,33,0.4)", paddingVertical: 30 },
+  empty: { textAlign: "center", color: COLORS.faint, paddingVertical: 30 },
 });
 
 export default StaffDebtsScreen;

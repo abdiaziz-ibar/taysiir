@@ -15,16 +15,4 @@ export const statusLabel = (status) => {
   return t("Lama Bixin (Unpaid)");
 };
 
-export const COLORS = {
-  navy: "#1F3A5F",
-  navyLight: "#2E5386",
-  navyDark: "#152943",
-  amber: "#C98A2C",
-  brand: "#C2410C",
-  success: "#2F7A4D",
-  danger: "#B3402A",
-  paper: "#FAFAF9",
-  surface: "#FFFFFF",
-  ink: "#14181F",
-  line: "#E7E5E0",
-};
+export { COLORS, RADIUS, SHADOW } from "./theme";

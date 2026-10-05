@@ -1,18 +1,13 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, Text, ScrollView, StyleSheet, RefreshControl, ActivityIndicator } from "react-native";
+import { View, Text, ScrollView, StyleSheet, RefreshControl } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import staffApi from "../../api/staffClient";
 import { useAuth } from "../../context/AuthContext";
 import { useStaff } from "../../context/StaffContext";
-import { StaffHeader, YearChips, Card, MonthBars } from "../../components/StaffUI";
-import { formatMoney, COLORS } from "../../utils/format";
+import { StaffHeader, YearChips, Card, MonthBars, StatTile, SectionTitle, Loading } from "../../components/StaffUI";
+import { formatMoney } from "../../utils/format";
+import { COLORS, RADIUS, SHADOW } from "../../utils/theme";
 import { t } from "../../i18n";
-
-const Stat = ({ label, value, color }) => (
-  <View style={styles.stat}>
-    <Text style={styles.statLabel}>{label}</Text>
-    <Text style={[styles.statValue, color && { color }]}>{value}</Text>
-  </View>
-);
 
 const StaffDashboardScreen = () => {
   const { staff } = useAuth();
@@ -46,36 +41,57 @@ const StaffDashboardScreen = () => {
       <StaffHeader title={t("Dashboard")} />
       <YearChips />
       {!data ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={COLORS.navy} size="large" />
-        </View>
+        <Loading />
       ) : (
-        <ScrollView
-          contentContainerStyle={styles.content}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-        >
-          <View style={styles.hero}>
-            <Text style={styles.heroSmall}>{t("Ku Soo Dhawoow,")}</Text>
-            <Text style={styles.heroName}>{staff?.fullName?.split(" ")[0] || t("Admin")}</Text>
+        <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} showsVerticalScrollIndicator={false}>
+          <LinearGradient colors={[COLORS.navy, COLORS.navyLight]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
+            <View style={styles.heroTop}>
+              <View style={{ flex: 1 }}>
+                <Text style={styles.heroSmall}>{t("Ku Soo Dhawoow,")}</Text>
+                <Text style={styles.heroName} numberOfLines={1}>
+                  {staff?.fullName?.split(" ")[0] || "Admin"}
+                </Text>
+              </View>
+              <View style={styles.rateBadge}>
+                <Text style={styles.rateValue}>{rate}%</Text>
+              </View>
+            </View>
             <View style={styles.track}>
               <View style={[styles.fill, { width: `${Math.min(rate, 100)}%` }]} />
             </View>
-            <Text style={styles.heroSmall}>{t("Collection Rate:")} {rate}%</Text>
-          </View>
+            <View style={styles.heroBottom}>
+              <Text style={styles.heroSmall}>{t("Collection Rate:")}</Text>
+              <Text style={styles.heroSmall}>
+                {formatMoney(data.totalPaid)} / {formatMoney(data.totalFees)}
+              </Text>
+            </View>
+          </LinearGradient>
 
           <View style={styles.grid}>
-            <Stat label={t("Waalidiinta")} value={data.totalParents} />
-            <Stat label={t("Wadarta Fee")} value={formatMoney(data.totalFees)} />
-            <Stat label={t("La Bixiyey")} value={formatMoney(data.totalPaid)} color={COLORS.success} />
-            <Stat label={t("Deynta")} value={formatMoney(data.totalDebt)} color={COLORS.danger} />
-            <Stat label={t("Paid")} value={data.paidCount} color={COLORS.success} />
-            <Stat label={t("Partial")} value={data.partialCount} color={COLORS.amber} />
-            <Stat label={t("Unpaid")} value={data.unpaidCount} color={COLORS.danger} />
+            <StatTile icon="people" label={t("Waalidiinta")} value={data.totalParents} color={COLORS.navy} />
+            <StatTile icon="wallet" label={t("Wadarta Fee")} value={formatMoney(data.totalFees)} color={COLORS.navy} />
+            <StatTile icon="checkmark-circle" label={t("La Bixiyey")} value={formatMoney(data.totalPaid)} color={COLORS.success} />
+            <StatTile icon="alert-circle" label={t("Deynta")} value={formatMoney(data.totalDebt)} color={COLORS.danger} />
           </View>
 
           <Card>
-            <Text style={styles.chartTitle}>{t("Lacagta La Bixiyey Bishii Kasta")}</Text>
-            <MonthBars data={monthly} valueKey="totalPaid" />
+            <View style={styles.statusRow}>
+              {[
+                [t("Paid"), data.paidCount, COLORS.success],
+                [t("Partial"), data.partialCount, COLORS.amber],
+                [t("Unpaid"), data.unpaidCount, COLORS.danger],
+              ].map(([label, count, color], i) => (
+                <View key={label} style={[styles.statusCol, i > 0 && styles.statusDivider]}>
+                  <Text style={[styles.statusCount, { color }]}>{count}</Text>
+                  <Text style={styles.statusLabel}>{label}</Text>
+                </View>
+              ))}
+            </View>
+          </Card>
+
+          <SectionTitle>{t("Lacagta La Bixiyey Bishii Kasta")}</SectionTitle>
+          <Card>
+            <MonthBars data={monthly} valueKey="totalPaid" color={COLORS.navy} />
           </Card>
         </ScrollView>
       )}
@@ -85,26 +101,22 @@ const StaffDashboardScreen = () => {
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  content: { padding: 14, paddingBottom: 40 },
-  hero: { backgroundColor: COLORS.navy, borderRadius: 14, padding: 18, marginBottom: 14 },
-  heroSmall: { color: "rgba(255,255,255,0.65)", fontSize: 12 },
-  heroName: { color: "#fff", fontSize: 24, fontWeight: "700", marginBottom: 12 },
-  track: { height: 8, backgroundColor: "rgba(255,255,255,0.15)", borderRadius: 999, overflow: "hidden", marginBottom: 8 },
-  fill: { height: 8, backgroundColor: "#fff", borderRadius: 999 },
+  content: { padding: 16, paddingBottom: 30 },
+  hero: { borderRadius: RADIUS.xl, padding: 20, marginBottom: 16, ...SHADOW.raised },
+  heroTop: { flexDirection: "row", alignItems: "center", marginBottom: 18 },
+  heroSmall: { color: "rgba(255,255,255,0.72)", fontSize: 13 },
+  heroName: { color: "#fff", fontSize: 28, fontWeight: "800", marginTop: 2 },
+  rateBadge: { width: 64, height: 64, borderRadius: 32, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center", borderWidth: 3, borderColor: "rgba(255,255,255,0.35)" },
+  rateValue: { color: "#fff", fontSize: 18, fontWeight: "800" },
+  track: { height: 8, backgroundColor: "rgba(255,255,255,0.2)", borderRadius: 4, overflow: "hidden" },
+  fill: { height: 8, backgroundColor: "#4ADE80", borderRadius: 4 },
+  heroBottom: { flexDirection: "row", justifyContent: "space-between", marginTop: 10 },
   grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between" },
-  stat: {
-    width: "48.5%",
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: COLORS.line,
-  },
-  chartTitle: { fontSize: 15, fontWeight: "700", color: COLORS.ink, marginBottom: 12 },
-  statLabel: { fontSize: 10, color: "rgba(20,24,33,0.5)", textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 6 },
-  statValue: { fontSize: 20, fontWeight: "700", color: COLORS.ink },
+  statusRow: { flexDirection: "row" },
+  statusCol: { flex: 1, alignItems: "center", paddingVertical: 4 },
+  statusDivider: { borderStartWidth: StyleSheet.hairlineWidth, borderStartColor: COLORS.line },
+  statusCount: { fontSize: 24, fontWeight: "800" },
+  statusLabel: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
 });
 
 export default StaffDashboardScreen;

@@ -35,7 +35,15 @@
           "photosPermission": "Taysir Foundation wuxuu u baahan yahay galitaanka sawirrada si aad u soo gudbiso caddaynta lacag bixinta (invoice/screenshot)."
         }
       ],
-      "expo-asset"
+      "expo-asset",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/ionicons.ttf"
+          ]
+        }
+      ]
     ]
   }
 }

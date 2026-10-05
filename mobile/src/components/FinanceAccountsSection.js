@@ -153,15 +153,15 @@ const FinanceAccountsSection = () => {
 const styles = StyleSheet.create({
   titleRow: { flexDirection: "row", alignItems: "flex-start", marginBottom: 6 },
   section: { fontSize: 15, fontWeight: "700", color: COLORS.ink },
-  note: { fontSize: 11, color: "rgba(20,24,33,0.5)", marginTop: 2, marginRight: 8 },
+  note: { fontSize: 11, color: COLORS.muted, marginTop: 2, marginRight: 8 },
   add: { color: COLORS.brand, fontSize: 13, fontWeight: "700" },
-  empty: { color: "rgba(20,24,33,0.4)", fontSize: 13, paddingVertical: 8 },
+  empty: { color: COLORS.faint, fontSize: 13, paddingVertical: 8 },
   row: { flexDirection: "row", alignItems: "center", paddingVertical: 10, borderTopWidth: 1, borderTopColor: COLORS.line },
   name: { fontSize: 14, fontWeight: "600", color: COLORS.ink },
-  sub: { fontSize: 12, color: "rgba(20,24,33,0.5)", marginTop: 2 },
+  sub: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
   link: { color: COLORS.navy, fontSize: 13, fontWeight: "600" },
   linkDanger: { color: COLORS.danger, fontSize: 13, fontWeight: "600" },
-  label: { fontSize: 13, color: "rgba(20,24,33,0.7)", marginBottom: 6, marginTop: 12 },
+  label: { fontSize: 13, color: COLORS.muted, marginBottom: 6, marginTop: 12 },
 });
 
 export default FinanceAccountsSection;

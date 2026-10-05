@@ -13,8 +13,8 @@ import {
 } from "react-native";
 import staffApi from "../../api/staffClient";
 import ProofImage from "../../components/ProofImage";
-import { StaffHeader, Chip, Badge } from "../../components/StaffUI";
-import { formatMoney, formatDate, COLORS } from "../../utils/format";
+import { StaffHeader, Chip, Badge, EmptyState, Loading } from "../../components/StaffUI";
+import { formatMoney, formatDate, COLORS, SHADOW } from "../../utils/format";
 import { t } from "../../i18n";
 
 const statusColor = (s) => (s === "confirmed" ? COLORS.success : COLORS.amber);
@@ -152,7 +152,7 @@ const StaffProofsScreen = ({ navigation }) => {
                     value={reply}
                     onChangeText={setReply}
                     placeholder={t("Qor jawaab...")}
-                    placeholderTextColor="#9CA3AF"
+                    placeholderTextColor={COLORS.faint}
                   />
                   <TouchableOpacity style={styles.replyBtn} onPress={sendReply} disabled={busy}>
                     <Text style={styles.replyBtnText}>{t("Dir")}</Text>
@@ -181,9 +181,7 @@ const StaffProofsScreen = ({ navigation }) => {
       </View>
 
       {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={COLORS.navy} size="large" />
-        </View>
+        <Loading />
       ) : (
         <FlatList
           data={proofs}
@@ -191,7 +189,7 @@ const StaffProofsScreen = ({ navigation }) => {
           renderItem={renderItem}
           contentContainerStyle={{ padding: 12, paddingBottom: 30 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListEmptyComponent={<Text style={styles.empty}>{t("Weli wax lama soo gudbin.")}</Text>}
+          ListEmptyComponent={<EmptyState icon="receipt-outline" text={t("Weli wax lama soo gudbin.")} />}
         />
       )}
 
@@ -208,13 +206,13 @@ const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
   center: { flex: 1, alignItems: "center", justifyContent: "center" },
   filters: { flexDirection: "row", paddingHorizontal: 12, paddingTop: 10 },
-  empty: { textAlign: "center", color: "rgba(20,24,33,0.4)", paddingVertical: 30 },
-  item: { backgroundColor: COLORS.surface, borderRadius: 12, marginBottom: 8, borderWidth: 1, borderColor: COLORS.line, overflow: "hidden" },
+  empty: { textAlign: "center", color: COLORS.faint, paddingVertical: 30 },
+  item: { backgroundColor: COLORS.surface, borderRadius: 18, marginBottom: 8, borderWidth: StyleSheet.hairlineWidth, borderColor: COLORS.line, overflow: "hidden", ...SHADOW.card },
   itemHead: { padding: 14 },
   badges: { flexDirection: "row", gap: 6, marginBottom: 8 },
   name: { fontSize: 14, fontWeight: "600", color: COLORS.ink },
-  msg: { fontSize: 13, color: "rgba(20,24,33,0.65)", marginTop: 4 },
-  date: { fontSize: 11, color: "rgba(20,24,33,0.4)", marginTop: 6 },
+  msg: { fontSize: 13, color: COLORS.muted, marginTop: 4 },
+  date: { fontSize: 11, color: COLORS.faint, marginTop: 6 },
   thread: { borderTopWidth: 1, borderTopColor: COLORS.line, padding: 12, backgroundColor: COLORS.paper },
   statusBtn: { borderWidth: 1, borderColor: COLORS.line, borderRadius: 999, paddingVertical: 8, alignItems: "center", backgroundColor: COLORS.surface, marginBottom: 10 },
   statusBtnText: { fontSize: 12, color: COLORS.navy, fontWeight: "600" },
@@ -223,7 +221,7 @@ const styles = StyleSheet.create({
   bubbleParent: { backgroundColor: COLORS.surface, borderWidth: 1, borderColor: COLORS.line, alignSelf: "flex-start" },
   bubbleName: { fontSize: 10, opacity: 0.7, marginBottom: 2 },
   replyRow: { flexDirection: "row", gap: 8, marginTop: 8 },
-  replyInput: { flex: 1, borderWidth: 1, borderColor: COLORS.line, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 8, fontSize: 13, backgroundColor: COLORS.surface, color: COLORS.ink },
+  replyInput: { flex: 1, borderWidth: 1.2, borderColor: COLORS.line, borderRadius: 14, paddingHorizontal: 10, paddingVertical: 8, fontSize: 13, backgroundColor: COLORS.surface, color: COLORS.ink },
   replyBtn: { backgroundColor: COLORS.brand, borderRadius: 8, paddingHorizontal: 16, justifyContent: "center" },
   replyBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
   viewer: { flex: 1, backgroundColor: "rgba(0,0,0,0.9)", alignItems: "center", justifyContent: "center" },

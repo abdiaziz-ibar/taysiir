@@ -1,22 +1,27 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-  StyleSheet,
-  Modal,
-  ScrollView,
-  ActivityIndicator,
-  RefreshControl,
-  KeyboardAvoidingView,
-  Platform,
-} from "react-native";
+import { View, Text, FlatList, ScrollView, StyleSheet, RefreshControl } from "react-native";
 import staffApi from "../../api/staffClient";
 import { useStaff } from "../../context/StaffContext";
-import { StaffHeader, YearChips, Chip, Badge, feeStatusColor, feeStatusText } from "../../components/StaffUI";
-import { formatMoney, COLORS } from "../../utils/format";
+import {
+  StaffHeader,
+  YearChips,
+  Chip,
+  Badge,
+  feeStatusColor,
+  feeStatusText,
+  SearchBar,
+  ListRow,
+  Avatar,
+  EmptyState,
+  Loading,
+  Fab,
+  ScreenModal,
+  Field,
+  PrimaryButton,
+  ErrorText,
+} from "../../components/StaffUI";
+import { formatMoney } from "../../utils/format";
+import { COLORS } from "../../utils/theme";
 import { t } from "../../i18n";
 
 const emptyForm = { fullName: "", phone: "", address: "", email: "", totalAmount: "" };
@@ -46,8 +51,8 @@ const StaffParentsScreen = ({ navigation }) => {
   }, [selectedYearId, search, status]);
 
   useEffect(() => {
-    const t = setTimeout(load, 250);
-    return () => clearTimeout(t);
+    const timer = setTimeout(load, 250);
+    return () => clearTimeout(timer);
   }, [load]);
 
   useEffect(() => {
@@ -96,18 +101,17 @@ const StaffParentsScreen = ({ navigation }) => {
   };
 
   const renderItem = ({ item: p }) => (
-    <TouchableOpacity style={styles.row} onPress={() => navigation.navigate("ParentDetail", { id: p._id })}>
-      <View style={{ flex: 1 }}>
-        <Text style={styles.name}>{p.fullName}</Text>
-        <Text style={styles.sub}>
-          {p.parentId} · {p.phone}
-        </Text>
-      </View>
+    <ListRow
+      left={<Avatar name={p.fullName} />}
+      title={p.fullName}
+      subtitle={`${p.parentId} · ${p.phone}`}
+      onPress={() => navigation.navigate("ParentDetail", { id: p._id })}
+    >
       <View style={styles.right}>
-        <Text style={styles.balance}>{formatMoney(p.balance)}</Text>
+        <Text style={[styles.balance, p.balance <= 0 && { color: COLORS.success }]}>{formatMoney(p.balance)}</Text>
         <Badge text={feeStatusText(p.feeStatus)} color={feeStatusColor(p.feeStatus)} />
       </View>
-    </TouchableOpacity>
+    </ListRow>
   );
 
   return (
@@ -116,18 +120,10 @@ const StaffParentsScreen = ({ navigation }) => {
       <YearChips />
 
       <View style={styles.toolbar}>
-        <TextInput
-          style={styles.search}
-          value={search}
-          onChangeText={setSearch}
-          placeholder={t("Raadi magaca ama phone...")}
-          placeholderTextColor="#9CA3AF"
-        />
-        <TouchableOpacity style={styles.addBtn} onPress={() => setShowForm(true)}>
-          <Text style={styles.addBtnText}>{t("+ Cusub")}</Text>
-        </TouchableOpacity>
+        <SearchBar value={search} onChangeText={setSearch} placeholder={t("Raadi magaca ama phone...")} />
       </View>
       <View style={styles.filters}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
         <Chip label={t("Dhammaan")} active={status === ""} onPress={() => setStatus("")} />
         <Chip label={t("Unpaid")} active={status === "unpaid"} onPress={() => setStatus("unpaid")} />
         <Chip label={t("Partial")} active={status === "partial"} onPress={() => setStatus("partial")} />
@@ -137,132 +133,54 @@ const StaffParentsScreen = ({ navigation }) => {
           active={!!idSort}
           onPress={() => setIdSort((d) => (d === "asc" ? "desc" : "asc"))}
         />
+        </ScrollView>
       </View>
-      <Text style={styles.hint}>{t("Lacagta waa tii sanadka")} {yearName || "..."} {t("kaliya.")}</Text>
+      <Text style={styles.hint}>
+        {t("Lacagta waa tii sanadka")} {yearName || "..."} {t("kaliya.")}
+      </Text>
 
       {loading ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={COLORS.navy} size="large" />
-        </View>
+        <Loading />
       ) : (
         <FlatList
           data={shown}
           keyExtractor={(p) => p._id}
           renderItem={renderItem}
-          contentContainerStyle={{ padding: 12, paddingBottom: 30 }}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-          ListEmptyComponent={<Text style={styles.empty}>{t("Waalid lama helin.")}</Text>}
+          ListEmptyComponent={<EmptyState icon="people-outline" text={t("Waalid lama helin.")} />}
+          showsVerticalScrollIndicator={false}
         />
       )}
 
-      <Modal visible={showForm} animationType="slide" onRequestClose={() => setShowForm(false)}>
-        <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>{t("Waalid Cusub")}</Text>
-            <TouchableOpacity onPress={() => setShowForm(false)}>
-              <Text style={styles.close}>{t("Jooji")}</Text>
-            </TouchableOpacity>
-          </View>
-          <ScrollView contentContainerStyle={styles.modalBody} keyboardShouldPersistTaps="handled">
-            {error ? <Text style={styles.error}>{error}</Text> : null}
-            <Text style={styles.label}>{t("Magaca Waalidka *")}</Text>
-            <TextInput style={styles.input} value={form.fullName} onChangeText={(v) => setForm({ ...form, fullName: v })} />
-            <Text style={styles.label}>{t("Phone *")}</Text>
-            <TextInput
-              style={styles.input}
-              value={form.phone}
-              onChangeText={(v) => setForm({ ...form, phone: v })}
-              keyboardType="phone-pad"
-            />
-            <Text style={styles.label}>{t("Address *")}</Text>
-            <TextInput style={styles.input} value={form.address} onChangeText={(v) => setForm({ ...form, address: v })} />
-            <Text style={styles.label}>{t("Email (ikhtiyaari)")}</Text>
-            <TextInput
-              style={styles.input}
-              value={form.email}
-              onChangeText={(v) => setForm({ ...form, email: v })}
-              autoCapitalize="none"
-              keyboardType="email-address"
-            />
-            <Text style={styles.label}>{t("Wadarta Fee sanadka")} {yearName} {t("(ikhtiyaari)")}</Text>
-            <TextInput
-              style={styles.input}
-              value={form.totalAmount}
-              onChangeText={(v) => setForm({ ...form, totalAmount: v })}
-              keyboardType="numeric"
-              placeholder={t("Tusaale: 100")}
-              placeholderTextColor="#9CA3AF"
-            />
-            <TouchableOpacity style={styles.saveBtn} onPress={handleSave} disabled={saving}>
-              {saving ? <ActivityIndicator color="#fff" /> : <Text style={styles.saveBtnText}>{t("Kaydi Waalidka")}</Text>}
-            </TouchableOpacity>
-          </ScrollView>
-        </KeyboardAvoidingView>
-      </Modal>
+      <Fab onPress={() => setShowForm(true)} label={t("Waalid Cusub")} />
+
+      <ScreenModal visible={showForm} title={t("Waalid Cusub")} onClose={() => setShowForm(false)}>
+        <ErrorText text={error} />
+        <Field label={t("Magaca Waalidka *")} value={form.fullName} onChangeText={(v) => setForm({ ...form, fullName: v })} />
+        <Field label={t("Phone *")} value={form.phone} onChangeText={(v) => setForm({ ...form, phone: v })} keyboardType="phone-pad" />
+        <Field label={t("Address *")} value={form.address} onChangeText={(v) => setForm({ ...form, address: v })} />
+        <Field label={t("Email (ikhtiyaari)")} value={form.email} onChangeText={(v) => setForm({ ...form, email: v })} autoCapitalize="none" keyboardType="email-address" />
+        <Field
+          label={`${t("Wadarta Fee sanadka")} ${yearName || ""} ${t("(ikhtiyaari)")}`}
+          value={form.totalAmount}
+          onChangeText={(v) => setForm({ ...form, totalAmount: v })}
+          keyboardType="numeric"
+          placeholder={t("Tusaale: 100")}
+        />
+        <PrimaryButton title={t("Kaydi Waalidka")} onPress={handleSave} loading={saving} />
+      </ScreenModal>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
-  center: { flex: 1, alignItems: "center", justifyContent: "center" },
-  toolbar: { flexDirection: "row", paddingHorizontal: 12, gap: 8 },
-  search: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: COLORS.line,
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 9,
-    backgroundColor: COLORS.surface,
-    fontSize: 14,
-    color: COLORS.ink,
-  },
-  addBtn: { backgroundColor: COLORS.brand, borderRadius: 999, paddingHorizontal: 16, justifyContent: "center" },
-  addBtnText: { color: "#fff", fontWeight: "700", fontSize: 13 },
-  filters: { flexDirection: "row", paddingHorizontal: 12, paddingTop: 10 },
-  hint: { fontSize: 11, color: "rgba(20,24,33,0.45)", paddingHorizontal: 14, paddingTop: 2 },
-  row: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 8,
-    borderWidth: 1,
-    borderColor: COLORS.line,
-  },
-  name: { fontSize: 15, fontWeight: "600", color: COLORS.ink },
-  sub: { fontSize: 12, color: "rgba(20,24,33,0.5)", marginTop: 3 },
-  right: { alignItems: "flex-end", gap: 4 },
-  balance: { fontSize: 14, fontWeight: "700", color: COLORS.danger },
-  empty: { textAlign: "center", color: "rgba(20,24,33,0.4)", paddingVertical: 30 },
-  modalHeader: {
-    backgroundColor: COLORS.navyDark,
-    paddingTop: 52,
-    paddingBottom: 16,
-    paddingHorizontal: 18,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  modalTitle: { color: "#fff", fontSize: 18, fontWeight: "700" },
-  close: { color: "rgba(255,255,255,0.8)", fontSize: 14 },
-  modalBody: { padding: 18, paddingBottom: 60 },
-  error: { backgroundColor: "rgba(179,64,42,0.1)", color: COLORS.danger, padding: 10, borderRadius: 8, marginBottom: 10, fontSize: 13 },
-  label: { fontSize: 13, color: "rgba(20,24,33,0.7)", marginBottom: 4, marginTop: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: COLORS.line,
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    fontSize: 15,
-    color: COLORS.ink,
-    backgroundColor: COLORS.surface,
-  },
-  saveBtn: { backgroundColor: COLORS.brand, borderRadius: 999, paddingVertical: 13, alignItems: "center", marginTop: 22 },
-  saveBtnText: { color: "#fff", fontWeight: "700", fontSize: 15 },
+  toolbar: { flexDirection: "row", paddingHorizontal: 16, paddingTop: 8 },
+  filters: { paddingHorizontal: 16, paddingTop: 12 },
+  hint: { fontSize: 11.5, color: COLORS.muted, paddingHorizontal: 18, paddingBottom: 4 },
+  right: { alignItems: "flex-end", gap: 5 },
+  balance: { fontSize: 15, fontWeight: "800", color: COLORS.danger },
 });
 
 export default StaffParentsScreen;

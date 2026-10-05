@@ -1,4 +1,5 @@
 const prisma = require("../lib/prisma");
+const { monthKey, currentMonthKey, monthsBetween, recurringRowsFor } = require("../utils/recurring");
 
 // Same Sep→Aug order the other reports use.
 const MONTHS = [
@@ -26,10 +27,20 @@ const getFinanceSummary = async (req, res, next) => {
     const start = new Date(startYear, 8, 1);
     const end = new Date(startYear + 1, 8, 1);
 
-    const [salaries, expenses] = await Promise.all([
+    const [salaries, concrete, templates] = await Promise.all([
       prisma.salaryPayment.findMany({ where: { paymentDate: { gte: start, lt: end } } }),
       prisma.expense.findMany({ where: { expenseDate: { gte: start, lt: end } } }),
+      prisma.recurringExpense.findMany(),
     ]);
+
+    // Monthly (recurring) entries count for each month of the year up to the current one —
+    // future months aren't spent yet.
+    const expenses = [...concrete];
+    const lastMonth = currentMonthKey();
+    monthsBetween(monthKey(start), monthKey(new Date(startYear + 1, 7, 1))).forEach((m) => {
+      if (m > lastMonth) return;
+      expenses.push(...recurringRowsFor(m, templates, concrete.filter((e) => monthKey(e.expenseDate) === m)));
+    });
 
     const months = MONTHS.map((month, idx) => ({ month, monthIndex: (8 + idx) % 12, salaries: 0, expenses: 0 }));
     const add = (rows, dateKey, field) =>

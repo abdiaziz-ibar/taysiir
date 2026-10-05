@@ -178,17 +178,17 @@ const EmployeesPanel = () => {
 
 const styles = StyleSheet.create({
   summaryRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 10 },
-  hint: { fontSize: 11, color: "rgba(20,24,33,0.45)", flex: 1, marginRight: 8 },
+  hint: { fontSize: 11, color: COLORS.muted, flex: 1, marginRight: 8 },
   addLink: { color: COLORS.brand, fontSize: 13, fontWeight: "700" },
-  empty: { textAlign: "center", color: "rgba(20,24,33,0.4)", paddingVertical: 30 },
+  empty: { textAlign: "center", color: COLORS.faint, paddingVertical: 30 },
   head: { flexDirection: "row", alignItems: "flex-start" },
   name: { fontSize: 15, fontWeight: "600", color: COLORS.ink },
-  sub: { fontSize: 12, color: "rgba(20,24,33,0.5)", marginTop: 2 },
+  sub: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
   salary: { fontSize: 15, fontWeight: "700", color: COLORS.ink },
   actions: { flexDirection: "row", gap: 18, marginTop: 10, borderTopWidth: 1, borderTopColor: COLORS.line, paddingTop: 10 },
   link: { color: COLORS.navy, fontSize: 13, fontWeight: "600" },
   linkDanger: { color: COLORS.danger, fontSize: 13, fontWeight: "600" },
-  label: { fontSize: 13, color: "rgba(20,24,33,0.7)", marginBottom: 6, marginTop: 12 },
+  label: { fontSize: 13, color: COLORS.muted, marginBottom: 6, marginTop: 12 },
 });
 
 export default EmployeesPanel;

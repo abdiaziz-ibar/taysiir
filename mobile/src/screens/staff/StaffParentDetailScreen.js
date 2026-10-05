@@ -21,6 +21,7 @@ import {
 } from "../../components/StaffUI";
 import ConfirmPasswordModal from "../../components/ConfirmPasswordModal";
 import { formatMoney, formatDate, COLORS } from "../../utils/format";
+import { SHADOW } from "../../utils/theme";
 import { t } from "../../i18n";
 
 const StaffParentDetailScreen = ({ route, navigation }) => {
@@ -306,23 +307,23 @@ const styles = StyleSheet.create({
   outlineText: { color: COLORS.ink, fontSize: 13, fontWeight: "600" },
   dangerBtn: { backgroundColor: COLORS.danger, borderRadius: 999, paddingVertical: 10, paddingHorizontal: 22, alignItems: "center" },
   dangerText: { color: "#fff", fontSize: 13, fontWeight: "700" },
-  debtCard: { backgroundColor: COLORS.navy, borderRadius: 12, padding: 16, marginBottom: 12 },
+  debtCard: { backgroundColor: COLORS.navy, borderRadius: 22, padding: 16, marginBottom: 12, ...SHADOW.raised },
   debtLabel: { color: "rgba(255,255,255,0.65)", fontSize: 12 },
   debtValue: { color: "#fff", fontSize: 26, fontWeight: "700", marginTop: 4 },
-  payBtn: { backgroundColor: COLORS.brand, borderRadius: 999, paddingVertical: 12, alignItems: "center", marginBottom: 12 },
+  payBtn: { backgroundColor: COLORS.brand, borderRadius: 14, paddingVertical: 14, alignItems: "center", marginBottom: 12 },
   payBtnText: { color: "#fff", fontWeight: "700", fontSize: 14 },
   sectionHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
   sectionTitle: { fontSize: 16, fontWeight: "700", color: COLORS.ink, marginBottom: 8 },
   link: { color: COLORS.navy, fontSize: 13, fontWeight: "600" },
   linkDanger: { color: COLORS.danger, fontSize: 13, fontWeight: "600" },
-  empty: { color: "rgba(20,24,33,0.4)", fontSize: 13, textAlign: "center", paddingVertical: 10 },
+  empty: { color: COLORS.faint, fontSize: 13, textAlign: "center", paddingVertical: 10 },
   feeRow: { flexDirection: "row", alignItems: "center", paddingVertical: 10, borderTopWidth: 1, borderTopColor: COLORS.line },
   feeYear: { fontSize: 14, fontWeight: "600", color: COLORS.ink },
-  feeSub: { fontSize: 12, color: "rgba(20,24,33,0.5)", marginTop: 2 },
+  feeSub: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
   feeActions: { flexDirection: "row", gap: 16, marginTop: 6 },
   feeBalance: { fontSize: 14, fontWeight: "700", color: COLORS.danger },
   paid: { fontSize: 14, fontWeight: "700", color: COLORS.success },
-  label: { fontSize: 13, color: "rgba(20,24,33,0.7)", marginBottom: 6, marginTop: 12 },
+  label: { fontSize: 13, color: COLORS.muted, marginBottom: 6, marginTop: 12 },
 });
 
 export default StaffParentDetailScreen;

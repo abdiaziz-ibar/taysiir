@@ -39,7 +39,7 @@ const ProofImage = ({ screenshotUrl, height = 180, onOpen }) => {
 
 const styles = StyleSheet.create({
   img: { width: "100%", borderRadius: 8, marginBottom: 10, backgroundColor: COLORS.line },
-  none: { fontSize: 12, color: "rgba(20,24,33,0.45)", marginBottom: 10 },
+  none: { fontSize: 12, color: COLORS.muted, marginBottom: 10 },
   fail: { backgroundColor: "rgba(179,64,42,0.08)", borderRadius: 8, padding: 12, marginBottom: 10 },
   failText: { color: COLORS.danger, fontSize: 12, marginBottom: 4 },
   link: { color: COLORS.navy, fontSize: 13, fontWeight: "700", textDecorationLine: "underline" },
