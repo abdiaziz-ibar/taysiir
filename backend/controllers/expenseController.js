@@ -1,6 +1,7 @@
 const prisma = require("../lib/prisma");
 const nextVoucherNumber = require("../utils/voucherNumber");
 const { serializeExpense } = require("../utils/serialize");
+const { inactiveNames } = require("./expenseCategoryController");
 const { monthKey, currentMonthKey, shiftMonth, monthStart, monthsBetween, isRepeatable, activeIn, recurringRowsFor } = require("../utils/recurring");
 
 const METHODS = ["Cash", "Mobile Money", "Bank", "Other"];
@@ -98,6 +99,31 @@ const isTrue = (v) => v === true || v === "true";
 
 const recurringRow = (template, month) => serializeExpense(recurringRowsFor(month, [template], [])[0]);
 
+// The regular categories used up to `month`, each with its latest entry (description, amount, method),
+// so a new month lists them again with "Bixi" and pre-fills last time's details. "Kale" is left out.
+const knownCategories = async (month, templates) => {
+  const before = await prisma.expense.findMany({
+    where: { expenseDate: { lt: monthStart(shiftMonth(month, 1)) } },
+    orderBy: { expenseDate: "desc" },
+  });
+  const latest = {};
+  const consider = (key, row, when) => {
+    if (!latest[key] || when > latest[key].when) latest[key] = { when, row };
+  };
+  before.forEach((e) => {
+    if (!isRepeatable(e.category)) consider(e.category.toLowerCase(), e, monthKey(e.expenseDate));
+  });
+  templates
+    .filter((t) => t.startMonth <= month && !isRepeatable(t.category))
+    .forEach((t) => consider(t.category.toLowerCase(), t, t.endMonth && t.endMonth < month ? t.endMonth : month));
+  const hidden = await inactiveNames();
+  return Object.entries(latest)
+    .filter(([key]) => !hidden.has(key))
+    .map(([, v]) => v)
+    .map(({ row }) => ({ category: row.category, description: row.description, amount: row.amount, paymentMethod: row.paymentMethod }))
+    .sort((a, b) => a.category.localeCompare(b.category));
+};
+
 // GET /api/expenses?month=YYYY-MM&category=&search=
 // Real entries plus the recurring ones that apply (a month with no month filter lists
 // every month up to the current one). Returns the rows, the total and a per-category breakdown.
@@ -139,6 +165,7 @@ const getExpenses = async (req, res, next) => {
       expenses: rows.map(serializeExpense),
       total: rows.reduce((s, e) => s + e.amount, 0),
       byCategory: Object.values(byCat).sort((a, b) => b.total - a.total),
+      ...(month ? { known: await knownCategories(month, templates) } : {}),
     });
   } catch (err) {
     next(err);

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from "react-native";
+import { View, Text, ScrollView, TouchableOpacity, StyleSheet } from "react-native";
 import financeApi, { verifyFinancePassword } from "../../api/financeClient";
 import { Loading, ListRow, ScreenModal, Field, Chip, ChipRow, PrimaryButton, ErrorText, EmptyState, Fab, Card, SectionTitle } from "../../components/StaffUI";
 import { FinanceHeader } from "../../components/FinanceUI";
@@ -33,8 +33,7 @@ const CATEGORY_ICON = {
   Kale: "ellipsis-horizontal-circle",
 };
 
-// New regular costs repeat every month by default (entered once; "Kale" is the exception).
-const emptyForm = () => ({ category: EXPENSE_CATEGORIES[0], description: "", amount: "", expenseDate: todayISO(), paymentMethod: "Cash", notes: "", recurring: true });
+const emptyForm = () => ({ category: EXPENSE_CATEGORIES[0], description: "", amount: "", expenseDate: todayISO(), paymentMethod: "Cash", notes: "" });
 
 // A recurring row from the server has the id "rec:<templateId>:<YYYY-MM>".
 const rowMonth = (x) => x._id.split(":")[2];
@@ -63,14 +62,19 @@ const FinanceExpensesScreen = ({ navigation, route }) => {
 
   useEffect(() => navigation.addListener("focus", load), [navigation, load]);
 
-  // `preset` pre-selects a category (the "Bixi" button of the checklist).
+  // `preset` pre-selects a category (the "Bixi" button of the checklist); `last` pre-fills last time's details.
   const openNew = useCallback(
-    (preset) => {
+    (preset, last) => {
       setError("");
       const first = typeof preset === "string" ? preset : category || EXPENSE_CATEGORIES[0];
       // Paying from another month's view dates the expense in that month, not today.
       const expenseDate = allMonths || month === currentMonth() ? todayISO() : `${month}-01`;
-      setForm({ ...emptyForm(), category: first, expenseDate, recurring: first !== "Kale" });
+      setForm({
+        ...emptyForm(),
+        category: first,
+        expenseDate,
+        ...(last ? { description: last.description, amount: String(last.amount), paymentMethod: last.paymentMethod } : {}),
+      });
     },
     [category, month, allMonths]
   );
@@ -119,41 +123,31 @@ const FinanceExpensesScreen = ({ navigation, route }) => {
     load();
   };
 
-  // One tap: every regular cost of this month becomes a monthly one from here on.
-  const repeatThisMonth = () =>
-    Alert.alert(t("Ka dhig bil kasta"), t("Dhammaan kharashyada bishan (marka laga reebo \"Kale\") ka dhig kuwo bil kasta ah, oo bilaha soo socda isla muuqda?"), [
-      { text: t("Jooji"), style: "cancel" },
-      {
-        text: t("Haa"),
-        onPress: async () => {
-          try {
-            await financeApi.post("/expenses/recurring/from-month", { month });
-            load();
-          } catch (err) {
-            Alert.alert(t(err.response?.data?.message || "Khalad ayaa dhacay."));
-          }
-        },
-      },
-    ]);
-
-  // The month's regular costs as a pay checklist (like the payroll list) — month view, no filter.
-  const showChecklist = !allMonths && !category && !!data;
-  const checklist = showChecklist
-    ? (() => {
-        const known = EXPENSE_CATEGORIES.map((c) => c.toLowerCase());
-        const extra = [...new Set(data.expenses.map((x) => x.category))].filter((c) => !known.includes(c.toLowerCase()));
-        return [...EXPENSE_CATEGORIES.filter((c) => c !== "Kale"), ...extra, "Kale"].map((c) => {
-          const rows = data.expenses.filter((x) => x.category.toLowerCase() === c.toLowerCase());
-          return { category: c, rows, paid: rows.length > 0, repeatable: c === "Kale", total: rows.reduce((s, x) => s + x.amount, 0) };
-        });
-      })()
-    : [];
-
-  const canRepeatMonth = !allMonths && !!data && data.expenses.some((x) => !x.recurring && x.category !== "Kale");
 
   const editing = !!form?._id;
   // A category already stored but not in the preset list stays selectable while editing.
   const formCategories = form && !EXPENSE_CATEGORIES.includes(form.category) ? [form.category, ...EXPENSE_CATEGORIES] : EXPENSE_CATEGORIES;
+
+  // The month's regular costs as a pay checklist (like the payroll list) — month view, no filter.
+  // Every regular category used so far is listed again each month; "Kale" can be paid any number of times.
+  const showChecklist = !allMonths && !category && !!data;
+  const checklist = showChecklist
+    ? (() => {
+        const order = (c) => {
+          const i = EXPENSE_CATEGORIES.findIndex((x) => x.toLowerCase() === c.toLowerCase());
+          return i === -1 ? 999 : i;
+        };
+        const known = data.known || [];
+        const names = [...new Set([...known.map((k) => k.category), ...data.expenses.filter((x) => x.category !== "Kale").map((x) => x.category)])]
+          .filter((c) => c.toLowerCase() !== "kale")
+          .sort((a, b) => order(a) - order(b));
+        return [...names, "Kale"].map((c) => {
+          const rows = data.expenses.filter((x) => x.category.toLowerCase() === c.toLowerCase());
+          const last = known.find((k) => k.category.toLowerCase() === c.toLowerCase());
+          return { category: c, rows, last, paid: rows.length > 0, repeatable: c === "Kale", total: rows.reduce((s, x) => s + x.amount, 0) };
+        });
+      })()
+    : [];
 
   return (
     <View style={styles.flex}>
@@ -201,30 +195,41 @@ const FinanceExpensesScreen = ({ navigation, route }) => {
                         <Text style={[styles.checkSub, { color: c.paid ? COLORS.success : COLORS.danger }]} numberOfLines={1}>
                           {c.paid ? `${formatMoney(c.total)} · ` : ""}
                           {c.repeatable ? t("{count} kharash", { count: c.rows.length }) : statusLabel(c.paid ? "paid" : "unpaid")}
+                          {!c.paid && !c.repeatable && c.last ? <Text style={{ color: COLORS.muted, fontStyle: "italic" }}>{`  ·  ${c.last.description} ${formatMoney(c.last.amount)}`}</Text> : null}
                           {c.paid && !c.repeatable && c.rows[0].recurring ? " · ↻" : ""}
                         </Text>
                       )}
                     </View>
-                    {c.paid && !c.repeatable ? (
-                      <TouchableOpacity style={styles.editBtn} onPress={() => openEdit(c.rows[0])} activeOpacity={0.8}>
-                        <Text style={styles.editText}>{t("Edit")}</Text>
-                      </TouchableOpacity>
-                    ) : (
-                      <TouchableOpacity style={styles.payBtn} onPress={() => openNew(c.category)} activeOpacity={0.8}>
+                    {!c.paid ? (
+                      <TouchableOpacity style={styles.payBtn} onPress={() => openNew(c.category, c.last)} activeOpacity={0.8}>
                         <Text style={styles.payText}>{t("Bixi")}</Text>
                       </TouchableOpacity>
-                    )}
+                    ) : null}
+                    {c.paid && (!c.repeatable || c.rows.length === 1) ? (
+                      <>
+                        <TouchableOpacity style={styles.editBtn} onPress={() => openEdit(c.rows[0])} activeOpacity={0.8}>
+                          <Text style={styles.editText}>{t("Edit")}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => setDeleteTarget(c.rows[0])} hitSlop={{ top: 8, bottom: 8, left: 6, right: 6 }}>
+                          <Icon name="trash-outline" size={19} color={COLORS.danger} />
+                        </TouchableOpacity>
+                      </>
+                    ) : null}
+                    {c.paid && c.repeatable ? (
+                      <TouchableOpacity style={styles.editBtn} onPress={() => openNew(c.category)} activeOpacity={0.8}>
+                        <Text style={styles.editText}>{t("+ Ku dar")}</Text>
+                      </TouchableOpacity>
+                    ) : null}
                   </View>
                 ))}
+                <TouchableOpacity style={[styles.checkRow, styles.checkBorder]} onPress={() => openNew()} activeOpacity={0.8}>
+                  <View style={styles.catIconSm}>
+                    <Icon name="add" size={18} color={COLORS.brand} />
+                  </View>
+                  <Text style={[styles.checkTitle, { flex: 1, color: COLORS.brand }]}>{t("Ku dar nooc cusub")}</Text>
+                </TouchableOpacity>
               </Card>
             </>
-          ) : null}
-
-          {canRepeatMonth ? (
-            <TouchableOpacity style={styles.repeatBtn} onPress={repeatThisMonth} activeOpacity={0.8}>
-              <Icon name="repeat" size={17} color={COLORS.navy} />
-              <Text style={styles.repeatText}>{t("Ka dhig bil kasta")}</Text>
-            </TouchableOpacity>
           ) : null}
 
           {data.expenses.length === 0 ? (
@@ -263,7 +268,7 @@ const FinanceExpensesScreen = ({ navigation, route }) => {
             <Text style={styles.label}>{t("Nooca *")}</Text>
             <ChipRow>
               {formCategories.map((c) => (
-                <Chip key={c} label={t(c)} active={form.category === c} onPress={() => setForm({ ...form, category: c, ...(editing ? {} : { recurring: c !== "Kale" }) })} />
+                <Chip key={c} label={t(c)} active={form.category === c} onPress={() => setForm({ ...form, category: c })} />
               ))}
             </ChipRow>
             {form.recurringId ? (
@@ -284,15 +289,6 @@ const FinanceExpensesScreen = ({ navigation, route }) => {
               ))}
             </ChipRow>
             <Field label={t("Faallo (ikhtiyaari)")} value={form.notes} onChangeText={(v) => setForm({ ...form, notes: v })} />
-            {form.category !== "Kale" && !form.recurringId ? (
-              <TouchableOpacity style={styles.toggle} onPress={() => setForm({ ...form, recurring: !form.recurring })} activeOpacity={0.8}>
-                <Icon name={form.recurring ? "checkbox" : "square-outline"} size={22} color={form.recurring ? COLORS.brand : COLORS.muted} />
-                <View style={{ flex: 1 }}>
-                  <Text style={styles.toggleTitle}>{t("Bil kasta (hal mar geli)")}</Text>
-                  <Text style={styles.toggleHint}>{t("Bisha dooratay iyo bilaha xiga isla kharashkan ayaa si toos ah u muuqan doona. Bilihii hore waxba kuma darmaan.")}</Text>
-                </View>
-              </TouchableOpacity>
-            ) : null}
             <PrimaryButton title={t("Kaydi")} onPress={save} loading={saving} />
           </>
         )}
@@ -338,11 +334,6 @@ const styles = StyleSheet.create({
   editBtn: { backgroundColor: COLORS.navyTint, borderRadius: RADIUS.pill, paddingHorizontal: 14, paddingVertical: 7 },
   editText: { color: COLORS.navy, fontSize: 13, fontWeight: "700" },
   note: { fontSize: 12.5, color: COLORS.navy, backgroundColor: COLORS.navyTint, borderRadius: RADIUS.md, padding: 10, marginTop: 10 },
-  repeatBtn: { flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, paddingVertical: 11, borderRadius: RADIUS.lg, backgroundColor: COLORS.navyTint, marginBottom: 14 },
-  repeatText: { fontSize: 14, fontWeight: "700", color: COLORS.navy },
-  toggle: { flexDirection: "row", alignItems: "flex-start", gap: 10, backgroundColor: COLORS.navyTint, borderRadius: RADIUS.md, padding: 12, marginTop: 14 },
-  toggleTitle: { fontSize: 14, fontWeight: "700", color: COLORS.ink },
-  toggleHint: { fontSize: 12, color: COLORS.muted, marginTop: 2 },
 });
 
 export default FinanceExpensesScreen;

@@ -241,3 +241,15 @@ model RecurringExpense {
   @@index([startMonth])
   @@map("recurring_expenses")
 }
+
+// The expense types the finance team picks from (Koronto, Biyaha, ...). They can add, rename and
+// hide types. "Kale" is built in. Expenses store the type's name, so renaming updates them too.
+model ExpenseCategory {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  isActive  Boolean  @default(true)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@map("expense_categories")
+}

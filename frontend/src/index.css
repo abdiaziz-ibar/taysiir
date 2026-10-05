@@ -42,6 +42,10 @@
   .table-base td {
     @apply py-2 px-3 border-b border-line;
   }
+  .table-base.total-table th,
+  .table-base.total-table td {
+    @apply px-2 text-[13px];
+  }
   .badge {
     @apply inline-block px-2 py-0.5 rounded text-xs font-medium;
   }

@@ -30,6 +30,12 @@ const monthsBetween = (from, to) => {
   return out;
 };
 
+// The regular monthly costs (each is recorded once a month). "Kale" is the catch-all and isn't expected monthly.
+const REGULAR_CATEGORIES = [
+  "Koronto", "Biyaha", "Kiro", "Internet & Telefoon", "Agabka & Qalabka",
+  "Qalin & Buugaag", "Dayactir", "Gaadiid & Shidaal", "Nadaafad", "Cunto & Casuumaad",
+];
+
 const isRepeatable = (category) => category === "Kale"; // the catch-all category can repeat
 
 const activeIn = (templates, month) => templates.filter((t) => t.startMonth <= month && (!t.endMonth || t.endMonth >= month));
@@ -55,4 +61,4 @@ const recurringRowsFor = (month, templates, concrete) =>
       updatedAt: t.updatedAt,
     }));
 
-module.exports = { monthKey, currentMonthKey, shiftMonth, monthStart, monthsBetween, isRepeatable, activeIn, recurringRowsFor };
+module.exports = { REGULAR_CATEGORIES, monthKey, currentMonthKey, shiftMonth, monthStart, monthsBetween, isRepeatable, activeIn, recurringRowsFor };

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { NavLink, Outlet, useNavigate } from "react-router-dom";
-import { Menu, X, ReceiptText, PiggyBank, KeyRound } from "lucide-react";
+import { Menu, X, ReceiptText, PiggyBank, KeyRound, LayoutDashboard, Users } from "lucide-react";
 import financeApi from "../api/financeAxios";
 import ChangePasswordModal from "../pages/portal/ChangePasswordModal";
 import LanguageSwitcher from "../i18n/LanguageSwitcher";
@@ -8,9 +8,10 @@ import { t } from "../i18n";
 
 const linkBase = "flex items-center gap-3 px-4 py-2.5 rounded-md text-sm transition-colors";
 
-const NavItem = ({ to, icon: Icon, children, onClick }) => (
+const NavItem = ({ to, icon: Icon, children, onClick, end }) => (
   <NavLink
     to={to}
+    end={end}
     onClick={onClick}
     className={({ isActive }) => `${linkBase} ${isActive ? "bg-navy text-white" : "text-white/75 hover:bg-white/10 hover:text-white"}`}
   >
@@ -61,8 +62,10 @@ const FinanceLayout = () => {
           </button>
         </div>
         <nav className="relative flex-1 px-3 py-4 space-y-1">
-          <NavItem to="/finance/expenses" icon={ReceiptText} onClick={() => setOpen(false)}>{t("Qarashaadka & Mushaharka")}</NavItem>
-          <NavItem to="/finance/report" icon={PiggyBank} onClick={() => setOpen(false)}>{t("Warbixinta Maaliyadda")}</NavItem>
+          <NavItem to="/finance" end icon={LayoutDashboard} onClick={() => setOpen(false)}>{t("Dashboard")}</NavItem>
+          <NavItem to="/finance/salaries" icon={Users} onClick={() => setOpen(false)}>{t("Mushaharka")}</NavItem>
+          <NavItem to="/finance/expenses" icon={ReceiptText} onClick={() => setOpen(false)}>{t("Qarashaadka")}</NavItem>
+          <NavItem to="/finance/total" icon={PiggyBank} onClick={() => setOpen(false)}>{t("Wadarta Guud")}</NavItem>
         </nav>
       </aside>
 

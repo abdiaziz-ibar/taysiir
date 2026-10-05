@@ -135,7 +135,7 @@ const financeLogin = async (username, password) => {
 };
 
 const FinanceLoginForm = () => (
-  <UsernameLoginForm doLogin={financeLogin} redirectTo="/finance/expenses" rememberKey="rememberedFinanceUsername" />
+  <UsernameLoginForm doLogin={financeLogin} redirectTo="/finance" rememberKey="rememberedFinanceUsername" />
 );
 
 const ParentLoginForm = () => {

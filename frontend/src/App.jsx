@@ -25,7 +25,9 @@ import Users from "./pages/Users";
 import Settings from "./pages/Settings";
 import PaymentProofs from "./pages/PaymentProofs";
 import Expenses from "./pages/finance/Expenses";
-import FinanceReport from "./pages/finance/FinanceReport";
+import FinanceDashboard from "./pages/finance/Dashboard";
+import FinanceSalaries from "./pages/finance/Salaries";
+import FinanceTotal from "./pages/finance/Total";
 
 function App() {
   return (
@@ -40,9 +42,11 @@ function App() {
 
       <Route element={<FinanceProtectedRoute />}>
         <Route element={<FinanceLayout />}>
-          <Route path="/finance" element={<Navigate to="/finance/expenses" replace />} />
+          <Route path="/finance" element={<FinanceDashboard />} />
+          <Route path="/finance/salaries" element={<FinanceSalaries />} />
           <Route path="/finance/expenses" element={<Expenses />} />
-          <Route path="/finance/report" element={<FinanceReport />} />
+          <Route path="/finance/total" element={<FinanceTotal />} />
+          <Route path="/finance/report" element={<Navigate to="/finance/total" replace />} />
         </Route>
       </Route>
 

@@ -53,3 +53,9 @@ export const monthLabel = (period) => {
   const [y, m] = period.split("-").map(Number);
   return `${t(MONTH_NAMES[m - 1])} ${y}`;
 };
+
+// School years run September → August, so a date before September belongs to the year that began last calendar year.
+export const currentStartYear = () => {
+  const now = new Date();
+  return now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
+};
