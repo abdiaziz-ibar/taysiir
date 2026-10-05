@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, Download, TrendingDown, Banknote, Repeat } from "lucide-react";
+import { ChevronLeft, ChevronRight, Download, TrendingDown, Repeat } from "lucide-react";
 import api, { verifyFinancePassword } from "../../api/financeAxios";
 import ConfirmDeleteModal from "../../components/ConfirmDeleteModal";
 import StatCard from "../../components/StatCard";
 import SalaryPanel from "../../components/finance/SalaryPanel";
+import MonthOverview from "../../components/finance/MonthOverview";
+import ExpenseChecklist from "../../components/finance/ExpenseChecklist";
 import Employees from "./Employees";
 import { formatMoney, formatDate } from "../../utils/format";
 import { downloadExcel } from "../../utils/excel";
@@ -175,7 +177,6 @@ const Expenses = () => {
   const [category, setCategory] = useState(""); // "" | SALARY_KEY | an expense category
   const [search, setSearch] = useState("");
   const [data, setData] = useState(null);
-  const [salaryPaid, setSalaryPaid] = useState(null); // salaries paid for `month`, shown on the "all" view
 
   const [salaryTab, setSalaryTab] = useState("payroll"); // "payroll" | "employees"
   const [refreshKey, setRefreshKey] = useState(0);
@@ -200,11 +201,6 @@ const Expenses = () => {
     api
       .get("/expenses", { params: { month: month || undefined, category: category || undefined, search: search || undefined } })
       .then((res) => setData(res.data));
-    if (category === "" && month) {
-      api.get("/salaries/summary", { params: { period: month } }).then((res) => setSalaryPaid(res.data.totals.paid));
-    } else {
-      setSalaryPaid(null);
-    }
   };
 
   useEffect(() => {
@@ -212,11 +208,14 @@ const Expenses = () => {
     return () => clearTimeout(t);
   }, [month, category, search]);
 
-  const openNew = () => {
+  // `preset` pre-selects a category (the "Bixi" button of the checklist).
+  const openNew = (preset) => {
     setEditingId(null);
     setEditingRow(null);
-    const first = isSalaryView ? SALARY_KEY : category || EXPENSE_CATEGORIES[0];
-    setForm({ ...emptyForm(), category: first, recurring: first !== "Kale" });
+    const first = preset || (isSalaryView ? SALARY_KEY : category || EXPENSE_CATEGORIES[0]);
+    // Paying from another month's view dates the expense in that month, not today.
+    const expenseDate = !month || month === currentMonth() ? todayISO() : `${month}-01`;
+    setForm({ ...emptyForm(), category: first, expenseDate, recurring: first !== "Kale" });
     setError("");
     setShowForm(true);
   };
@@ -318,9 +317,10 @@ const Expenses = () => {
     ? EXPENSE_CATEGORIES
     : [form.category, ...EXPENSE_CATEGORIES];
 
-  const canRepeatMonth = !!month && !!data && data.expenses.some((x) => !x.recurring && x.category !== "Kale");
+  // The month's regular costs as a pay checklist — only on the unfiltered month view.
+  const showChecklist = !!month && !category && !search;
 
-  const showSalaryCard = category === "" && month && salaryPaid !== null;
+  const canRepeatMonth = !!month && !!data && data.expenses.some((x) => !x.recurring && x.category !== "Kale");
 
   return (
     <div className="space-y-5">
@@ -328,7 +328,7 @@ const Expenses = () => {
         <h2 className="text-xl font-serif">
           {isSalaryView ? t("Mushaharka") : t("Qarashaadka")} {month ? `— ${monthLabel(month)}` : t("— Dhammaan")}
         </h2>
-        <button className="btn-primary" onClick={showForm ? closeForm : openNew}>
+        <button className="btn-primary" onClick={showForm ? closeForm : () => openNew()}>
           {showForm ? t("Jooji") : t("+ Kharash Cusub")}
         </button>
       </div>
@@ -472,21 +472,18 @@ const Expenses = () => {
         <p className="text-ink/50">{t("Waa la soo shubayaa...")}</p>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <StatCard
+          {month && <MonthOverview month={month} reloadKey={data} />}
+          {showChecklist && <ExpenseChecklist expenses={data.expenses} onPay={openNew} onEdit={openEdit} />}
+          {!showChecklist && <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {!month && <StatCard
               label={t("Wadarta Qarashaadka")}
-              value={formatMoney(data.total + (showSalaryCard ? salaryPaid : 0))}
+              value={formatMoney(data.total)}
               accent="text-danger"
               icon={TrendingDown}
               iconBg="bg-danger/10"
               iconColor="text-danger"
-            />
-            {showSalaryCard && (
-              <button type="button" className="text-start" onClick={() => setCategory(SALARY_KEY)} title={t("Fur mushaharka")}>
-                <StatCard label={t("Mushaharka La Bixiyey (fur →)")} value={formatMoney(salaryPaid)} icon={Banknote} />
-              </button>
-            )}
-            <div className={`card ${showSalaryCard ? "" : "md:col-span-2"}`}>
+            />}
+            <div className={`card ${month ? "md:col-span-3" : "md:col-span-2"}`}>
               <p className="text-xs uppercase tracking-wide text-ink/50 mb-2">{t("Qarashaadka Kale")}</p>
               {data.byCategory.length === 0 ? (
                 <p className="text-sm text-ink/40">-</p>
@@ -500,7 +497,7 @@ const Expenses = () => {
                 </div>
               )}
             </div>
-          </div>
+          </div>}
 
           <div className="card overflow-x-auto">
             <table className="table-base">

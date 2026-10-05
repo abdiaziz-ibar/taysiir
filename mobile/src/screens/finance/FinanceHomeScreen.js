@@ -27,20 +27,24 @@ const FinanceHomeScreen = ({ navigation }) => {
   const [month, setMonth] = useState(currentMonth());
   const [sal, setSal] = useState(null);
   const [exp, setExp] = useState(null);
+  const [overview, setOverview] = useState(null); // teachers / staff / expenses split for the month
   const [refreshing, setRefreshing] = useState(false);
 
   const load = useCallback(async () => {
-    const [s, e] = await Promise.all([
+    const [s, e, o] = await Promise.all([
       financeApi.get("/salaries/summary", { params: { period: month } }),
       financeApi.get("/expenses", { params: { month } }),
+      financeApi.get("/finance/month", { params: { period: month } }),
     ]);
     setSal(s.data);
     setExp(e.data);
+    setOverview(o.data);
   }, [month]);
 
   useEffect(() => {
     setSal(null);
     setExp(null);
+    setOverview(null);
     load();
   }, [load]);
 
@@ -52,7 +56,7 @@ const FinanceHomeScreen = ({ navigation }) => {
     setRefreshing(false);
   };
 
-  const ready = sal && exp;
+  const ready = sal && exp && overview;
   const paid = sal?.totals.paid || 0;
   const due = sal?.totals.salary || 0;
   const pct = due > 0 ? Math.min(100, Math.round((paid / due) * 100)) : 0;
@@ -81,16 +85,28 @@ const FinanceHomeScreen = ({ navigation }) => {
 
           <LinearGradient colors={[COLORS.navy, COLORS.navyLight]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
             <Text style={styles.heroLabel}>{t("Wadarta Baxday bishan")}</Text>
-            <Text style={styles.heroAmount}>{formatMoney(paid + exp.total)}</Text>
+            <Text style={styles.heroAmount}>{formatMoney(overview.totals.paid)}</Text>
             <View style={styles.miniRow}>
               <View style={styles.mini}>
-                <Text style={styles.miniLabel}>{t("Mushaharka")}</Text>
-                <Text style={styles.miniValue}>{formatMoney(paid)}</Text>
+                <Text style={styles.miniLabel}>{t("Macalimiinta")}</Text>
+                <Text style={styles.miniValue}>{formatMoney(overview.teachers.paid)}</Text>
+              </View>
+              <View style={styles.mini}>
+                <Text style={styles.miniLabel}>{t("Shaqaale")}</Text>
+                <Text style={styles.miniValue}>{formatMoney(overview.staff.paid)}</Text>
               </View>
               <View style={styles.mini}>
                 <Text style={styles.miniLabel}>{t("Qarashaadka")}</Text>
-                <Text style={styles.miniValue}>{formatMoney(exp.total)}</Text>
+                <Text style={styles.miniValue}>{formatMoney(overview.expenses.total)}</Text>
               </View>
+            </View>
+            <View style={styles.remainRow}>
+              <Icon name={overview.totals.salaryRemaining > 0 ? "alert-circle" : "checkmark-circle"} size={16} color={overview.totals.salaryRemaining > 0 ? COLORS.amber : "rgba(255,255,255,0.85)"} />
+              <Text style={[styles.remainText, overview.totals.salaryRemaining > 0 && { color: COLORS.amber }]}>
+                {overview.totals.salaryRemaining > 0
+                  ? t("Mushahar dhiman: {amount}", { amount: formatMoney(overview.totals.salaryRemaining) })
+                  : t("Mushaharka oo dhan waa la bixiyey")}
+              </Text>
             </View>
           </LinearGradient>
 
@@ -158,7 +174,9 @@ const styles = StyleSheet.create({
   miniRow: { flexDirection: "row", gap: 10 },
   mini: { flex: 1, backgroundColor: "rgba(255,255,255,0.12)", borderRadius: RADIUS.md, padding: 12 },
   miniLabel: { color: "rgba(255,255,255,0.7)", fontSize: 11 },
-  miniValue: { color: "#fff", fontSize: 18, fontWeight: "800", marginTop: 3 },
+  miniValue: { color: "#fff", fontSize: 16, fontWeight: "800", marginTop: 3 },
+  remainRow: { flexDirection: "row", alignItems: "center", gap: 6, marginTop: 14 },
+  remainText: { color: "rgba(255,255,255,0.85)", fontSize: 13, fontWeight: "600" },
   payHead: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   payTitle: { fontSize: 15, fontWeight: "800", color: COLORS.ink },
   payPct: { fontSize: 15, fontWeight: "800", color: COLORS.success },

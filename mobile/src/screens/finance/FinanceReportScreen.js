@@ -53,7 +53,8 @@ const FinanceReportScreen = () => {
           <Text style={styles.note}>{t("Mushaharka iyo qarashaadka marka la bixiyey (Sebtembar → Ogosto).")}</Text>
 
           <View style={styles.grid}>
-            <Stat label={t("Mushaharka")} value={formatMoney(data.totals.salaries)} />
+            <Stat label={t("Macalimiinta")} value={formatMoney(data.totals.teachers)} />
+            <Stat label={t("Shaqaale")} value={formatMoney(data.totals.staff)} />
             <Stat label={t("Qarashaadka")} value={formatMoney(data.totals.expenses)} color={COLORS.danger} />
             <Stat label={t("Wadarta Baxday")} value={formatMoney(data.totals.total)} color={COLORS.danger} />
           </View>
@@ -64,7 +65,7 @@ const FinanceReportScreen = () => {
               <View key={m.month} style={styles.monthRow}>
                 <Text style={styles.monthName}>{t(m.month)}</Text>
                 <Text style={styles.monthLine}>
-                  {t("Mushahar")} {formatMoney(m.salaries)} {t("· Kharash")} {formatMoney(m.expenses)}
+                  {t("Macalin")} {formatMoney(m.teachers)} · {t("Shaqaale")} {formatMoney(m.staff)} {t("· Kharash")} {formatMoney(m.expenses)}
                 </Text>
                 <Text style={styles.monthTotal}>{formatMoney(m.total)}</Text>
               </View>

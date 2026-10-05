@@ -25,37 +25,41 @@ const statusFor = (due, paid) => {
   return paid >= due ? "paid" : "partial";
 };
 
-// GET /api/salaries/summary?period=YYYY-MM
-// The payroll sheet for one month: every active employee (plus any inactive
+// The payroll sheet rows for one month: every active employee (plus any inactive
 // one who was still paid that month) with what's due, paid and left.
+const salaryRowsFor = async (period) => {
+  const payments = await prisma.salaryPayment.findMany({
+    where: { period },
+    orderBy: { createdAt: "asc" },
+  });
+  const paidIds = [...new Set(payments.map((p) => p.employeeId))];
+  const employees = await prisma.employee.findMany({
+    where: { OR: [{ status: "active" }, { id: { in: paidIds } }] },
+    orderBy: { employeeId: "asc" },
+  });
+
+  return employees.map((employee) => {
+    const own = payments.filter((p) => p.employeeId === employee.id);
+    const monthlySalary = salaryDueFor(employee, own);
+    const totalPaid = sum(own, "amount");
+    return {
+      employee: serializeEmployee(employee),
+      monthlySalary,
+      totalPaid,
+      balance: Math.max(monthlySalary - totalPaid, 0),
+      status: statusFor(monthlySalary, totalPaid),
+      payments: own.map(serializeSalaryPayment),
+    };
+  });
+};
+
+// GET /api/salaries/summary?period=YYYY-MM
 const getSalarySummary = async (req, res, next) => {
   try {
     const period = req.query.period || currentPeriod();
     if (!PERIOD_RE.test(period)) throw badRequest("Bisha waa inay noqotaa qaabka YYYY-MM.");
 
-    const payments = await prisma.salaryPayment.findMany({
-      where: { period },
-      orderBy: { createdAt: "asc" },
-    });
-    const paidIds = [...new Set(payments.map((p) => p.employeeId))];
-    const employees = await prisma.employee.findMany({
-      where: { OR: [{ status: "active" }, { id: { in: paidIds } }] },
-      orderBy: { employeeId: "asc" },
-    });
-
-    const rows = employees.map((employee) => {
-      const own = payments.filter((p) => p.employeeId === employee.id);
-      const monthlySalary = salaryDueFor(employee, own);
-      const totalPaid = sum(own, "amount");
-      return {
-        employee: serializeEmployee(employee),
-        monthlySalary,
-        totalPaid,
-        balance: Math.max(monthlySalary - totalPaid, 0),
-        status: statusFor(monthlySalary, totalPaid),
-        payments: own.map(serializeSalaryPayment),
-      };
-    });
+    const rows = await salaryRowsFor(period);
 
     res.json({
       period,
@@ -167,4 +171,4 @@ const deleteSalaryPayment = async (req, res, next) => {
   }
 };
 
-module.exports = { getSalarySummary, createSalaryPayment, updateSalaryPayment, deleteSalaryPayment };
+module.exports = { getSalarySummary, createSalaryPayment, updateSalaryPayment, deleteSalaryPayment, salaryRowsFor };

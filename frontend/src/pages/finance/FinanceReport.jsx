@@ -26,9 +26,9 @@ const FinanceReport = () => {
   }, [startYear]);
 
   const exportExcel = () => {
-    const headers = ["Bil", "Mushaharka", "Qarashaadka", "Wadarta"];
-    const rows = data.months.map((m) => [m.month, m.salaries, m.expenses, m.total]);
-    rows.push(["Wadarta", data.totals.salaries, data.totals.expenses, data.totals.total]);
+    const headers = ["Bil", "Macalimiinta", "Shaqaalaha", "Qarashaadka", "Wadarta"];
+    const rows = data.months.map((m) => [m.month, m.teachers, m.staff, m.expenses, m.total]);
+    rows.push(["Wadarta", data.totals.teachers, data.totals.staff, data.totals.expenses, data.totals.total]);
     downloadExcel(`warbixinta-maaliyadda-${data.schoolYear}.xlsx`, headers, rows);
   };
 
@@ -84,7 +84,8 @@ const FinanceReport = () => {
               <thead>
                 <tr>
                   <th>{t("Bil")}</th>
-                  <th className="text-end">{t("Mushaharka")}</th>
+                  <th className="text-end">{t("Macalimiinta")}</th>
+                  <th className="text-end">{t("Shaqaale")}</th>
                   <th className="text-end">{t("Qarashaadka")}</th>
                   <th className="text-end">{t("Wadarta")}</th>
                 </tr>
@@ -93,14 +94,16 @@ const FinanceReport = () => {
                 {data.months.map((m) => (
                   <tr key={m.month}>
                     <td>{t(m.month)}</td>
-                    <td className="text-end">{formatMoney(m.salaries)}</td>
+                    <td className="text-end">{formatMoney(m.teachers)}</td>
+                    <td className="text-end">{formatMoney(m.staff)}</td>
                     <td className="text-end">{formatMoney(m.expenses)}</td>
-                    <td className="text-end">{formatMoney(m.total)}</td>
+                    <td className="text-end font-medium">{formatMoney(m.total)}</td>
                   </tr>
                 ))}
                 <tr className="font-semibold">
                   <td>{t("Wadarta")}</td>
-                  <td className="text-end">{formatMoney(data.totals.salaries)}</td>
+                  <td className="text-end">{formatMoney(data.totals.teachers)}</td>
+                  <td className="text-end">{formatMoney(data.totals.staff)}</td>
                   <td className="text-end">{formatMoney(data.totals.expenses)}</td>
                   <td className="text-end">{formatMoney(data.totals.total)}</td>
                 </tr>

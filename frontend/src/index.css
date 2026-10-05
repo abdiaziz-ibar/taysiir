@@ -36,6 +36,9 @@
   .table-base th {
     @apply text-start py-2 px-3 border-b-2 border-line text-ink/60 font-medium;
   }
+  .table-base th.text-end {
+    text-align: end;
+  }
   .table-base td {
     @apply py-2 px-3 border-b border-line;
   }
