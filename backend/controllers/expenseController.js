@@ -95,7 +95,6 @@ const parseFields = (body, { partial }) => {
   return out;
 };
 
-const isTrue = (v) => v === true || v === "true";
 
 const recurringRow = (template, month) => serializeExpense(recurringRowsFor(month, [template], [])[0]);
 
@@ -179,18 +178,7 @@ const createExpense = async (req, res, next) => {
     const data = parseFields(req.body, { partial: false });
     const date = data.expenseDate || new Date();
 
-    if (isTrue(req.body.recurring)) {
-      const startMonth = monthKey(date);
-      await assertOncePerMonth(data.category, date, { checkRecurring: false });
-      await assertNoRecurringClash(data.category, startMonth);
-      const { expenseDate, ...fields } = data;
-      const template = await prisma.recurringExpense.create({
-        data: { ...fields, startMonth, createdById: req.financeUser?._id || null },
-      });
-      return res.status(201).json(recurringRow(template, startMonth));
-    }
-
-    await assertOncePerMonth(data.category, date, { checkRecurring: true });
+    await assertOncePerMonth(data.category, date, { checkRecurring: false });
     const expense = await prisma.expense.create({
       data: { ...data, voucherNumber: await nextVoucherNumber("expense", "EXP"), createdById: req.financeUser?._id || null },
     });
@@ -211,27 +199,6 @@ const updateExpense = async (req, res, next) => {
     const category = data.category ?? current.category;
     const date = data.expenseDate ?? current.expenseDate;
     await assertOncePerMonth(category, date, { excludeId: current.id, checkRecurring: false });
-
-    if (isTrue(req.body.recurring)) {
-      const startMonth = monthKey(date);
-      await assertNoRecurringClash(category, startMonth);
-      const template = await prisma.$transaction(async (tx) => {
-        const created = await tx.recurringExpense.create({
-          data: {
-            category,
-            description: data.description ?? current.description,
-            amount: data.amount ?? current.amount,
-            paymentMethod: data.paymentMethod ?? current.paymentMethod,
-            notes: data.notes !== undefined ? data.notes : current.notes,
-            startMonth,
-            createdById: req.financeUser?._id || null,
-          },
-        });
-        await tx.expense.delete({ where: { id: current.id } });
-        return created;
-      });
-      return res.json(recurringRow(template, startMonth));
-    }
 
     const expense = await prisma.expense.update({ where: { id: req.params.id }, data });
     res.json(serializeExpense(expense));
@@ -309,50 +276,4 @@ const stopRecurring = async (req, res, next) => {
   }
 };
 
-// POST /api/expenses/recurring/from-month  { month }
-// One click: make every regular (non-"Kale") entry of this month a monthly entry that
-// continues from this month on. Entries whose category is already monthly are skipped.
-const repeatMonth = async (req, res, next) => {
-  try {
-    const month = requireMonth(req.body.month);
-    const rows = await prisma.expense.findMany({
-      where: { expenseDate: { gte: monthStart(month), lt: monthStart(shiftMonth(month, 1)) } },
-    });
-
-    let created = 0;
-    let skipped = 0;
-    for (const e of rows) {
-      if (isRepeatable(e.category)) {
-        skipped += 1;
-        continue;
-      }
-      const clash = await prisma.recurringExpense.findFirst({
-        where: { category: { equals: e.category, mode: "insensitive" }, OR: [{ endMonth: null }, { endMonth: { gte: month } }] },
-      });
-      if (clash) {
-        skipped += 1;
-        continue;
-      }
-      await prisma.$transaction(async (tx) => {
-        await tx.recurringExpense.create({
-          data: {
-            category: e.category,
-            description: e.description,
-            amount: e.amount,
-            paymentMethod: e.paymentMethod,
-            notes: e.notes,
-            startMonth: month,
-            createdById: req.financeUser?._id || null,
-          },
-        });
-        await tx.expense.delete({ where: { id: e.id } });
-      });
-      created += 1;
-    }
-    res.json({ created, skipped });
-  } catch (err) {
-    next(err);
-  }
-};
-
-module.exports = { getExpenses, createExpense, updateExpense, deleteExpense, updateRecurring, stopRecurring, repeatMonth };
+module.exports = { getExpenses, createExpense, updateExpense, deleteExpense, updateRecurring, stopRecurring };
