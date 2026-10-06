@@ -176,6 +176,7 @@ export default {
   "Ikhtiyaari: hadda ku dar lacagta uu waalidkan ku leeyahay sanad dugsiyeedkan, si aadan mar dambe ugu noqon.": "Optional: add the amount this parent owes for this academic year now, so you don't have to come back to it.",
   "Inactive (shaqada ka tagay)": "Inactive (left the job)",
   "Internet & Telefoon": "Internet & Phone",
+  "Isku Dar": "Combined",
   "Isku day badan oo khaldan. Akoonka waa la xiray {minutes} daqiiqo. Fadlan dib isku day markay dhamaato.": "Too many wrong attempts. The account is locked for {minutes} minutes. Please try again when it ends.",
   "Isticmaalaha lama helin.": "User not found.",
   "Isticmaalaha waa la tirtiray.": "The user was deleted.",

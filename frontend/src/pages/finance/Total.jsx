@@ -26,11 +26,11 @@ const Total = () => {
       "Bil",
       "Mushaharka La Rabay", "Mushaharka La Bixiyey", "Mushaharka Lama Bixin",
       "Qarashaadka La Bixiyey", "Qarashaadka Lama Bixin (nooc)",
-      "Wadarta La Bixiyey", "Mushaharka Lama Bixin",
+      "Wadarta La Bixiyey", "Mushaharka Lama Bixin", "Isku Dar",
     ];
-    const rows = data.months.map((m) => [m.month, m.salaryDue, m.salaryPaid, m.salaryRemaining, m.expenses, m.expenseUnpaid.count, m.paid, m.unpaid]);
+    const rows = data.months.map((m) => [m.month, m.salaryDue, m.salaryPaid, m.salaryRemaining, m.expenses, m.expenseUnpaid.count, m.paid, m.unpaid, m.paid + m.unpaid]);
     const tot = data.totals;
-    rows.push(["Wadarta", tot.salaryDue, tot.salaryPaid, tot.salaryRemaining, tot.expenses, "", tot.paid, tot.unpaid]);
+    rows.push(["Wadarta", tot.salaryDue, tot.salaryPaid, tot.salaryRemaining, tot.expenses, "", tot.paid, tot.unpaid, tot.paid + tot.unpaid]);
     downloadExcel(`wadarta-maaliyadda-${data.schoolYear}.xlsx`, headers, rows);
   };
 
@@ -82,7 +82,7 @@ const Total = () => {
                   <th rowSpan={2}>{t("Bil")}</th>
                   <th colSpan={3} className="!text-center border-s border-line">{t("Mushaharka")}</th>
                   <th colSpan={2} className="!text-center border-s border-line">{t("Qarashaadka")}</th>
-                  <th colSpan={2} className="!text-center border-s border-line">{t("Wadarta")}</th>
+                  <th colSpan={3} className="!text-center border-s border-line">{t("Wadarta")}</th>
                 </tr>
                 <tr>
                   <th className="text-end border-s border-line">{t("La Rabay")}</th>
@@ -92,6 +92,7 @@ const Total = () => {
                   <th className="text-end">{t("Lama Bixin")}</th>
                   <th className="text-end border-s border-line">{t("La Bixiyey")}</th>
                   <th className="text-end">{t("Lama Bixin")}</th>
+                  <th className="text-end">{t("Isku Dar")}</th>
                 </tr>
               </thead>
               <tbody>
@@ -103,6 +104,7 @@ const Total = () => {
                     <td className="text-end text-ink/70 text-xs">{m.future || m.idle ? "-" : t("{count} nooc", { count: m.expenseUnpaid.count })}</td>
                     <td className="text-end text-success font-medium border-s border-line">{formatMoney(m.paid)}</td>
                     <td className={`text-end ${m.unpaid > 0 ? "text-danger font-medium" : "text-ink/50"}`}>{formatMoney(m.unpaid)}</td>
+                    <td className="text-end font-semibold">{formatMoney(m.paid + m.unpaid)}</td>
                   </tr>
                 ))}
                 <tr className="font-semibold">
@@ -112,6 +114,7 @@ const Total = () => {
                   <td></td>
                   <td className="text-end text-success border-s border-line">{formatMoney(data.totals.paid)}</td>
                   <td className="text-end text-danger">{formatMoney(data.totals.unpaid)}</td>
+                  <td className="text-end">{formatMoney(data.totals.paid + data.totals.unpaid)}</td>
                 </tr>
               </tbody>
             </table>

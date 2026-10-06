@@ -214,6 +214,7 @@ export default {
   "Internet & Telefoon": "الإنترنت والهاتف",
   "Invoice": "فاتورة",
   "Invoice/Screenshot (PNG/JPG)": "فاتورة/لقطة شاشة (PNG/JPG)",
+  "Isku Dar": "المجموع",
   "Isku day badan oo khaldan. Akoonka waa la xiray {minutes} daqiiqo. Fadlan dib isku day markay dhamaato.": "محاولات خاطئة كثيرة. تم قفل الحساب لمدة {minutes} دقيقة. يرجى المحاولة مجددًا بعد انتهائها.",
   "Isticmaalaha lama helin.": "لم يتم العثور على المستخدم.",
   "Isticmaalaha waa la tirtiray.": "تم حذف المستخدم.",
