@@ -19,7 +19,7 @@ const Payments = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-serif">{t("Lacag Bixinta")}</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t("Lacag Bixinta")}</h2>
         <Link to="/payments/new" className="btn-primary">{t("+ Lacag Bixin Cusub")}</Link>
       </div>
 

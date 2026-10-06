@@ -154,7 +154,7 @@ const Parents = () => {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-serif">{t("Waalidiinta")}</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t("Waalidiinta")}</h2>
           <p className="text-xs text-ink/50 mt-0.5">
             {t("Lacagta hoos ku qoran waa tii sanadka")} <span className="font-medium">{selectedYearName || t("la doortay")}</span> {t("kaliya. Si aad u aragto wadarta dhammaan sannadaha, eeg")} <Link to="/reports/parents-summary" className="text-link hover:underline">{t("Wadarta Waalidiinta")}</Link>.
           </p>

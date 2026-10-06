@@ -21,7 +21,7 @@ const Salaries = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-serif">
+        <h2 className="text-2xl font-bold tracking-tight">
           {t("Mushaharka")}{tab === "payroll" ? ` — ${monthLabel(month)}` : ""}
         </h2>
         {tab === "payroll" && <MonthBar month={month} onChange={setMonth} />}

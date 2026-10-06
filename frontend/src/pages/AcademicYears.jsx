@@ -81,7 +81,7 @@ const AcademicYears = () => {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-serif">{t("Sanad Dugsiyeedka (Academic Years)")}</h2>
+      <h2 className="text-2xl font-bold tracking-tight">{t("Sanad Dugsiyeedka (Academic Years)")}</h2>
 
       <form onSubmit={handleCreate} className="card flex items-end gap-3">
         {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}

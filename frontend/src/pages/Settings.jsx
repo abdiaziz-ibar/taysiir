@@ -32,7 +32,7 @@ const Settings = () => {
 
   return (
     <div className="max-w-md space-y-5">
-      <h2 className="text-xl font-serif">{t("Dejinta (Settings)")}</h2>
+      <h2 className="text-2xl font-bold tracking-tight">{t("Dejinta (Settings)")}</h2>
 
       <div className="card space-y-1">
         <p className="text-sm text-ink/50">{t("Magaca")}</p>

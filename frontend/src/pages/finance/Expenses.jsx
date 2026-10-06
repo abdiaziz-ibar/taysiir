@@ -156,7 +156,7 @@ const Expenses = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-serif">
+        <h2 className="text-2xl font-bold tracking-tight">
           {t("Qarashaadka")} {tab === "list" ? (month ? `— ${monthLabel(month)}` : t("— Dhammaan")) : ""}
         </h2>
         {tab === "list" && (
@@ -285,9 +285,9 @@ const Expenses = () => {
         <>
           {month && (
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <StatCard label={t("Wadarta Qarashaadka")} value={formatMoney(data.total)} accent="text-danger" icon={TrendingDown} iconBg="bg-danger/10" iconColor="text-danger" />
-              <StatCard label={t("Noocyada La Bixiyey")} value={`${paidRegular} / ${REGULAR.length}`} accent="text-success" icon={CheckCircle2} iconBg="bg-success/10" iconColor="text-success" />
-              <StatCard label={t("Lama Bixin")} value={String(REGULAR.length - paidRegular)} accent={REGULAR.length - paidRegular > 0 ? "text-danger" : ""} icon={AlertCircle} iconBg="bg-amber/10" iconColor="text-amber" />
+              <StatCard tone="blue" label={t("Wadarta Qarashaadka")} value={formatMoney(data.total)} icon={TrendingDown} />
+              <StatCard tone="teal" label={t("Noocyada La Bixiyey")} value={`${paidRegular} / ${REGULAR.length}`} icon={CheckCircle2} />
+              <StatCard tone="pink" label={t("Lama Bixin")} value={String(REGULAR.length - paidRegular)} icon={AlertCircle} />
             </div>
           )}
           {showChecklist && <ExpenseChecklist expenses={data.expenses} known={data.known || []} options={CATEGORIES} onPay={openNew} onEdit={openEdit} onDelete={setDeleteTarget} />}

@@ -17,20 +17,20 @@ const MonthlyReport = () => {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-serif">{t("Warbixinta Bilaha")} {yearName ? `— ${yearName}` : ""}</h2>
+      <h2 className="text-2xl font-bold tracking-tight">{t("Warbixinta Bilaha")} {yearName ? `— ${yearName}` : ""}</h2>
 
       <div className="card">
         <ResponsiveContainer width="100%" height={280}>
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E7E5E0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E3E8EC" />
             <XAxis dataKey="month" tickFormatter={(v) => t(v)} tick={{ fontSize: 12, fill: "#6B7280" }} />
             <YAxis tick={{ fontSize: 12, fill: "#6B7280" }} />
             <Tooltip labelFormatter={(l) => t(l)}
               formatter={(v) => formatMoney(v)}
-              contentStyle={{ background: "#FFFFFF", border: "1px solid #E7E5E0", borderRadius: 6, color: "#14181F" }}
-              cursor={{ stroke: "#E7E5E0" }}
+              contentStyle={{ background: "#FFFFFF", border: "1px solid #E3E8EC", borderRadius: 6, color: "#14181F" }}
+              cursor={{ stroke: "#E3E8EC" }}
             />
-            <Line type="monotone" dataKey="totalPaid" stroke="#1F3A5F" strokeWidth={2} dot={{ r: 3, fill: "#1F3A5F" }} />
+            <Line type="monotone" dataKey="totalPaid" stroke="#2563EB" strokeWidth={2} dot={{ r: 3, fill: "#2563EB" }} />
           </LineChart>
         </ResponsiveContainer>
       </div>

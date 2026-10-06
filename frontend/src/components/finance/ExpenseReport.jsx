@@ -46,11 +46,11 @@ const ExpenseReport = () => {
           <div className="card">
             <ResponsiveContainer width="100%" height={260}>
               <BarChart data={data.months}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E7E5E0" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E3E8EC" />
                 <XAxis dataKey="month" tickFormatter={(v) => t(v)} tick={{ fontSize: 12, fill: "#6B7280" }} />
                 <YAxis tick={{ fontSize: 12, fill: "#6B7280" }} />
-                <Tooltip labelFormatter={(l) => t(l)} formatter={(v) => [formatMoney(v), t("Qarashaadka")]} contentStyle={{ background: "#FFFFFF", border: "1px solid #E7E5E0", borderRadius: 6, color: "#14181F" }} cursor={{ fill: "#F5F5F4" }} />
-                <Bar isAnimationActive={false} dataKey="expenses" fill="#C98A2C" radius={[3, 3, 0, 0]} />
+                <Tooltip labelFormatter={(l) => t(l)} formatter={(v) => [formatMoney(v), t("Qarashaadka")]} contentStyle={{ background: "#FFFFFF", border: "1px solid #E3E8EC", borderRadius: 6, color: "#14181F" }} cursor={{ fill: "#F5F5F4" }} />
+                <Bar isAnimationActive={false} dataKey="expenses" fill="#10B981" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -67,7 +67,7 @@ const ExpenseReport = () => {
                 </thead>
                 <tbody>
                   {data.months.map((m) => (
-                    <tr key={m.period} className={m.future ? "opacity-40" : ""}>
+                    <tr key={m.period} className={m.idle || (m.future && m.paid === 0) ? "opacity-40" : ""}>
                       <td>{t(m.month)}</td>
                       <td className="text-end">{formatMoney(m.expenses)}</td>
                     </tr>

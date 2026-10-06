@@ -85,7 +85,7 @@ const ParentsSummaryReport = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-serif">{t("Wadarta Lacagta Waalidiinta — Dhammaan Sannadaha")}</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t("Wadarta Lacagta Waalidiinta — Dhammaan Sannadaha")}</h2>
         <button onClick={handleExport} className="btn-secondary text-sm">{t("⬇ Soo Deji Excel")}</button>
       </div>
 

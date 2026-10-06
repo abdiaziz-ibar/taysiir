@@ -33,7 +33,7 @@ const YearlyReport = () => {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-serif">{t("Warbixinta Sanad Dugsiyeedka —")} {data.academicYear}</h2>
+      <h2 className="text-2xl font-bold tracking-tight">{t("Warbixinta Sanad Dugsiyeedka —")} {data.academicYear}</h2>
 
       <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         <StatCard label={t("Waalidiinta")} value={data.totalParents} icon={Users} iconBg="bg-navy/10" iconColor="text-navy" />
@@ -46,17 +46,17 @@ const YearlyReport = () => {
       <div className="card">
         <ResponsiveContainer width="100%" height={300}>
           <BarChart data={data.monthly}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#E7E5E0" />
+            <CartesianGrid strokeDasharray="3 3" stroke="#E3E8EC" />
             <XAxis dataKey="month" tickFormatter={(v) => t(v)} tick={{ fontSize: 12, fill: "#6B7280" }} />
             <YAxis tick={{ fontSize: 12, fill: "#6B7280" }} />
             <Tooltip labelFormatter={(l) => t(l)}
               formatter={(v) => formatMoney(v)}
-              contentStyle={{ background: "#FFFFFF", border: "1px solid #E7E5E0", borderRadius: 6, color: "#14181F" }}
+              contentStyle={{ background: "#FFFFFF", border: "1px solid #E3E8EC", borderRadius: 6, color: "#14181F" }}
               cursor={{ fill: "rgba(31,58,95,0.06)" }}
             />
             <Legend wrapperStyle={{ color: "#6B7280" }} />
-            <Bar dataKey="paid" name={t("Paid")} fill="#1F3A5F" radius={[3, 3, 0, 0]} />
-            <Bar dataKey="balance" name={t("Balance")} fill="#C98A2C" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="paid" name={t("Paid")} fill="#2563EB" radius={[3, 3, 0, 0]} />
+            <Bar dataKey="balance" name={t("Balance")} fill="#10B981" radius={[3, 3, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

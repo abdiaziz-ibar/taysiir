@@ -87,7 +87,7 @@ const Employees = () => {
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 className="text-xl font-serif">{t("Shaqaalaha & Macalimiinta")}</h2>
+          <h2 className="text-2xl font-bold tracking-tight">{t("Shaqaalaha & Macalimiinta")}</h2>
           <p className="text-sm text-ink/50 mt-0.5">
             {employees.length} {t("diiwaan · Mushaharka bishii (Active):")} <span className="text-ink">{formatMoney(payroll)}</span>
           </p>

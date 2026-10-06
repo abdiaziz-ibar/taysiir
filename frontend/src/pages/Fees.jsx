@@ -16,7 +16,7 @@ const Fees = () => {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-serif">{t("Lacagaha School-ka (Fees)")}</h2>
+      <h2 className="text-2xl font-bold tracking-tight">{t("Lacagaha School-ka (Fees)")}</h2>
       <div className="card overflow-x-auto">
         <table className="table-base">
           <thead>

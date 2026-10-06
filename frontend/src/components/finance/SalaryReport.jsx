@@ -48,13 +48,13 @@ const SalaryReport = () => {
           <div className="card">
             <ResponsiveContainer width="100%" height={280}>
               <BarChart data={data.months.map((m) => ({ month: m.month, teachers: m.teachers.paid, staff: m.staff.paid }))}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#E7E5E0" />
+                <CartesianGrid strokeDasharray="3 3" stroke="#E3E8EC" />
                 <XAxis dataKey="month" tickFormatter={(v) => t(v)} tick={{ fontSize: 12, fill: "#6B7280" }} />
                 <YAxis tick={{ fontSize: 12, fill: "#6B7280" }} />
-                <Tooltip labelFormatter={(l) => t(l)} formatter={(v) => formatMoney(v)} contentStyle={{ background: "#FFFFFF", border: "1px solid #E7E5E0", borderRadius: 6, color: "#14181F" }} cursor={{ fill: "#F5F5F4" }} />
+                <Tooltip labelFormatter={(l) => t(l)} formatter={(v) => formatMoney(v)} contentStyle={{ background: "#FFFFFF", border: "1px solid #E3E8EC", borderRadius: 6, color: "#14181F" }} cursor={{ fill: "#F5F5F4" }} />
                 <Legend />
-                <Bar isAnimationActive={false} dataKey="teachers" stackId="s" name={t("Macalimiinta")} fill="#1F3A5F" />
-                <Bar isAnimationActive={false} dataKey="staff" stackId="s" name={t("Shaqaale")} fill="#2F7A4D" radius={[3, 3, 0, 0]} />
+                <Bar isAnimationActive={false} dataKey="teachers" stackId="s" name={t("Macalimiinta")} fill="#2563EB" />
+                <Bar isAnimationActive={false} dataKey="staff" stackId="s" name={t("Shaqaale")} fill="#10B981" radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -73,7 +73,7 @@ const SalaryReport = () => {
               </thead>
               <tbody>
                 {data.months.map((m) => (
-                  <tr key={m.period} className={m.future ? "opacity-40" : ""}>
+                  <tr key={m.period} className={m.idle || (m.future && m.paid === 0) ? "opacity-40" : ""}>
                     <td>{t(m.month)}</td>
                     <td className="text-end">{formatMoney(m.teachers.paid)}</td>
                     <td className="text-end">{formatMoney(m.staff.paid)}</td>

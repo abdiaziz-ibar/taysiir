@@ -76,7 +76,7 @@ const PaymentProofs = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-serif flex items-center gap-2">
+        <h2 className="text-2xl font-bold tracking-tight flex items-center gap-2">
           <Receipt size={20} className="text-navy" />
           {t("Lacag Bixinta & Cabashooyinka")}
         </h2>

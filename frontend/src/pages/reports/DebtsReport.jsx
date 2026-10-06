@@ -36,7 +36,7 @@ const DebtsReport = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-serif">{t("Warbixinta Deymaha")} {yearName ? `— ${yearName}` : ""}</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t("Warbixinta Deymaha")} {yearName ? `— ${yearName}` : ""}</h2>
         <div className="flex gap-3 print:hidden">
           <button onClick={handleExport} className="btn-secondary">{t("⬇ Soo Deji Excel")}</button>
           <button onClick={handlePrint} className="btn-secondary">{t("Print")}</button>

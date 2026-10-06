@@ -268,6 +268,7 @@ export default {
   "Ma lihid ogolaanshaha (permission) tallaabadan.": "You don't have permission for this action.",
   "Maaliyadda": "Finance",
   "Maaliyadda ·": "Finance ·",
+  "Maamul": "Manage",
   "Maamul Noocyada": "Manage Categories",
   "Maamul Noocyada Qarashaadka": "Manage Expense Categories",
   "Maamulka": "Management",

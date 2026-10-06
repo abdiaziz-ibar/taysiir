@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { GraduationCap, Users, Receipt, Wallet, AlertCircle, ChevronRight } from "lucide-react";
 import api from "../../api/financeAxios";
 import MonthBar from "../../components/finance/MonthBar";
+import StatCard from "../../components/StatCard";
 import { formatMoney } from "../../utils/format";
 import { currentMonth, monthLabel } from "../../utils/finance";
 import { t } from "../../i18n";
@@ -77,7 +78,7 @@ const Dashboard = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-serif">{t("Dashboard")} — {monthLabel(month)}</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t("Dashboard")} — {monthLabel(month)}</h2>
         <MonthBar month={month} onChange={setMonth} />
       </div>
 
@@ -86,40 +87,16 @@ const Dashboard = () => {
       ) : (
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-            <div className="card bg-navy text-white border-navy">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase tracking-wide text-white/70">{t("Wadarta Bisha Baxday")}</p>
-                <span className="w-8 h-8 rounded-full bg-white/15 flex items-center justify-center shrink-0"><Wallet size={16} className="text-white" /></span>
-              </div>
-              <p className="text-2xl font-serif">{formatMoney(m.totals.paid)}</p>
-              <p className="text-xs text-white/70 mt-1">{t("Mushaharka + qarashaadka")}</p>
-            </div>
-            <div className="card">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase tracking-wide text-ink/50">{t("Mushaharka La Bixiyey")}</p>
-                <span className="w-8 h-8 rounded-full bg-navy/10 flex items-center justify-center shrink-0"><GraduationCap size={16} className="text-navy" /></span>
-              </div>
-              <p className="text-2xl font-serif">{formatMoney(m.teachers.paid + m.staff.paid)}</p>
-              <p className="text-xs text-ink/50 mt-1">{t("Mushaharka: {amount}", { amount: formatMoney(m.totals.salaryDue) })}</p>
-            </div>
-            <div className="card">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase tracking-wide text-ink/50">{t("Qarashaadka")}</p>
-                <span className="w-8 h-8 rounded-full bg-danger/10 flex items-center justify-center shrink-0"><Receipt size={16} className="text-danger" /></span>
-              </div>
-              <p className="text-2xl font-serif">{formatMoney(m.expenses.total)}</p>
-              <p className="text-xs text-ink/50 mt-1">{t("{count} kharash", { count: m.expenses.count })}</p>
-            </div>
-            <div className="card">
-              <div className="flex items-center justify-between mb-2">
-                <p className="text-xs uppercase tracking-wide text-ink/50">{t("Lama Bixin")}</p>
-                <span className="w-8 h-8 rounded-full bg-amber/10 flex items-center justify-center shrink-0"><AlertCircle size={16} className="text-amber" /></span>
-              </div>
-              <p className={`text-2xl font-serif ${m.totals.salaryRemaining > 0 ? "text-danger" : "text-success"}`}>{formatMoney(m.totals.salaryRemaining)}</p>
-              <p className="text-xs text-ink/50 mt-1">
-                {t("Mushahar dhiman")} · {t("Qarashaad lama bixin: {count} nooc", { count: m.expenses.unpaid.count })}
-              </p>
-            </div>
+            <StatCard tone="purple" label={t("Wadarta Bisha Baxday")} value={formatMoney(m.totals.paid)} icon={Wallet} footer={t("Mushaharka + qarashaadka")} />
+            <StatCard tone="teal" label={t("Mushaharka La Bixiyey")} value={formatMoney(m.teachers.paid + m.staff.paid)} icon={GraduationCap} footer={t("Mushaharka: {amount}", { amount: formatMoney(m.totals.salaryDue) })} />
+            <StatCard tone="blue" label={t("Qarashaadka")} value={formatMoney(m.expenses.total)} icon={Receipt} footer={t("{count} kharash", { count: m.expenses.count })} />
+            <StatCard
+              tone="pink"
+              label={t("Mushahar Dhiman")}
+              value={formatMoney(m.totals.salaryRemaining)}
+              icon={AlertCircle}
+              footer={t("Qarashaad lama bixin: {count} nooc", { count: m.expenses.unpaid.count })}
+            />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
@@ -174,14 +151,14 @@ const Dashboard = () => {
             ) : (
               <ResponsiveContainer width="100%" height={260}>
                 <BarChart data={year.months.map((x) => ({ month: x.month, salaries: x.salaryPaid, expenses: x.expenses, unpaid: x.unpaid }))}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#E7E5E0" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#E3E8EC" />
                   <XAxis dataKey="month" tickFormatter={(v) => t(v)} tick={{ fontSize: 12, fill: "#6B7280" }} />
                   <YAxis tick={{ fontSize: 12, fill: "#6B7280" }} />
-                  <Tooltip labelFormatter={(l) => t(l)} formatter={(v) => formatMoney(v)} contentStyle={{ background: "#FFFFFF", border: "1px solid #E7E5E0", borderRadius: 6, color: "#14181F" }} cursor={{ fill: "#F5F5F4" }} />
+                  <Tooltip labelFormatter={(l) => t(l)} formatter={(v) => formatMoney(v)} contentStyle={{ background: "#FFFFFF", border: "1px solid #E3E8EC", borderRadius: 6, color: "#14181F" }} cursor={{ fill: "#F5F5F4" }} />
                   <Legend />
-                  <Bar isAnimationActive={false} dataKey="salaries" stackId="paid" name={t("Mushaharka")} fill="#1F3A5F" />
-                  <Bar isAnimationActive={false} dataKey="expenses" stackId="paid" name={t("Qarashaadka")} fill="#C98A2C" radius={[3, 3, 0, 0]} />
-                  <Bar isAnimationActive={false} dataKey="unpaid" name={t("Lama Bixin")} fill="#C0392B" radius={[3, 3, 0, 0]} />
+                  <Bar isAnimationActive={false} dataKey="salaries" stackId="paid" name={t("Mushaharka")} fill="#2563EB" />
+                  <Bar isAnimationActive={false} dataKey="expenses" stackId="paid" name={t("Qarashaadka")} fill="#10B981" radius={[3, 3, 0, 0]} />
+                  <Bar isAnimationActive={false} dataKey="unpaid" name={t("Lama Bixin")} fill="#F43F5E" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}

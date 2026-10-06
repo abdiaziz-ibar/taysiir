@@ -16,7 +16,7 @@ const Debts = () => {
 
   return (
     <div className="space-y-5">
-      <h2 className="text-xl font-serif">{t("Waalidiinta Deynta Lagu Leeyahay")}</h2>
+      <h2 className="text-2xl font-bold tracking-tight">{t("Waalidiinta Deynta Lagu Leeyahay")}</h2>
 
       <div className="card overflow-x-auto">
         <table className="table-base">

@@ -80,7 +80,7 @@ const PaymentNew = () => {
 
   return (
     <div className="max-w-2xl space-y-5">
-      <h2 className="text-xl font-serif">{t("Lacag Bixin Cusub")}</h2>
+      <h2 className="text-2xl font-bold tracking-tight">{t("Lacag Bixin Cusub")}</h2>
 
       <form onSubmit={handleSubmit} className="card space-y-4">
         {error && <div className="bg-danger/10 text-danger text-sm rounded-md px-3 py-2">{error}</div>}

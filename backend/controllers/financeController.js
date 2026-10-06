@@ -2,6 +2,7 @@ const prisma = require("../lib/prisma");
 const { monthKey, currentMonthKey, monthsBetween, monthStart, shiftMonth, recurringRowsFor } = require("../utils/recurring");
 const { salaryRowsFor } = require("./salaryController");
 const { inactiveNames } = require("./expenseCategoryController");
+const financeStartMonth = require("../utils/financeStart");
 
 // Same Sep→Aug order the other reports use.
 const MONTHS = [
@@ -179,21 +180,28 @@ const getYearOverview = async (req, res, next) => {
     ]);
 
     const hidden = await inactiveNames();
+    const start = await financeStartMonth();
     const byCat = {};
     const months = [];
     for (let i = 0; i < periods.length; i += 1) {
       const period = periods[i];
       const future = period > now;
-      const empty = { count: 0, paidCount: 0, due: 0, paid: 0, remaining: 0 };
-      let teachers = empty;
-      let staff = empty;
-      let expenseRows = [];
+      const idle = !start || period < start; // before any finance data existed
+      let teachers;
+      let staff;
+      let expenseRows;
       let unpaidExp = { count: 0, categories: [] };
-      if (!future) {
-        const rows = await salaryRowsFor(period);
-        teachers = salaryGroup(rows.filter((r) => r.employee.type === "teacher"));
-        staff = salaryGroup(rows.filter((r) => r.employee.type !== "teacher"));
-        const own = concrete.filter((e) => monthKey(e.expenseDate) === period);
+      const rows = await salaryRowsFor(period);
+      const own = concrete.filter((e) => monthKey(e.expenseDate) === period);
+      teachers = salaryGroup(rows.filter((r) => r.employee.type === "teacher"));
+      staff = salaryGroup(rows.filter((r) => r.employee.type !== "teacher"));
+      if (idle) {
+        expenseRows = [];
+      } else if (future) {
+        // Paid in advance counts as paid; nothing is due or unpaid before the month starts.
+        [teachers, staff] = [teachers, staff].map((g) => ({ ...g, due: g.paid, remaining: 0 }));
+        expenseRows = own;
+      } else {
         expenseRows = [...own, ...recurringRowsFor(period, templates, own)];
         unpaidExp = unpaidExpenses(period, concrete, templates, hidden);
       }
@@ -205,6 +213,7 @@ const getYearOverview = async (req, res, next) => {
         period,
         month: MONTHS[i],
         future,
+        idle,
         teachers,
         staff,
         salaryDue: teachers.due + staff.due,

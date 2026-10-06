@@ -1,5 +1,6 @@
 const prisma = require("../lib/prisma");
 const nextVoucherNumber = require("../utils/voucherNumber");
+const financeStartMonth = require("../utils/financeStart");
 const { serializeEmployee, serializeSalaryPayment } = require("../utils/serialize");
 
 const PERIOD_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
@@ -28,6 +29,10 @@ const statusFor = (due, paid) => {
 // The payroll sheet rows for one month: every active employee (plus any inactive
 // one who was still paid that month) with what's due, paid and left.
 const salaryRowsFor = async (period) => {
+  // Before the first school year with any data nothing is owed, so the sheet stays empty.
+  const start = await financeStartMonth();
+  if (!start || period < start) return [];
+
   const payments = await prisma.salaryPayment.findMany({
     where: { period },
     orderBy: { createdAt: "asc" },

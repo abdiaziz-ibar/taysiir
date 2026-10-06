@@ -42,7 +42,7 @@ const AllYearsReport = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-serif">{t("Dhammaan Sannadaha — Lacagta Guud")}</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t("Dhammaan Sannadaha — Lacagta Guud")}</h2>
         <button onClick={handleExport} className="btn-secondary text-sm">{t("⬇ Soo Deji Excel")}</button>
       </div>
 

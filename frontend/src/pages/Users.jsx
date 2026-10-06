@@ -77,7 +77,7 @@ const Users = () => {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between">
-        <h2 className="text-xl font-serif">{t("Isticmaalayaasha")}</h2>
+        <h2 className="text-2xl font-bold tracking-tight">{t("Isticmaalayaasha")}</h2>
         <button className="btn-primary" onClick={() => setShowForm((v) => !v)}>
           {showForm ? t("Jooji") : t("+ Isticmaale Cusub")}
         </button>

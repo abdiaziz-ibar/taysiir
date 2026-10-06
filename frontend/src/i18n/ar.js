@@ -310,6 +310,7 @@ export default {
   "Ma lihid ogolaanshaha (permission) tallaabadan.": "ليس لديك إذن لتنفيذ هذا الإجراء.",
   "Maaliyadda": "المالية",
   "Maaliyadda ·": "المالية ·",
+  "Maamul": "إدارة",
   "Maamul Noocyada": "إدارة الأنواع",
   "Maamul Noocyada Qarashaadka": "إدارة أنواع المصروفات",
   "Maamulka": "الإدارة",
