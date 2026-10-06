@@ -25,12 +25,13 @@ const Total = () => {
     const headers = [
       "Bil",
       "Mushaharka La Rabay", "Mushaharka La Bixiyey", "Mushaharka Lama Bixin",
-      "Qarashaadka La Bixiyey", "Qarashaadka Lama Bixin (nooc)",
-      "Wadarta La Bixiyey", "Mushaharka Lama Bixin", "Isku Dar",
+      "Qarashaadka La Rabay (qiyaas)", "Qarashaadka La Bixiyey", "Qarashaadka Lama Bixin (qiyaas)",
+      "Wadarta La Rabay", "Wadarta La Bixiyey", "Wadarta Lama Bixin", "Isku Dar",
     ];
-    const rows = data.months.map((m) => [m.month, m.salaryDue, m.salaryPaid, m.salaryRemaining, m.expenses, m.expenseUnpaid.count, m.paid, m.unpaid, m.paid + m.unpaid]);
+    const line = (m) => [m.salaryDue, m.salaryPaid, m.salaryRemaining, m.expenseDue, m.expenses, m.expenseUnpaid.estimate, m.due, m.paid, m.unpaid, m.paid + m.unpaid];
+    const rows = data.months.map((m) => [m.month, ...line(m)]);
     const tot = data.totals;
-    rows.push(["Wadarta", tot.salaryDue, tot.salaryPaid, tot.salaryRemaining, tot.expenses, "", tot.paid, tot.unpaid, tot.paid + tot.unpaid]);
+    rows.push(["Wadarta", tot.salaryDue, tot.salaryPaid, tot.salaryRemaining, tot.expenseDue, tot.expenses, tot.expenseUnpaid, tot.due, tot.paid, tot.unpaid, tot.paid + tot.unpaid]);
     downloadExcel(`wadarta-maaliyadda-${data.schoolYear}.xlsx`, headers, rows);
   };
 
@@ -57,7 +58,7 @@ const Total = () => {
             <StatCard tone="purple" label={t("Wadarta La Bixiyey")} value={formatMoney(data.totals.paid)} icon={Wallet} footer={t("Mushaharka + qarashaadka")} />
             <StatCard tone="teal" label={t("Mushaharka La Bixiyey")} value={formatMoney(data.totals.salaryPaid)} icon={Banknote} />
             <StatCard tone="blue" label={t("Qarashaadka La Bixiyey")} value={formatMoney(data.totals.expenses)} icon={TrendingDown} />
-            <StatCard tone="pink" label={t("Mushaharka Lama Bixin")} value={formatMoney(data.totals.unpaid)} icon={AlertCircle} footer={t("Qarashaad lama bixin: {count} nooc", { count: data.totals.expenseUnpaidCount })} />
+            <StatCard tone="pink" label={t("Mushaharka Lama Bixin")} value={formatMoney(data.totals.salaryRemaining)} icon={AlertCircle} footer={t("Qarashaad lama bixin: {count} nooc", { count: data.totals.expenseUnpaidCount })} />
           </div>
 
           <div className="card">
@@ -81,16 +82,18 @@ const Total = () => {
                 <tr className="text-center">
                   <th rowSpan={2}>{t("Bil")}</th>
                   <th colSpan={3} className="!text-center border-s border-line">{t("Mushaharka")}</th>
-                  <th colSpan={2} className="!text-center border-s border-line">{t("Qarashaadka")}</th>
-                  <th colSpan={3} className="!text-center border-s border-line">{t("Wadarta")}</th>
+                  <th colSpan={3} className="!text-center border-s border-line">{t("Qarashaadka")}</th>
+                  <th colSpan={4} className="!text-center border-s border-line">{t("Wadarta")}</th>
                 </tr>
                 <tr>
                   <th className="text-end border-s border-line">{t("La Rabay")}</th>
                   <th className="text-end">{t("La Bixiyey")}</th>
                   <th className="text-end">{t("Lama Bixin")}</th>
-                  <th className="text-end border-s border-line">{t("La Bixiyey")}</th>
+                  <th className="text-end border-s border-line">{t("La Rabay")}</th>
+                  <th className="text-end">{t("La Bixiyey")}</th>
                   <th className="text-end">{t("Lama Bixin")}</th>
-                  <th className="text-end border-s border-line">{t("La Bixiyey")}</th>
+                  <th className="text-end border-s border-line">{t("La Rabay")}</th>
+                  <th className="text-end">{t("La Bixiyey")}</th>
                   <th className="text-end">{t("Lama Bixin")}</th>
                   <th className="text-end">{t("Isku Dar")}</th>
                 </tr>
@@ -100,26 +103,37 @@ const Total = () => {
                   <tr key={m.period} className={`${m.idle || (m.future && m.paid === 0) ? "opacity-40" : ""} ${m.period === data.currentPeriod ? "bg-navy/5" : ""}`}>
                     <td>{t(m.month)}</td>
                     <Cells due={m.salaryDue} paid={m.salaryPaid} unpaid={m.salaryRemaining} />
-                    <td className="text-end text-success border-s border-line">{formatMoney(m.expenses)}</td>
-                    <td className="text-end text-ink/70 text-xs">{m.future || m.idle ? "-" : t("{count} nooc", { count: m.expenseUnpaid.count })}</td>
-                    <td className="text-end text-success font-medium border-s border-line">{formatMoney(m.paid)}</td>
-                    <td className={`text-end ${m.unpaid > 0 ? "text-danger font-medium" : "text-ink/50"}`}>{formatMoney(m.unpaid)}</td>
+                    <td className="text-end border-s border-line">{m.expenseUnpaid.estimate > 0 ? "~" : ""}{formatMoney(m.expenseDue)}</td>
+                    <td className="text-end text-success">{formatMoney(m.expenses)}</td>
+                    <td className="text-end text-ink/70">
+                      {m.future || m.idle ? "-" : (
+                        <>
+                          {m.expenseUnpaid.estimate > 0 && <span>~{formatMoney(m.expenseUnpaid.estimate)} · </span>}
+                          <span className="text-xs">{t("{count} nooc", { count: m.expenseUnpaid.count })}</span>
+                        </>
+                      )}
+                    </td>
+                    <td className="text-end border-s border-line">{m.expenseUnpaid.estimate > 0 ? "~" : ""}{formatMoney(m.due)}</td>
+                    <td className="text-end text-success font-medium">{formatMoney(m.paid)}</td>
+                    <td className={`text-end ${m.unpaid > 0 ? "text-danger font-medium" : "text-ink/50"}`}>{m.expenseUnpaid.estimate > 0 ? "~" : ""}{formatMoney(m.unpaid)}</td>
                     <td className="text-end font-semibold">{formatMoney(m.paid + m.unpaid)}</td>
                   </tr>
                 ))}
                 <tr className="font-semibold">
                   <td>{t("Wadarta")}</td>
                   <Cells due={data.totals.salaryDue} paid={data.totals.salaryPaid} unpaid={data.totals.salaryRemaining} />
-                  <td className="text-end text-success border-s border-line">{formatMoney(data.totals.expenses)}</td>
-                  <td></td>
-                  <td className="text-end text-success border-s border-line">{formatMoney(data.totals.paid)}</td>
+                  <td className="text-end border-s border-line">~{formatMoney(data.totals.expenseDue)}</td>
+                  <td className="text-end text-success">{formatMoney(data.totals.expenses)}</td>
+                  <td className="text-end">~{formatMoney(data.totals.expenseUnpaid)}</td>
+                  <td className="text-end border-s border-line">~{formatMoney(data.totals.due)}</td>
+                  <td className="text-end text-success">{formatMoney(data.totals.paid)}</td>
                   <td className="text-end text-danger">{formatMoney(data.totals.unpaid)}</td>
                   <td className="text-end">{formatMoney(data.totals.paid + data.totals.unpaid)}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-          <p className="text-xs text-ink/50 flex items-center gap-1.5"><CheckCircle2 size={13} /> {t("Qarashaadka kale ma lahan lacag go'an oo la rabo, sidaas darteed waxaa la muujiyaa waxa la bixiyey iyo tirada noocyada aan weli la bixin. \"Lama Bixin\" ee wadarta waa mushaharka.")}</p>
+          <p className="text-xs text-ink/50 flex items-center gap-1.5"><CheckCircle2 size={13} /> {t("Qarashaadka la rabay iyo lama bixin (~) waa qiyaas: nooc kasta oo bishaas aan la bixin wuxuu qiimo u qaadanayaa lacagtii ugu dambeysay ee nooca la bixiyey. Isku Dar = La Bixiyey + Lama Bixin.")}</p>
         </>
       )}
     </div>

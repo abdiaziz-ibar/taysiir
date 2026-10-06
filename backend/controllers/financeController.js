@@ -79,9 +79,16 @@ const getFinanceSummary = async (req, res, next) => {
 };
 
 // The regular categories (not "Kale") used in an earlier month that have nothing recorded for `period`
-// (real or monthly-recurring). Only names and a count: what they would cost isn't known, so no amount is made up.
-// `concrete` is every real expense up to the end of the period.
+// (real or monthly-recurring), with a rough estimate of what they would cost: the last amount recorded for
+// each in an earlier month. `concrete` is every real expense up to the end of the period.
 const unpaidExpenses = (period, concrete, templates, hidden = new Set()) => {
+  const amountIn = (key, month) => {
+    const own = concrete.filter((e) => e.category.toLowerCase() === key && monthKey(e.expenseDate) === month);
+    if (own.length) return own.reduce((sum, e) => sum + e.amount, 0);
+    const rec = recurringRowsFor(month, templates, []).filter((r) => r.category.toLowerCase() === key);
+    return rec.length ? rec.reduce((sum, e) => sum + e.amount, 0) : null;
+  };
+
   const expected = new Map();
   concrete.forEach((e) => {
     if (e.category !== "Kale" && monthKey(e.expenseDate) < period) expected.set(e.category.toLowerCase(), e.category);
@@ -89,12 +96,21 @@ const unpaidExpenses = (period, concrete, templates, hidden = new Set()) => {
   templates.forEach((t) => {
     if (t.category !== "Kale" && t.startMonth < period) expected.set(t.category.toLowerCase(), t.category);
   });
-  const paidNow = new Set([
-    ...concrete.filter((e) => monthKey(e.expenseDate) === period).map((e) => e.category.toLowerCase()),
-    ...recurringRowsFor(period, templates, []).map((r) => r.category.toLowerCase()),
-  ]);
-  const categories = [...expected].filter(([key]) => !paidNow.has(key) && !hidden.has(key)).map(([, name]) => name);
-  return { count: categories.length, categories };
+
+  const categories = [];
+  let estimate = 0;
+  expected.forEach((name, key) => {
+    if (hidden.has(key) || amountIn(key, period) !== null) return;
+    categories.push(name);
+    for (let back = 1; back <= 24; back += 1) {
+      const known = amountIn(key, shiftMonth(period, -back));
+      if (known !== null) {
+        estimate += known;
+        break;
+      }
+    }
+  });
+  return { count: categories.length, estimate, categories };
 };
 
 const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
@@ -126,7 +142,7 @@ const getMonthOverview = async (req, res, next) => {
     ]);
     const expenses = [...concrete, ...recurringRowsFor(period, templates, concrete)];
     const history = await prisma.expense.findMany({ where: { expenseDate: { lt: monthStart(shiftMonth(period, 1)) } } });
-    const unpaidExp = period > currentMonthKey() ? { count: 0, categories: [] } : unpaidExpenses(period, history, templates, await inactiveNames());
+    const unpaidExp = period > currentMonthKey() ? { count: 0, estimate: 0, categories: [] } : unpaidExpenses(period, history, templates, await inactiveNames());
 
     const byCat = {};
     expenses.forEach((e) => {
@@ -151,7 +167,7 @@ const getMonthOverview = async (req, res, next) => {
         paid: teachers.paid + staff.paid + expensesTotal, // salaries paid + expenses
         salaryDue: teachers.due + staff.due,
         salaryRemaining: teachers.remaining + staff.remaining, // salaries still to be paid
-        unpaid: teachers.remaining + staff.remaining, // salaries still to pay (expenses have no fixed amount owed)
+        unpaid: teachers.remaining + staff.remaining + unpaidExp.estimate, // salaries still to pay + estimated unpaid expenses
       },
     });
   } catch (err) {
@@ -190,7 +206,7 @@ const getYearOverview = async (req, res, next) => {
       let teachers;
       let staff;
       let expenseRows;
-      let unpaidExp = { count: 0, categories: [] };
+      let unpaidExp = { count: 0, estimate: 0, categories: [] };
       const rows = await salaryRowsFor(period);
       const own = concrete.filter((e) => monthKey(e.expenseDate) === period);
       teachers = salaryGroup(rows.filter((r) => r.employee.type === "teacher"));
@@ -221,8 +237,10 @@ const getYearOverview = async (req, res, next) => {
         salaryRemaining: teachers.remaining + staff.remaining,
         expenses,
         expenseUnpaid: unpaidExp,
+        expenseDue: expenses + unpaidExp.estimate, // paid + a rough estimate of what is still unpaid
+        due: teachers.due + staff.due + expenses + unpaidExp.estimate,
         paid: teachers.paid + staff.paid + expenses,
-        unpaid: teachers.remaining + staff.remaining,
+        unpaid: teachers.remaining + staff.remaining + unpaidExp.estimate,
       });
     }
 
@@ -244,6 +262,9 @@ const getYearOverview = async (req, res, next) => {
         salaryRemaining: sum((m) => m.salaryRemaining),
         expenses: sum((m) => m.expenses),
         expenseUnpaidCount: sum((m) => m.expenseUnpaid.count),
+        expenseUnpaid: sum((m) => m.expenseUnpaid.estimate),
+        expenseDue: sum((m) => m.expenseDue),
+        due: sum((m) => m.due),
         paid: sum((m) => m.paid),
         unpaid: sum((m) => m.unpaid),
       },
