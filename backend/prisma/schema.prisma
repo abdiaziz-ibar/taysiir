@@ -147,6 +147,8 @@ model Employee {
   position      String? // e.g. "Macallinka Xisaabta", "Waardiye"
   monthlySalary Float    @default(0)
   status        String   @default("active") // "active" | "inactive"
+  startMonth    String? // "YYYY-MM" first month on the payroll; empty = from the beginning
+  endMonth      String? // "YYYY-MM" last month on the payroll; empty = still working
   notes         String?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt

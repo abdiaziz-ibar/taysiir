@@ -54,3 +54,9 @@ export const monthLabel = (period) => {
 export const formatSigned = (n) => (n < 0 ? `-${formatMoney(-n)}` : formatMoney(n));
 
 export const isValidDate = (s) => /^\d{4}-\d{2}-\d{2}$/.test(s) && !Number.isNaN(new Date(s).getTime());
+
+// School years run September → August, so a date before September belongs to the year that began last calendar year.
+export const currentStartYear = () => {
+  const now = new Date();
+  return now.getMonth() >= 8 ? now.getFullYear() : now.getFullYear() - 1;
+};

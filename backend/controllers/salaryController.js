@@ -38,10 +38,14 @@ const salaryRowsFor = async (period) => {
     orderBy: { createdAt: "asc" },
   });
   const paidIds = [...new Set(payments.map((p) => p.employeeId))];
-  const employees = await prisma.employee.findMany({
-    where: { OR: [{ status: "active" }, { id: { in: paidIds } }] },
-    orderBy: { employeeId: "asc" },
-  });
+  // On the payroll for this month: from startMonth (if set) up to endMonth; with no end month, only
+  // while active. Anyone paid for the month is always listed, so past months keep their history.
+  const everyone = await prisma.employee.findMany({ orderBy: { employeeId: "asc" } });
+  const employees = everyone.filter(
+    (e) =>
+      paidIds.includes(e.id) ||
+      ((!e.startMonth || e.startMonth <= period) && (e.endMonth ? period <= e.endMonth : e.status === "active"))
+  );
 
   return employees.map((employee) => {
     const own = payments.filter((p) => p.employeeId === employee.id);

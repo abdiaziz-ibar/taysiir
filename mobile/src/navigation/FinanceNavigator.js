@@ -23,7 +23,7 @@ const Tabs = () => {
       <Tab.Screen name="Home" component={FinanceHomeScreen} options={{ title: t("Guud"), tabBarIcon: icon("home") }} />
       <Tab.Screen name="Salaries" component={FinanceSalariesScreen} options={{ title: t("Mushaharka"), tabBarLabel: t("Mushahar"), tabBarIcon: icon("wallet") }} />
       <Tab.Screen name="Expenses" component={FinanceExpensesScreen} options={{ title: t("Qarashaadka"), tabBarLabel: t("Kharash"), tabBarIcon: icon("receipt") }} />
-      <Tab.Screen name="Report" component={FinanceReportScreen} options={{ title: t("Warbixin"), tabBarIcon: icon("stats-chart") }} />
+      <Tab.Screen name="Report" component={FinanceReportScreen} options={{ title: t("Wadarta"), tabBarIcon: icon("stats-chart") }} />
       <Tab.Screen name="Account" component={FinanceAccountScreen} options={{ title: t("Xisaabta"), tabBarIcon: icon("person-circle") }} />
     </Tab.Navigator>
   );

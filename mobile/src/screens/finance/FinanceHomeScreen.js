@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, RefreshControl } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import financeApi from "../../api/financeClient";
 import { FinanceHeader } from "../../components/FinanceUI";
-import { Loading, Card, SectionTitle, EmptyState } from "../../components/StaffUI";
+import { Loading, Card, SectionTitle, EmptyState, StatTile, Badge } from "../../components/StaffUI";
 import MonthNav from "../../components/MonthNav";
 import Icon from "../../components/Icon";
 import { formatMoney, formatDate } from "../../utils/format";
@@ -83,32 +82,12 @@ const FinanceHomeScreen = ({ navigation }) => {
         <ScrollView contentContainerStyle={styles.content} refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />} showsVerticalScrollIndicator={false}>
           <MonthNav period={month} onChange={setMonth} />
 
-          <LinearGradient colors={[COLORS.navy, COLORS.navyLight]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.hero}>
-            <Text style={styles.heroLabel}>{t("Wadarta Baxday bishan")}</Text>
-            <Text style={styles.heroAmount}>{formatMoney(overview.totals.paid)}</Text>
-            <View style={styles.miniRow}>
-              <View style={styles.mini}>
-                <Text style={styles.miniLabel}>{t("Macalimiinta")}</Text>
-                <Text style={styles.miniValue}>{formatMoney(overview.teachers.paid)}</Text>
-              </View>
-              <View style={styles.mini}>
-                <Text style={styles.miniLabel}>{t("Shaqaale")}</Text>
-                <Text style={styles.miniValue}>{formatMoney(overview.staff.paid)}</Text>
-              </View>
-              <View style={styles.mini}>
-                <Text style={styles.miniLabel}>{t("Qarashaadka")}</Text>
-                <Text style={styles.miniValue}>{formatMoney(overview.expenses.total)}</Text>
-              </View>
-            </View>
-            <View style={styles.remainRow}>
-              <Icon name={overview.totals.salaryRemaining > 0 ? "alert-circle" : "checkmark-circle"} size={16} color={overview.totals.salaryRemaining > 0 ? COLORS.amber : "rgba(255,255,255,0.85)"} />
-              <Text style={[styles.remainText, overview.totals.salaryRemaining > 0 && { color: COLORS.amber }]}>
-                {overview.totals.salaryRemaining > 0
-                  ? t("Mushahar dhiman: {amount}", { amount: formatMoney(overview.totals.salaryRemaining) })
-                  : t("Mushaharka oo dhan waa la bixiyey")}
-              </Text>
-            </View>
-          </LinearGradient>
+          <View style={styles.grid}>
+            <StatTile icon="wallet" label={t("Wadarta Bisha Baxday")} value={formatMoney(overview.totals.paid)} color="#7C3AED" note={t("Mushaharka + qarashaadka")} />
+            <StatTile icon="people" label={t("Mushaharka La Bixiyey")} value={formatMoney(overview.teachers.paid + overview.staff.paid)} color={COLORS.success} note={t("Mushaharka: {amount}", { amount: formatMoney(overview.totals.salaryDue) })} />
+            <StatTile icon="receipt" label={t("Qarashaadka")} value={formatMoney(overview.expenses.total)} color={COLORS.navy} note={t("{count} kharash", { count: overview.expenses.count })} />
+            <StatTile icon="alert-circle" label={t("Mushahar Dhiman")} value={formatMoney(overview.totals.salaryRemaining)} color={COLORS.danger} note={t("Qarashaad lama bixin: {count} nooc", { count: overview.expenses.unpaid.count })} />
+          </View>
 
           <Card>
             <View style={styles.payHead}>
@@ -154,7 +133,10 @@ const FinanceHomeScreen = ({ navigation }) => {
                     </Text>
                     <Text style={styles.recentSub}>{r.sub}</Text>
                   </View>
-                  <Text style={styles.recentAmount}>{formatMoney(r.amount)}</Text>
+                  <View style={{ alignItems: "flex-end", gap: 5 }}>
+                    <Text style={styles.recentAmount}>{formatMoney(r.amount)}</Text>
+                    <Badge text={t("La Bixiyey")} color={COLORS.success} />
+                  </View>
                 </View>
               ))}
             </Card>
@@ -168,7 +150,7 @@ const FinanceHomeScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   flex: { flex: 1, backgroundColor: COLORS.paper },
   content: { padding: 16, paddingBottom: 30 },
-  hero: { borderRadius: RADIUS.xl, padding: 20, marginTop: 14, marginBottom: 14, ...SHADOW.raised },
+  grid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "space-between", marginTop: 14 },
   heroLabel: { color: "rgba(255,255,255,0.72)", fontSize: 12, textTransform: "uppercase", letterSpacing: 0.8 },
   heroAmount: { color: "#fff", fontSize: 36, fontWeight: "800", marginTop: 4, marginBottom: 16 },
   miniRow: { flexDirection: "row", gap: 10 },

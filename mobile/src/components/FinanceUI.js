@@ -17,7 +17,7 @@ export const FinanceHeader = ({ title, actions = [], onBack }) => {
           {actions.map((a) => (
             <IconButton key={a.icon} name={a.icon} onPress={a.onPress} label={a.label} />
           ))}
-          <LanguageButton light />
+          <LanguageButton />
           <IconButton name="log-out-outline" onPress={financeLogout} label="Log out" />
         </>
       }

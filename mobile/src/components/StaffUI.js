@@ -11,7 +11,6 @@ import {
   Platform,
   ActivityIndicator,
 } from "react-native";
-import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
 import { useStaff } from "../context/StaffContext";
@@ -23,24 +22,17 @@ import { t } from "../i18n";
 
 // ---------------------------------------------------------------- header
 
-export const IconButton = ({ name, onPress, style, color = "#fff", size = 20, label }) => (
+export const IconButton = ({ name, onPress, style, color = COLORS.ink, size = 20, label }) => (
   <TouchableOpacity onPress={onPress} accessibilityLabel={label} activeOpacity={0.7} style={[styles.iconBtn, style]}>
     <Icon name={name} size={size} color={color} />
   </TouchableOpacity>
 );
 
-// The one header every screen uses: brand gradient, rounded bottom edge, safe-area aware.
+// The one header every screen uses: a flat white bar with the title, safe-area aware.
 export const AppHeader = ({ title, subtitle, onBack, actions, children }) => {
   const insets = useSafeAreaInsets();
   return (
-    <LinearGradient
-      colors={[COLORS.navyDark, COLORS.navy]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={[styles.header, { paddingTop: insets.top + 14 }]}
-    >
-      <View style={styles.decoA} pointerEvents="none" />
-      <View style={styles.decoB} pointerEvents="none" />
+    <View style={[styles.header, { paddingTop: insets.top + 12 }]}>
       <View style={styles.headerRow}>
         {onBack ? <IconButton name="chevron-back" onPress={onBack} label="Back" style={{ marginEnd: 12 }} /> : null}
         <View style={{ flex: 1 }}>
@@ -56,7 +48,7 @@ export const AppHeader = ({ title, subtitle, onBack, actions, children }) => {
         {actions ? <View style={styles.headerActions}>{actions}</View> : null}
       </View>
       {children}
-    </LinearGradient>
+    </View>
   );
 };
 
@@ -68,7 +60,7 @@ export const StaffHeader = ({ title }) => {
       subtitle={staff?.fullName}
       actions={
         <>
-          <LanguageButton light />
+          <LanguageButton />
           <IconButton name="log-out-outline" onPress={staffLogout} label="Log out" />
         </>
       }
@@ -226,18 +218,25 @@ export const InfoRow = ({ label, value }) =>
     </View>
   ) : null;
 
-// Big number tile with a tinted icon (dashboard grids).
-export const StatTile = ({ icon, label, value, color = COLORS.navy }) => (
+// Figure tile: a tinted icon beside the label, the big number below (and an optional small note).
+export const StatTile = ({ icon, label, value, color = COLORS.navy, note }) => (
   <View style={styles.tile}>
-    <View style={[styles.tileIcon, { backgroundColor: `${color}1A` }]}>
-      <Icon name={icon} size={18} color={color} />
+    <View style={styles.tileHead}>
+      <View style={[styles.tileIcon, { backgroundColor: `${color}1A` }]}>
+        <Icon name={icon} size={17} color={color} />
+      </View>
+      <Text style={styles.tileLabel} numberOfLines={2}>
+        {label}
+      </Text>
     </View>
     <Text style={styles.tileValue} numberOfLines={1} adjustsFontSizeToFit>
       {value}
     </Text>
-    <Text style={styles.tileLabel} numberOfLines={1}>
-      {label}
-    </Text>
+    {note ? (
+      <Text style={styles.tileNote} numberOfLines={1}>
+        {note}
+      </Text>
+    ) : null}
   </View>
 );
 
@@ -325,22 +324,20 @@ const styles = StyleSheet.create({
   // header
   header: {
     paddingHorizontal: 18,
-    paddingBottom: 20,
-    borderBottomLeftRadius: RADIUS.xl,
-    borderBottomRightRadius: RADIUS.xl,
-    overflow: "hidden",
+    paddingBottom: 14,
+    backgroundColor: COLORS.surface,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: COLORS.line,
   },
-  decoA: { position: "absolute", top: -60, end: -40, width: 170, height: 170, borderRadius: 85, backgroundColor: "rgba(255,255,255,0.06)" },
-  decoB: { position: "absolute", bottom: -70, start: -50, width: 150, height: 150, borderRadius: 75, backgroundColor: "rgba(255,255,255,0.04)" },
   headerRow: { flexDirection: "row", alignItems: "center" },
-  headerTitle: { color: "#fff", fontSize: 21, fontWeight: "800", letterSpacing: 0.2 },
-  headerSub: { color: "rgba(255,255,255,0.65)", fontSize: 13, marginTop: 2 },
+  headerTitle: { color: COLORS.ink, fontSize: 22, fontWeight: "800", letterSpacing: -0.2 },
+  headerSub: { color: COLORS.muted, fontSize: 13, marginTop: 2 },
   headerActions: { flexDirection: "row", alignItems: "center", gap: 8 },
-  iconBtn: { width: 38, height: 38, borderRadius: 19, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center" },
+  iconBtn: { width: 38, height: 38, borderRadius: 12, backgroundColor: "#F1F4F9", alignItems: "center", justifyContent: "center" },
 
   // segmented control
-  seg: { flexDirection: "row", backgroundColor: "#E7EAF0", borderRadius: RADIUS.md, padding: 4 },
-  segItem: { flex: 1, paddingVertical: 9, borderRadius: 11, alignItems: "center" },
+  seg: { flexDirection: "row", backgroundColor: "#EAEEF4", borderRadius: RADIUS.md, padding: 4 },
+  segItem: { flex: 1, paddingVertical: 9, borderRadius: 10, alignItems: "center" },
   segItemActive: { backgroundColor: COLORS.surface, ...SHADOW.card },
   segText: { fontSize: 13, fontWeight: "600", color: COLORS.muted },
   segTextActive: { color: COLORS.navy, fontWeight: "800" },
@@ -409,7 +406,7 @@ const styles = StyleSheet.create({
     borderRadius: RADIUS.lg,
     padding: 16,
     marginBottom: 12,
-    borderWidth: StyleSheet.hairlineWidth,
+    borderWidth: 1,
     borderColor: COLORS.line,
     ...SHADOW.card,
   },
@@ -429,9 +426,11 @@ const styles = StyleSheet.create({
     borderColor: COLORS.line,
     ...SHADOW.card,
   },
-  tileIcon: { width: 34, height: 34, borderRadius: 12, alignItems: "center", justifyContent: "center", marginBottom: 12 },
-  tileValue: { fontSize: 22, fontWeight: "800", color: COLORS.ink },
-  tileLabel: { fontSize: 12, color: COLORS.muted, marginTop: 2, fontWeight: "500" },
+  tileHead: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },
+  tileIcon: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center" },
+  tileValue: { fontSize: 23, fontWeight: "800", color: COLORS.ink, letterSpacing: -0.3 },
+  tileLabel: { flex: 1, fontSize: 12.5, color: COLORS.muted, fontWeight: "500" },
+  tileNote: { fontSize: 11.5, color: COLORS.muted, marginTop: 4 },
   listRow: {
     flexDirection: "row",
     alignItems: "center",

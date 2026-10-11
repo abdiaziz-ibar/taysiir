@@ -7,7 +7,7 @@ import { COLORS, formatMoney } from "../utils/format";
 import { EMPLOYEE_TYPES } from "../utils/finance";
 import { t } from "../i18n";
 
-const emptyForm = { fullName: "", type: "teacher", position: "", phone: "", monthlySalary: "", notes: "", status: "active" };
+const emptyForm = { fullName: "", type: "teacher", position: "", phone: "", monthlySalary: "", notes: "", status: "active", startMonth: "", endMonth: "" };
 
 // Teachers / staff register, shown inside the Qarashaadka screen (Mushaharka → Shaqaalaha).
 const EmployeesPanel = () => {
@@ -45,6 +45,8 @@ const EmployeesPanel = () => {
       monthlySalary: String(e.monthlySalary),
       notes: e.notes || "",
       status: e.status,
+      startMonth: e.startMonth || "",
+      endMonth: e.endMonth || "",
     });
   };
 
@@ -154,6 +156,8 @@ const EmployeesPanel = () => {
                 </ChipRow>
               </>
             )}
+            <Field label={t("Bisha uu bilaabay (ikhtiyaari)")} value={form.startMonth} onChangeText={(v) => setForm({ ...form, startMonth: v })} placeholder="YYYY-MM" autoCapitalize="none" />
+            <Field label={t("Bisha ugu dambeysay ee uu shaqeeyay (ikhtiyaari)")} value={form.endMonth} onChangeText={(v) => setForm({ ...form, endMonth: v })} placeholder="YYYY-MM" autoCapitalize="none" />
             <Field label={t("Faallo (ikhtiyaari)")} value={form.notes} onChangeText={(v) => setForm({ ...form, notes: v })} />
             <PrimaryButton title={t("Kaydi")} onPress={save} loading={saving} />
           </>

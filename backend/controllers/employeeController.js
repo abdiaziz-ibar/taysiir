@@ -2,6 +2,7 @@ const prisma = require("../lib/prisma");
 const { serializeEmployee } = require("../utils/serialize");
 
 const TYPES = ["teacher", "staff"];
+const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
 const STATUSES = ["active", "inactive"];
 
 // Next display code (E001, E002...) from the highest in use, not a count —
@@ -41,9 +42,19 @@ const parseFields = (body, { partial }) => {
     if (!STATUSES.includes(body.status)) throw badRequest("Xaaladda khalad ah.");
     out.status = body.status;
   }
+  ["startMonth", "endMonth"].forEach((k) => {
+    if (has(k)) {
+      const v = body[k] ? String(body[k]).trim() : "";
+      if (v && !MONTH_RE.test(v)) throw badRequest("Bisha waa inay noqotaa qaabka YYYY-MM.");
+      out[k] = v || null;
+    }
+  });
   ["phone", "position", "notes"].forEach((k) => {
     if (has(k)) out[k] = body[k] ? String(body[k]).trim() || null : null;
   });
+  if (out.startMonth && out.endMonth && out.startMonth > out.endMonth) {
+    throw badRequest("Bisha uu bilaabay waa inaysan ka dambeyn bisha ugu dambeysay.");
+  }
   return out;
 };
 

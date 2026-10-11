@@ -5,7 +5,7 @@ import { formatMoney } from "../../utils/format";
 import { EMPLOYEE_TYPES } from "../../utils/finance";
 import { t } from "../../i18n";
 
-const emptyForm = { fullName: "", type: "teacher", position: "", phone: "", monthlySalary: "", notes: "", status: "active" };
+const emptyForm = { fullName: "", type: "teacher", position: "", phone: "", monthlySalary: "", notes: "", status: "active", startMonth: "", endMonth: "" };
 
 const Employees = () => {
   const [employees, setEmployees] = useState([]);
@@ -47,6 +47,8 @@ const Employees = () => {
       monthlySalary: String(e.monthlySalary),
       notes: e.notes || "",
       status: e.status,
+      startMonth: e.startMonth || "",
+      endMonth: e.endMonth || "",
     });
     setError("");
     setShowForm(true);
@@ -134,6 +136,16 @@ const Employees = () => {
               </select>
             </div>
           )}
+          <div>
+            <label className="label-field">{t("Bisha uu bilaabay (ikhtiyaari)")}</label>
+            <input type="month" className="input-field" value={form.startMonth} onChange={(e) => setForm({ ...form, startMonth: e.target.value })} />
+            <p className="text-xs text-ink/50 mt-1">{t("Bilaha ka horreeya ma ku muuqdo mushaharka. Madhan = bilowga.")}</p>
+          </div>
+          <div>
+            <label className="label-field">{t("Bisha ugu dambeysay ee uu shaqeeyay (ikhtiyaari)")}</label>
+            <input type="month" className="input-field" value={form.endMonth} onChange={(e) => setForm({ ...form, endMonth: e.target.value })} />
+            <p className="text-xs text-ink/50 mt-1">{t("Bisha ka dambeysa ma ku muuqdo mushaharka; bisha laftiisa waa ku jirtaa. Madhan = wali wuu shaqeeyaa.")}</p>
+          </div>
           <div className="md:col-span-2">
             <label className="label-field">{t("Faallo (ikhtiyaari)")}</label>
             <input className="input-field" value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
@@ -177,7 +189,16 @@ const Employees = () => {
             {employees.map((e) => (
               <tr key={e._id}>
                 <td className="text-ink/60">{e.employeeId}</td>
-                <td className="font-medium">{e.fullName}</td>
+                <td className="font-medium">
+                  {e.fullName}
+                  {(e.startMonth || e.endMonth) && (
+                    <span className="block text-xs text-ink/50 font-normal">
+                      {e.startMonth ? `${t("Laga bilaabo")} ${e.startMonth}` : ""}
+                      {e.startMonth && e.endMonth ? " · " : ""}
+                      {e.endMonth ? `${t("Ilaa")} ${e.endMonth}` : ""}
+                    </span>
+                  )}
+                </td>
                 <td><span className={e.type === "teacher" ? "badge bg-navy/10 text-navy" : "badge bg-amber/10 text-amber"}>{EMPLOYEE_TYPES[e.type]}</span></td>
                 <td>{e.position || "-"}</td>
                 <td>{e.phone || "-"}</td>

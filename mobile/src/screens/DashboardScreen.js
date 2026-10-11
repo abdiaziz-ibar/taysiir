@@ -42,7 +42,7 @@ const DashboardScreen = () => {
       subtitle="Taysir Foundation"
       actions={
         <>
-          <LanguageButton light />
+          <LanguageButton />
           <IconButton name="key-outline" onPress={() => setShowPassword(true)} label="Password" />
           <IconButton name="log-out-outline" onPress={logout} label="Log out" />
         </>
